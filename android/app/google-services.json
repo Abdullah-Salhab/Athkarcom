@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1098413929041",
+    "project_id": "athkar-com",
+    "storage_bucket": "athkar-com.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098413929041:android:ad9889a02681659c443e70",
+        "android_client_info": {
+          "package_name": "com.athkar.athkar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmE0Tx_QyT9-aoOKbclaVHKxmvpNoU_zE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

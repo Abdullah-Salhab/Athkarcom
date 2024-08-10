@@ -1,0 +1,7 @@
+
+14/4/2024 => make the online athkar logic and store the users that finish that thker + create user collection db + other design changes
+15/4/2024 => store online athkar current count for each in shared pref + change create user screen design + other design changes
+16/4/2024 => store the new user + select the user wanted + update the required data filed when the user changed + other
+26 - 30 /4/2024 => change design of athkar page + vibrating + other bugs
+7/7/2024 => change design of offline athkar page
+9/8/2024 => change into notion tool
