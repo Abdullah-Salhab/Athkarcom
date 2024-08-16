@@ -29,8 +29,8 @@ class _OfflineAthkarState extends State<OfflineAthkar> {
         child: SizedBox(
           width: 1000,
           child: SplitRectangleIntoTriangles(
-            leftImageAsset: 'assets/images/day.jpg',
-            rightImageAsset: 'assets/images/night.jpg',
+            leftImageAsset: 'assets/images/day.png',
+            rightImageAsset: 'assets/images/night.png',
           ),
         ),
       ),
@@ -148,7 +148,6 @@ class _LeftTriangleButtonState extends State<LeftTriangleButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigator.of(context).push(MaterialPageRoute(builder: (context) => SectionDetailScreen(id: 1,title: "أذكار الصباح",)));
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => CounterPage(
                   id: 1,

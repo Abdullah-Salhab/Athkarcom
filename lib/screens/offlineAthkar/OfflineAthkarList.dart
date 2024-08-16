@@ -1,4 +1,3 @@
-import 'package:athkar/screens/offlineAthkar/AddOfflineAthkar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +49,13 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('أذكاري'),
+        title: const Text(
+          'أذكاري',
+          style: TextStyle(
+            fontFamily: 'Amiri',
+            fontSize: 24.0,
+          ),
+        ),
         actions: [
           IconButton(
               onPressed: () {
@@ -62,7 +67,6 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
       body: athkarList.isNotEmpty
           ? ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
               itemCount: athkarList.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
@@ -99,9 +103,23 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // athkarStatus[index]?Icon(Icons.done,size: 10,color: Colors.green,):SizedBox(),
-                        SizedBox(width: MediaQuery.sizeOf(context).width>600? 300:120, child: Text(athkarList[index])),
                         SizedBox(
-                          width:  MediaQuery.sizeOf(context).width>600?150:MediaQuery.sizeOf(context).width>350?125:70,
+                          width: MediaQuery.sizeOf(context).width > 600
+                              ? 300
+                              : 120,
+                          child: Text(
+                            athkarList[index],
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width > 600
+                              ? 150
+                              : MediaQuery.sizeOf(context).width > 350
+                                  ? 125
+                                  : 70,
                           child: Text(
                               "${athkarCurrentCount[index]}/${athkarCount[index]}"),
                         ),

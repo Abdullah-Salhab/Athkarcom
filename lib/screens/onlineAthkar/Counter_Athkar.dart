@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class CounterAthkarScreen extends StatefulWidget {
   final int count;
@@ -47,7 +47,6 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
       'users': users,
     });
 
-    Navigator.of(context).pop();
   }
 
   @override
@@ -65,7 +64,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
         title: const Text(
           'الذكر',
           style: TextStyle(
-            fontFamily: 'Tajawal',
+            fontFamily: 'Amiri',
             fontSize: 24.0,
           ),
         ),
@@ -83,157 +82,145 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
         width: double.infinity,
         color: const Color.fromRGBO(240, 248, 255, 1.0),
         height: double.infinity,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                width: 1000,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        !kIsWeb? IconButton(
-                            onPressed: () {
-                              Share.share(widget.content.toString());
-                            },
-                            icon: const Icon(Icons.share)):SizedBox(),
-                        IconButton(
-                            onPressed: () {
-                              // Copy the content to the clipboard
-                              Clipboard.setData(ClipboardData(
-                                  text: widget.content.toString()));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    backgroundColor: Colors.blue,
-                                    duration: Duration(seconds: 2),
-                                    content: Text(
-                                      'تم النسخ الى الحافظة',
-                                      style: TextStyle(
-                                        fontFamily: 'Tajawal',
-                                      ),
-                                    )),
-                              );
-                            },
-                            icon: const Icon(Icons.copy)),
-                      ],
-                    ),
-                    Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Colors.amber,
-                        ),
-                        margin: const EdgeInsets.symmetric(horizontal: 5),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 5),
-                        child: const Text("1/1",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ))),
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(.5),
-                        spreadRadius: 5,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(10)),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      maxHeight: 300, maxWidth: 1300, minWidth: 1300),
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 10),
-                      child: Text(
-                        "الذكر: ${widget.content}",
-                        textDirection: TextDirection.rtl,
-                        style: const TextStyle(
-                            fontSize: 20, fontFamily: 'Tajawal'),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              if (widget.value != "")
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Column(
+              children: [
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(.5),
-                          spreadRadius: 5,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(10)),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: 200, maxWidth: 1300),
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 10),
-                        child: Text(
-                          "الفضل: ${widget.value}",
-                          textDirection: TextDirection.rtl,
-                          style: const TextStyle(
-                              fontSize: 18, fontFamily: 'Tajawal'),
-                        ),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          !kIsWeb
+                              ? IconButton(
+                                  onPressed: () {
+                                    Share.share(widget.content.toString());
+                                  },
+                                  icon: const Icon(Icons.share))
+                              : const SizedBox(),
+                          IconButton(
+                              onPressed: () {
+                                // Copy the content to the clipboard
+                                Clipboard.setData(ClipboardData(
+                                    text: widget.content.toString()));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      backgroundColor: Colors.blue,
+                                      duration: Duration(seconds: 2),
+                                      content: Text(
+                                        'تم النسخ الى الحافظة',
+                                      )),
+                                );
+                              },
+                              icon: const Icon(Icons.copy)),
+                        ],
                       ),
+                    ],
+                  ),
+                ),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 430),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin:
+                              EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 1,
+                                  offset: const Offset(0, 3),
+                                )
+                              ]),
+                          child: ListTile(
+                            title: Text(
+                              "${widget.content}",
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontSize: 18, fontFamily: 'Amiri', height: 2),
+                            ),
+                          ),
+                        ),
+                        if (widget.value!.isNotEmpty)
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 5),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 5),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 1,
+                                    offset: const Offset(0, 3),
+                                  )
+                                ]),
+                            child: ListTile(
+                              subtitle: Text(
+                                "${widget.value}",
+                                textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Tajawal',
+                                    fontWeight: FontWeight.w100),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-              const SizedBox(
-                height: 200,
-              ),
-              GestureDetector(
-                onTap: () {
-                  decreaseCounter();
-                },
-                child: CircularPercentIndicator(
-                  radius: 100.0,
-                  lineWidth: 13.0,
-                  percent: counter / int.parse(widget.count.toString()),
-                  center: Text(
-                    "$counter",
-                    style: const TextStyle(
-                      fontSize: 30,
+              ],
+            ),
+            Column(
+              children: [
+                GestureDetector(
+                  onTap: () => decreaseCounter(),
+                  child: CircularPercentIndicator(
+                    radius: 80.0,
+                    lineWidth: 9.0,
+                    percent: counter / int.parse(widget.count.toString()),
+                    center: Text(
+                      "${counter}",
+                      style:
+                          const TextStyle(fontSize: 30, fontFamily: 'Tajawal'),
                     ),
+                    progressColor: Colors.green,
                   ),
-                  progressColor: Colors.green,
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              if (counter == 0 && widget.index != -1)
-                ElevatedButton.icon(
-                    onPressed: () {
-                      resetCounter();
-                    },
-                    icon: Icon(Icons.refresh),
-                    label: Text(
-                      "إعادة",
-                      style: TextStyle(fontSize: 20),
-                    ))
-            ],
-          ),
+              ],
+            ),
+            if (counter == 0 && widget.index != -1)
+              ElevatedButton.icon(
+                  onPressed: () {
+                    resetCounter();
+                  },
+                  icon: Icon(Icons.refresh),
+                  label: Text(
+                    "إعادة",
+                    style: TextStyle(fontSize: 20),
+                  )),
+            SizedBox(
+              height: 10,
+            ),
+          ],
         ),
       ),
     );
@@ -244,22 +231,60 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
       if (counter > 0) {
         counter--;
 
-        if (widget.id == "0") saveCounterResult();
-        else saveCounterOnlineResult();
+        if (widget.id == "0")
+          saveCounterResult();
+        else
+          saveCounterOnlineResult();
       }
       if (counter == 0) {
+        Vibrate.vibrate();
         if (widget.id == "0") {
           print("Finished Offline");
         } else {
           _updateUsers();
           print("Finished Online");
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.green,
-            content: Text('تم إنهاء الذكر 👏✅'),
-            duration: Duration(seconds: 1),
-          ),
+        if (widget.id != "0")
+        Navigator.of(context).pop();
+        showModalBottomSheet<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return SizedBox(
+              height: 250,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 5,
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.close,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Image.asset(
+                    "assets/images/celebrate.gif",
+                    width: 150,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  const Text(
+                    'تم إكمال الذكر هنيئاً لك',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       }
     });

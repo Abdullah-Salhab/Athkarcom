@@ -96,107 +96,112 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       appBar: AppBar(
         title: const Text('إضافة حساب جديد'),
       ),
-      body: Container(
-        margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(.5),
-                spreadRadius: 5,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              )
-            ],
-            borderRadius: BorderRadius.circular(10)),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "إنشاء حساب جديد",
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _firstNameController,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      labelText: "* الاسم الاول"),
-                  validator: (value) {
-                    if (value!.trim().isEmpty) {
-                      return 'يرجى إدخال الاسم';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _lastNameController,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      labelText: "* الاسم الآخير"),
-                  validator: (value) {
-                    if (value!.trim().isEmpty) {
-                      return 'يرجى إدخال الاسم';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-
-                      String firstName = _firstNameController.text.trim();
-                      String lastName = _lastNameController.text.trim();
-                      String fullName = '$firstName $lastName';
-
-                      bool nameExists = await _checkIfNameExists(fullName);
-
-                      if (nameExists) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('الحساب موجود'),
-                              content: const Text(
-                                  'يوجد حساب بهذا الاسم يرجى تعديل الاسم'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('حسنا'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      } else {
-                        await _saveUserData(fullName);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Colors.green,
-                            content: Text('تم إنشاء الحساب بنجاح!'),
-                          ),
-                        );
-                        // You can navigate to another screen here
-                      }
-                    }
-                  },
-                  child: const Text('إنشاء الحساب'),
-                ),
-                const SizedBox(height: 20),
+      body: Center(
+        child: Container(
+          width: 1000,
+          margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(.5),
+                  spreadRadius: 5,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                )
               ],
+              borderRadius: BorderRadius.circular(10)),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "إنشاء حساب جديد",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _firstNameController,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        labelText: "* الاسم الاول"),
+                    validator: (value) {
+                      if (value!.trim().isEmpty) {
+                        return 'يرجى إدخال الاسم';
+                      }
+                      return null;
+                    },
+                    maxLength: 10,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        labelText: "* الاسم الآخير"),
+                    validator: (value) {
+                      if (value!.trim().isEmpty) {
+                        return 'يرجى إدخال الاسم';
+                      }
+                      return null;
+                    },
+                    maxLength: 10,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+
+                        String firstName = _firstNameController.text.trim();
+                        String lastName = _lastNameController.text.trim();
+                        String fullName = '$firstName $lastName';
+
+                        bool nameExists = await _checkIfNameExists(fullName);
+
+                        if (nameExists) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('الحساب موجود'),
+                                content: const Text(
+                                    'يوجد حساب بهذا الاسم يرجى تعديل الاسم'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('حسنا'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          await _saveUserData(fullName);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.green,
+                              content: Text('تم إنشاء الحساب بنجاح!'),
+                            ),
+                          );
+                          // You can navigate to another screen here
+                        }
+                      }
+                    },
+                    child: const Text('إنشاء الحساب'),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),

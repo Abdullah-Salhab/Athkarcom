@@ -108,9 +108,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Icons.person,
                 color: Colors.black,
               ),
-              Text(
-                value,
-                style: const TextStyle(color: Colors.black),
+              SizedBox(
+                child: Text(
+                  value,
+                  style: const TextStyle(color: Colors.black),
+                ),
               ),
             ],
           ),

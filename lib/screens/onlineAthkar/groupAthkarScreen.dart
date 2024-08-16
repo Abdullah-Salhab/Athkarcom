@@ -1,6 +1,5 @@
 import 'package:athkar/screens/onlineAthkar/Add_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/Counter_Athkar.dart';
-import 'package:athkar/screens/onlineAthkar/Edit_Athkar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -177,36 +176,33 @@ class _AthkarListScreenState extends State<AthkarListScreen> {
                                       color: Colors.green,
                                     )
                                   : const SizedBox(),
-                              Text(
-                                object['content'],
-                                style: const TextStyle(
-                                  fontFamily: 'Tajawal',
+                              SizedBox(
+                                width: MediaQuery.sizeOf(context).width > 600
+                                    ? 300
+                                    : 120,
+                                child: Text(
+                                  object['content'],
+                                  style: const TextStyle(
+                                    fontFamily: 'Tajawal',
+                                  ),
                                 ),
                               ),
-                              Text(
-                                '${users.contains(userName) ? 0 : currentCount >= 0 ? currentCount : object["count"]}/${object['count']}',
-                                style: const TextStyle(
-                                  fontFamily: 'Tajawal',
+                              SizedBox(
+                                width: MediaQuery.sizeOf(context).width > 600
+                                    ? 150
+                                    : MediaQuery.sizeOf(context).width > 350
+                                    ? 125
+                                    : 70,
+                                child: Text(
+                                  '${users.contains(userName) ? 0 : currentCount >= 0 ? currentCount : object["count"]}/${object['count']}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Tajawal',
+                                  ),
                                 ),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  // Same As delete then create new one
-                                  // IconButton(
-                                  //     onPressed: () {
-                                  //       Navigator.push(
-                                  //         context,
-                                  //         MaterialPageRoute(
-                                  //           builder: (context) =>
-                                  //               EditAthkarScreen(
-                                  //                   objectId: object.id),
-                                  //         ),
-                                  //       );
-                                  //     },
-                                  //     icon: const Icon(
-                                  //       Icons.edit,
-                                  //     )),
                                   IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () {

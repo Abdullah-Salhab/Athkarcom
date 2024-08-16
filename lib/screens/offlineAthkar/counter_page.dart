@@ -26,6 +26,7 @@ class _CounterPageState extends State<CounterPage> {
   List<int> counterValues = [];
   int currentPage = 0;
   final FocusNode _focusNode = FocusNode();
+  bool vibrationActive = true;
 
   @override
   void initState() {
@@ -41,11 +42,55 @@ class _CounterPageState extends State<CounterPage> {
       }
       if (counterValues[index] == 0 &&
           _pageController.page != sectionDetails.length - 1) {
-        if (!kIsWeb) Vibrate.vibrate();
+        if (!kIsWeb && vibrationActive) Vibrate.vibrate();
         print("Enter");
         _pageController.nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
+        );
+      }
+      if (counterValues[index] == 0 &&
+          _pageController.page == sectionDetails.length - 1) {
+        Navigator.pop(context);
+        showModalBottomSheet<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return SizedBox(
+              height: 250,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 5,
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.close,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Image.asset(
+                    "assets/images/celebrate.gif",
+                    width: 150,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  const Text(
+                    'تم إكمال الأذكار هنيئاً لك',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       }
     });
@@ -62,13 +107,20 @@ class _CounterPageState extends State<CounterPage> {
             fontSize: 24.0,
           ),
         ),
+        actions: [
+          IconButton(onPressed: (){
+            setState(() {
+              vibrationActive = !vibrationActive;
+            });
+          }, icon: Icon(Icons.vibration,color: vibrationActive?Colors.amber:Colors.white,size: 27,))
+        ],
       ),
       body: !isLoad
           ? const Center(
-            child: CircularProgressIndicator(
+              child: CircularProgressIndicator(
                 value: 5,
               ),
-          )
+            )
           : PageView(
               scrollDirection: Axis.vertical,
               controller: _pageController,
@@ -78,9 +130,9 @@ class _CounterPageState extends State<CounterPage> {
                 });
               },
               children: [
-                for (int index = 0; index < sectionDetails.length; index++)
-                  buildGestureDetector(index),
-              ]),
+                  for (int index = 0; index < sectionDetails.length; index++)
+                    buildGestureDetector(index),
+                ]),
     );
   }
 
@@ -88,28 +140,27 @@ class _CounterPageState extends State<CounterPage> {
     return KeyboardListener(
       focusNode: _focusNode,
       onKeyEvent: (KeyEvent event) {
-          if (event.logicalKey == LogicalKeyboardKey.enter ||
-              event.logicalKey == LogicalKeyboardKey.space ||
-              event.logicalKey == LogicalKeyboardKey.arrowDown ) {
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-            );
-            // decrementCounter(index);
-          }
-          else if(event.logicalKey == LogicalKeyboardKey.arrowUp){
-            _pageController.previousPage(
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-            );
-          }
+        if (event.logicalKey == LogicalKeyboardKey.enter ||
+            event.logicalKey == LogicalKeyboardKey.space ||
+            event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          _pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
+          );
+          // decrementCounter(index);
+        } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          _pageController.previousPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
+          );
+        }
       },
       autofocus: true,
       child: GestureDetector(
         onTap: () => decrementCounter(index),
         child: Container(
           width: double.infinity,
-          color: const Color.fromRGBO(240, 248, 255, 1.0),
+          color:  Color.fromRGBO(240, 248, 255, 1.0),
           height: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +169,7 @@ class _CounterPageState extends State<CounterPage> {
                 children: [
                   Container(
                     margin:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                         EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -175,10 +226,10 @@ class _CounterPageState extends State<CounterPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
-                            margin:
-                                EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                            padding:
-                                EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 5),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 color: Colors.white,
@@ -196,7 +247,9 @@ class _CounterPageState extends State<CounterPage> {
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
-                                    fontSize: 18, fontFamily: 'Amiri', height: 2),
+                                    fontSize: 18,
+                                    fontFamily: 'Amiri',
+                                    height: 2),
                               ),
                             ),
                           ),
@@ -246,15 +299,17 @@ class _CounterPageState extends State<CounterPage> {
                           int.parse(sectionDetails[index].count.toString()),
                       center: Text(
                         "${counterValues[index]}",
-                        style:
-                            const TextStyle(fontSize: 30, fontFamily: 'Tajawal'),
+                        style: const TextStyle(
+                            fontSize: 30, fontFamily: 'Tajawal'),
                       ),
                       progressColor: Colors.green,
                     ),
                   ),
                 ],
               ),
-              SizedBox(),
+              const SizedBox(),
+              if(index==0)
+                Image.asset("assets/images/swipe-down.png",width: 120,opacity: const AlwaysStoppedAnimation(0.2),),
             ],
           ),
         ),
@@ -285,5 +340,32 @@ class _CounterPageState extends State<CounterPage> {
     }).catchError((error) {
       print(error);
     });
+  }
+  Future<void> _showHintImage(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // backgroundColor: Color.fromRGBO(0, 0, 0, 0.5),
+          content: Center(
+            child: Image.asset("assets/images/scroll.png",width: 100,),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'إغلاق',
+                style: TextStyle(
+                  fontFamily: 'Tajawal',
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
