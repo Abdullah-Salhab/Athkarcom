@@ -35,7 +35,6 @@ class _CounterPageState extends State<CounterPage> {
   }
 
   void decrementCounter(int index) {
-    print(counterValues[index]);
     setState(() {
       if (counterValues[index] > 0) {
         counterValues[index] = counterValues[index] - 1;
@@ -43,7 +42,6 @@ class _CounterPageState extends State<CounterPage> {
       if (counterValues[index] == 0 &&
           _pageController.page != sectionDetails.length - 1) {
         if (!kIsWeb && vibrationActive) Vibrate.vibrate();
-        print("Enter");
         _pageController.nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
@@ -108,11 +106,18 @@ class _CounterPageState extends State<CounterPage> {
           ),
         ),
         actions: [
-          IconButton(onPressed: (){
-            setState(() {
-              vibrationActive = !vibrationActive;
-            });
-          }, icon: Icon(Icons.vibration,color: vibrationActive?Colors.amber:Colors.white,size: 27,))
+          if (!kIsWeb)
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    vibrationActive = !vibrationActive;
+                  });
+                },
+                icon: Icon(
+                  Icons.vibration,
+                  color: vibrationActive ? Colors.amber : Colors.white,
+                  size: 27,
+                ))
         ],
       ),
       body: !isLoad
@@ -160,7 +165,7 @@ class _CounterPageState extends State<CounterPage> {
         onTap: () => decrementCounter(index),
         child: Container(
           width: double.infinity,
-          color:  Color.fromRGBO(240, 248, 255, 1.0),
+          color: Theme.of(context).scaffoldBackgroundColor,
           height: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -168,8 +173,7 @@ class _CounterPageState extends State<CounterPage> {
               Column(
                 children: [
                   Container(
-                    margin:
-                         EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -232,7 +236,7 @@ class _CounterPageState extends State<CounterPage> {
                                 horizontal: 5, vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Colors.white,
+                                color: Theme.of(context).dialogBackgroundColor,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(.5),
@@ -261,7 +265,7 @@ class _CounterPageState extends State<CounterPage> {
                                   horizontal: 5, vertical: 5),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
+                                  color: Theme.of(context).dialogBackgroundColor,
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.grey.withOpacity(.5),
@@ -308,8 +312,12 @@ class _CounterPageState extends State<CounterPage> {
                 ],
               ),
               const SizedBox(),
-              if(index==0)
-                Image.asset("assets/images/swipe-down.png",width: 120,opacity: const AlwaysStoppedAnimation(0.2),),
+              if (index == 0)
+                Image.asset(
+                  "assets/images/swipe-down.png",
+                  width: 120,
+                  opacity: const AlwaysStoppedAnimation(0.2),
+                ),
             ],
           ),
         ),
@@ -341,6 +349,7 @@ class _CounterPageState extends State<CounterPage> {
       print(error);
     });
   }
+
   Future<void> _showHintImage(BuildContext context) async {
     return showDialog<void>(
       context: context,
@@ -349,7 +358,10 @@ class _CounterPageState extends State<CounterPage> {
         return AlertDialog(
           // backgroundColor: Color.fromRGBO(0, 0, 0, 0.5),
           content: Center(
-            child: Image.asset("assets/images/scroll.png",width: 100,),
+            child: Image.asset(
+              "assets/images/scroll.png",
+              width: 100,
+            ),
           ),
           actions: <Widget>[
             TextButton(

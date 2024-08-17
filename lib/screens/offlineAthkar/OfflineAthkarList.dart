@@ -73,7 +73,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                   margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
-                    color: Colors.white,
+                    color: Theme.of(context).dialogBackgroundColor,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.5),
@@ -153,14 +153,22 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                     ),
                   ),
                   ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          Theme.of(context).dialogBackgroundColor,
+                        ),
+                        shadowColor: MaterialStateProperty.all(
+                            Colors.grey.withOpacity(0.5)),
+                      ),
                       onPressed: () {
                         _showAddAthkarDialog(context);
                       },
-                      child: const Text(
+                      child:  Text(
                         "إضافة ذكر",
                         style: TextStyle(
                           fontFamily: 'Tajawal',
-                          fontSize: 24.0,
+                          fontSize: 22.0,
+                          color: Theme.of(context).hintColor
                         ),
                       ))
                 ],

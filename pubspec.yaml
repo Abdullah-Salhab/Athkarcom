@@ -46,6 +46,10 @@ dependencies:
   cloud_firestore:
   shared_preferences:
   flutter_vibrate:
+  google_fonts:
+  provider:
+  awesome_dialog:
+  connectivity:
 
 
 flutter_launcher_icons:

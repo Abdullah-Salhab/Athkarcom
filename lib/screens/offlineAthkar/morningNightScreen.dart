@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'counter_page.dart';
-import '../onlineAthkar/groupAthkarScreen.dart';
 
-class OfflineAthkar extends StatefulWidget {
-  const OfflineAthkar({super.key});
+class MorningEveningAthkars extends StatefulWidget {
+  const MorningEveningAthkars({super.key});
 
   @override
-  State<OfflineAthkar> createState() => _OfflineAthkarState();
+  State<MorningEveningAthkars> createState() => _MorningEveningAthkarsState();
 }
 
-class _OfflineAthkarState extends State<OfflineAthkar> {
+class _MorningEveningAthkarsState extends State<MorningEveningAthkars> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

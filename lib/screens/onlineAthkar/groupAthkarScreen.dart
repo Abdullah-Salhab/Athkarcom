@@ -2,16 +2,19 @@ import 'package:athkar/screens/onlineAthkar/Add_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/Counter_Athkar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AthkarListScreen extends StatefulWidget {
-  const AthkarListScreen({super.key});
+import '../../models/SettingsProvider.dart';
+
+class GroupAthkarListScreen extends StatefulWidget {
+  const GroupAthkarListScreen({super.key});
 
   @override
-  State<AthkarListScreen> createState() => _AthkarListScreenState();
+  State<GroupAthkarListScreen> createState() => _GroupAthkarListScreenState();
 }
 
-class _AthkarListScreenState extends State<AthkarListScreen> {
+class _GroupAthkarListScreenState extends State<GroupAthkarListScreen> {
   String userName = "";
   int currentCount = 1;
   late SharedPreferences prefs;
@@ -121,7 +124,7 @@ class _AthkarListScreenState extends State<AthkarListScreen> {
                             vertical: 10, horizontal: 10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
-                          color: Colors.white,
+                          color: Theme.of(context).dialogBackgroundColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.withOpacity(0.5),
@@ -191,8 +194,8 @@ class _AthkarListScreenState extends State<AthkarListScreen> {
                                 width: MediaQuery.sizeOf(context).width > 600
                                     ? 150
                                     : MediaQuery.sizeOf(context).width > 350
-                                    ? 125
-                                    : 70,
+                                        ? 125
+                                        : 70,
                                 child: Text(
                                   '${users.contains(userName) ? 0 : currentCount >= 0 ? currentCount : object["count"]}/${object['count']}',
                                   style: const TextStyle(

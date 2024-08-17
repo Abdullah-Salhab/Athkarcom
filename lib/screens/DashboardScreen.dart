@@ -1,7 +1,10 @@
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../models/SettingsProvider.dart';
+import 'Drawer.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/groupAthkarScreen.dart';
@@ -16,7 +19,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String userName = "";
-  List<String> usersList = [""];
   String dropdownValue = "";
   List<String> athkarList = [];
   List<String> athkarCount = [];
@@ -29,28 +31,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (prefs.containsKey("userName")) {
         userName = prefs.getString('userName')!.trim();
         dropdownValue = userName;
-      }
-    });
-  }
-
-  setCurrentUserName() async {
-    // Check Shared Preferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    await prefs.setString('userName', dropdownValue);
-    await saveOfflineAthkarList();
-    await prefs.setStringList('usersList', usersList);
-    setState(() {
-      userName = dropdownValue;
-    });
-  }
-
-  getUsersList() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      if (prefs.containsKey('usersList')) {
-        usersList = prefs.getStringList('usersList')!;
-        dropdownValue = userName;
+      } else {
+        Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CreateUserScreen()))
+            .then((value) {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => DashboardScreen()));
+        });
       }
     });
   }
@@ -67,58 +54,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         // print(athkarCurrentCount);
       }
     });
-  }
-
-  saveOfflineAthkarList() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // print(athkarList);
-    // print(athkarCount);
-    // print(athkarCurrentCount);
-    await prefs.setStringList('athkarList', athkarList);
-    await prefs.setStringList('athkarCount', athkarCount);
-    await prefs.setStringList('athkarCurrentCount', athkarCurrentCount);
-  }
-
-  Widget dropDownList() {
-    return DropdownButton<String>(
-      value: dropdownValue,
-      icon: const Icon(
-        Icons.arrow_downward,
-        color: Colors.black,
-      ),
-      elevation: 26,
-      style: const TextStyle(color: Colors.black),
-      underline: const SizedBox(),
-      onChanged: (String? value) {
-        // This is called when the user selects an item.
-        setState(() {
-          dropdownValue = value!;
-          setCurrentUserName();
-          // Save to Firestore
-          updateLastLogin();
-        });
-      },
-      items: usersList.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              const Icon(
-                Icons.person,
-                color: Colors.black,
-              ),
-              SizedBox(
-                child: Text(
-                  value,
-                  style: const TextStyle(color: Colors.black),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
   }
 
   Future<void> updateLastLogin() async {
@@ -146,8 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     getUserName();
-    getUsersList();
-    if(userName != "") {
+    if (userName != "") {
       updateLastLogin();
     }
     getOfflineAthkarList();
@@ -156,6 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MyDrawer(),
       appBar: AppBar(
         title: const Text(
           'أذكاركم',
@@ -164,7 +99,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             fontSize: 24.0,
           ),
         ),
-        actions: [dropDownList(), const SizedBox(width: 30)],
       ),
       body: LayoutBuilder(
         builder: (BuildContext, BoxConstraints) {
@@ -181,7 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
+                  color: Theme.of(context).dialogBackgroundColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -197,7 +131,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const AthkarListScreen()),
+                            builder: (context) =>
+                                const GroupAthkarListScreen()),
                       );
                     } else {
                       Navigator.push(
@@ -205,14 +140,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         MaterialPageRoute(
                             builder: (context) => CreateUserScreen()),
                       ).then((value) async {
-                        await getUserName();
-                        await getUsersList();
                         await getOfflineAthkarList();
                         if (userName != "") {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const AthkarListScreen()),
+                                builder: (context) =>
+                                    const GroupAthkarListScreen()),
                           );
                         }
                         return null;
@@ -248,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
+                  color: Theme.of(context).dialogBackgroundColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -263,7 +197,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const OfflineAthkar()),
+                          builder: (context) => const MorningEveningAthkars()),
                     );
                   },
                   shape: RoundedRectangleBorder(
@@ -295,7 +229,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
+                  color: Theme.of(context).dialogBackgroundColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -344,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
+                  color: Theme.of(context).dialogBackgroundColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -393,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
+                  color: Theme.of(context).dialogBackgroundColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -410,8 +344,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       MaterialPageRoute(
                           builder: (context) => CreateUserScreen()),
                     ).then((value) async {
-                      await getUserName();
-                      await getUsersList();
                       await getOfflineAthkarList();
                     });
                   },

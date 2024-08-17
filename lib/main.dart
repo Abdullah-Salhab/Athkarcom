@@ -4,8 +4,13 @@ import 'package:athkar/screens/DashboardScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'models/SettingsProvider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +23,11 @@ Future<void> main() async {
           messagingSenderId: "1098413929041",
           appId: "1:1098413929041:web:b6234f8f25837f0d443e70",
           measurementId: "G-1VTDGVMNN7"));
-  runApp(const MyApp());
+  runApp( MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => SettingsProvider()),
+    ],
+      child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,18 +37,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: const MainScreen(),
-      // theme: context.watch<SettingsProvider>().getTheme,
+      theme: context.watch<SettingsProvider>().getTheme,
       debugShowCheckedModeBanner: false,
       title: "أذكاركم",
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.green,
-              titleTextStyle: TextStyle(
-                  fontFamily: 'Tajawal', fontSize: 22.0, color: Colors.white),
-              foregroundColor: Colors.white,
-              centerTitle: true,
-              elevation: 0),
-          scaffoldBackgroundColor: Colors.white),
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -58,8 +58,21 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+
+  //this function will get the current theme
+  Future getCurrentTheme() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool? theme = sharedPreferences.getBool('theme');
+    if (theme==null) {
+      theme = false;
+      sharedPreferences.setBool('theme',false);
+    }
+    context.read<SettingsProvider>().setNight(theme);
+  }
+
   @override
   void initState() {
+    getCurrentTheme();
     Timer(
         kIsWeb ? const Duration(seconds: 1) : const Duration(seconds: 3),
         () => Navigator.pushReplacement(context,

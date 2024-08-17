@@ -80,7 +80,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
       },
       child: Container(
         width: double.infinity,
-        color: const Color.fromRGBO(240, 248, 255, 1.0),
+        color: Theme.of(context).scaffoldBackgroundColor,
         height: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -135,7 +135,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                               EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
+                              color: Theme.of(context).dialogBackgroundColor,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(.5),
@@ -162,7 +162,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                 horizontal: 5, vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Colors.white,
+                                color: Theme.of(context).dialogBackgroundColor,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(.5),

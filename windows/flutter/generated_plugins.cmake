@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
   firebase_core
   pdfx
+  rive_common
   url_launcher_windows
 )
 

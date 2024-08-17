@@ -30,7 +30,7 @@ apply plugin: 'kotlin-android'
 android {
     namespace "com.athkar.athkar"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    ndkVersion "25.1.8937393"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
