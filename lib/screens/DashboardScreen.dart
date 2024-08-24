@@ -24,13 +24,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<String> athkarCount = [];
   List<String> athkarCurrentCount = [];
 
-  getUserName() async {
+  Future<void> getUserName() async {
     // Check Shared Preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       if (prefs.containsKey("userName")) {
         userName = prefs.getString('userName')!.trim();
         dropdownValue = userName;
+        updateLastLogin();
       } else {
         Navigator.push(context,
                 MaterialPageRoute(builder: (context) => CreateUserScreen()))
@@ -49,9 +50,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         athkarList = prefs.getStringList('athkarList')!;
         athkarCount = prefs.getStringList('athkarCount')!;
         athkarCurrentCount = prefs.getStringList('athkarCurrentCount')!;
-        // print(athkarList);
-        // print(athkarCount);
-        // print(athkarCurrentCount);
       }
     });
   }
@@ -81,9 +79,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     getUserName();
-    if (userName != "") {
-      updateLastLogin();
-    }
     getOfflineAthkarList();
   }
 

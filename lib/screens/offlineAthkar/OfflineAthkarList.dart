@@ -66,78 +66,82 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
       ),
       body: athkarList.isNotEmpty
           ? ListView.builder(
-              shrinkWrap: true,
               itemCount: athkarList.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Theme.of(context).dialogBackgroundColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            const Offset(0, 2), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => CounterAthkarScreen(
-                                    count: int.parse(athkarCount[index]),
-                                    currentCount:
-                                        int.parse(athkarCurrentCount[index]),
-                                    content: athkarList[index],
-                                    id: "0",
-                                    value: "",
-                                    index: index,
-                                  ))).then((value) => getAthkarList());
-                    },
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // athkarStatus[index]?Icon(Icons.done,size: 10,color: Colors.green,):SizedBox(),
-                        SizedBox(
-                          width: MediaQuery.sizeOf(context).width > 600
-                              ? 300
-                              : 120,
-                          child: Text(
-                            athkarList[index],
-                            style: TextStyle(
-                              fontFamily: 'Tajawal',
-                            ),
+                return Column(
+                  children: [
+                    Container(
+                      width: 1300,
+                      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Theme.of(context).dialogBackgroundColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset:
+                                const Offset(0, 2), // changes position of shadow
                           ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.sizeOf(context).width > 600
-                              ? 150
-                              : MediaQuery.sizeOf(context).width > 350
-                                  ? 125
-                                  : 70,
-                          child: Text(
-                              "${athkarCurrentCount[index]}/${athkarCount[index]}"),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                        ],
+                      ),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CounterAthkarScreen(
+                                        count: int.parse(athkarCount[index]),
+                                        currentCount:
+                                            int.parse(athkarCurrentCount[index]),
+                                        content: athkarList[index],
+                                        id: "0",
+                                        value: "",
+                                        index: index,
+                                      ))).then((value) => getAthkarList());
+                        },
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                _showDeleteConfirmationDialog(context, index);
-                              },
+                            // athkarStatus[index]?Icon(Icons.done,size: 10,color: Colors.green,):SizedBox(),
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width > 600
+                                  ? 300
+                                  : 120,
+                              child: Text(
+                                athkarList[index],
+                                style: TextStyle(
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width > 600
+                                  ? 150
+                                  : MediaQuery.sizeOf(context).width > 350
+                                      ? 125
+                                      : 70,
+                              child: Text(
+                                  "${athkarCurrentCount[index]}/${athkarCount[index]}"),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    _showDeleteConfirmationDialog(context, index);
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                        // Add more fields if needed
+                      ),
                     ),
-                    // Add more fields if needed
-                  ),
+                  ],
                 );
               },
             )

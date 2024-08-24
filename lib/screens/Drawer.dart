@@ -26,6 +26,7 @@ class _MyDrawerState extends State<MyDrawer> {
   List<String> athkarCount = [];
   List<String> athkarCurrentCount = [];
   bool isDarkThemeActive = false;
+  int userPoints = 0;
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _MyDrawerState extends State<MyDrawer> {
         userName = prefs.getString('userName')!.trim();
       }
     });
+    getUserPoints();
   }
 
   setCurrentUserName(selectedUser) async {
@@ -96,6 +98,19 @@ class _MyDrawerState extends State<MyDrawer> {
     });
   }
 
+  Future<void> getUserPoints() async {
+    var userQuerySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where("name", isEqualTo: userName)
+        .get();
+    if (userQuerySnapshot.docs.isNotEmpty) {
+      var userDocument = userQuerySnapshot.docs.first;
+      setState(() {
+        userPoints = userDocument.get("points");
+      });
+    }
+  }
+
   saveOfflineAthkarList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('athkarList', athkarList);
@@ -116,10 +131,22 @@ class _MyDrawerState extends State<MyDrawer> {
                     settingsProvider.isNight ? Colors.grey[800] : Colors.green),
             accountName: Text(
               userName,
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 18),
             ),
-            accountEmail: Text(""),
+            accountEmail: Row(
+              children: [
+                Text("${userPoints} نقطة ",
+                    style: TextStyle(fontSize: 18,)),
+                SizedBox(width: 5,),
+                Icon(
+                  size: 30,
+                  Icons.stars_sharp,
+                  color: Colors.yellow,
+                ),
+              ],
+            ),
             currentAccountPicture: CircleAvatar(
+              radius: 10,
               backgroundColor:
                   settingsProvider.isNight ? Colors.black : Colors.white,
               child: Icon(
@@ -153,6 +180,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       userName = usersList[index];
                     });
                     setCurrentUserName(usersList[index]);
+                    getUserPoints();
                   },
                 );
               },
@@ -282,7 +310,6 @@ class _MyDrawerState extends State<MyDrawer> {
                       isDarkThemeActive = !isDarkThemeActive;
                     });
                     context.read<SettingsProvider>().changeNight();
-                    print(value);
                   }),
               Text("المظلم"),
               Image.asset(

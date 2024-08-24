@@ -14,7 +14,19 @@ import 'models/SettingsProvider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
+  if(!kIsWeb) {
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyC__xvSmqgiQofAHGCGwFfZWLcVgSvlccY",
+            authDomain: "athkar-com.firebaseapp.com",
+            projectId: "athkar-com",
+            storageBucket: "athkar-com.appspot.com",
+            messagingSenderId: "1098413929041",
+            appId: "1:1098413929041:android:ad9889a02681659c443e70",
+            measurementId: "G-1VTDGVMNN7")
+    );
+  } else {
+    await Firebase.initializeApp(
       options: const FirebaseOptions(
           apiKey: "AIzaSyC__xvSmqgiQofAHGCGwFfZWLcVgSvlccY",
           authDomain: "athkar-com.firebaseapp.com",
@@ -23,6 +35,7 @@ Future<void> main() async {
           messagingSenderId: "1098413929041",
           appId: "1:1098413929041:web:b6234f8f25837f0d443e70",
           measurementId: "G-1VTDGVMNN7"));
+  }
   runApp( MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => SettingsProvider()),

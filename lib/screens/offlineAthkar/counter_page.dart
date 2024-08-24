@@ -173,6 +173,7 @@ class _CounterPageState extends State<CounterPage> {
               Column(
                 children: [
                   Container(
+                    width: 1300,
                     margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -230,6 +231,7 @@ class _CounterPageState extends State<CounterPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
+                            width: 1300,
                             margin: EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
                             padding: EdgeInsets.symmetric(
@@ -241,7 +243,7 @@ class _CounterPageState extends State<CounterPage> {
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(.5),
                                     spreadRadius: 2,
-                                    blurRadius: 1,
+                                    blurRadius: 7,
                                     offset: const Offset(0, 3),
                                   )
                                 ]),
@@ -259,6 +261,7 @@ class _CounterPageState extends State<CounterPage> {
                           ),
                           if (sectionDetails[index].description!.isNotEmpty)
                             Container(
+                              width: 1300,
                               margin: EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 5),
                               padding: EdgeInsets.symmetric(
@@ -270,7 +273,7 @@ class _CounterPageState extends State<CounterPage> {
                                     BoxShadow(
                                       color: Colors.grey.withOpacity(.5),
                                       spreadRadius: 2,
-                                      blurRadius: 1,
+                                      blurRadius: 7,
                                       offset: const Offset(0, 3),
                                     )
                                   ]),

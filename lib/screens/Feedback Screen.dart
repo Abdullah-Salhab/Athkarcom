@@ -131,7 +131,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         onPressed: () async {
                           if (myController.text.trim() != "" &&
                               await getConnection(context)) {
-                            // print(myController.text + " " + dropdownValue);
                             await feedbackDoc.add({
                               'Type': dropdownValue,
                               'Body': myController.text,

@@ -42,6 +42,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         DateTime.now().hour,
         DateTime.now().minute,
       ),
+      'points':0
     });
     Navigator.of(context).pop();
   }
@@ -134,6 +135,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                       if (value!.trim().isEmpty) {
                         return 'يرجى إدخال الاسم';
                       }
+                      if (usersList.length>=10) {
+                        return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
+                      }
                       return null;
                     },
                     maxLength: 10,
@@ -149,6 +153,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                     validator: (value) {
                       if (value!.trim().isEmpty) {
                         return 'يرجى إدخال الاسم';
+                      }
+                      if (usersList.length>=10) {
+                        return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
                       }
                       return null;
                     },

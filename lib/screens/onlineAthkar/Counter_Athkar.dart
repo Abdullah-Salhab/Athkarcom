@@ -46,7 +46,18 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
     await objectRef.update({
       'users': users,
     });
+  }
 
+  Future<void> _updateUserPoints() async {
+    var userQuerySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where("name", isEqualTo: widget.userName)
+        .get();
+    if (userQuerySnapshot.docs.isNotEmpty) {
+      var userDocument = userQuerySnapshot.docs.first;
+      int currentPoints = userDocument.get('points');
+      await userDocument.reference.update({'points': currentPoints + 10});
+    }
   }
 
   @override
@@ -88,6 +99,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
             Column(
               children: [
                 Container(
+                  width: 1300,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                   child: Row(
@@ -129,6 +141,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
+                          width: 1300,
                           margin:
                               EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                           padding:
@@ -140,7 +153,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(.5),
                                   spreadRadius: 2,
-                                  blurRadius: 1,
+                                  blurRadius: 7,
                                   offset: const Offset(0, 3),
                                 )
                               ]),
@@ -156,6 +169,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                         ),
                         if (widget.value!.isNotEmpty)
                           Container(
+                            width: 1300,
                             margin: EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
                             padding: EdgeInsets.symmetric(
@@ -167,7 +181,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(.5),
                                     spreadRadius: 2,
-                                    blurRadius: 1,
+                                    blurRadius: 7,
                                     offset: const Offset(0, 3),
                                   )
                                 ]),
@@ -242,10 +256,10 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
           print("Finished Offline");
         } else {
           _updateUsers();
+          _updateUserPoints();
           print("Finished Online");
         }
-        if (widget.id != "0")
-        Navigator.of(context).pop();
+        if (widget.id != "0") Navigator.of(context).pop();
         showModalBottomSheet<void>(
           context: context,
           builder: (BuildContext context) {
