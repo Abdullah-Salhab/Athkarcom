@@ -32,6 +32,7 @@ class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
             ? noUsersEmptyWidget(context)
             : ListView.builder(
                 itemCount: widget.users.length,
+                physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
@@ -57,15 +58,15 @@ class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
                           child: Center(
                             child: Text(
                               "${widget.content}",
-                              style:
-                                  const TextStyle(fontSize: 22, fontFamily: 'Tajawal'),
+                              style: const TextStyle(
+                                  fontSize: 22, fontFamily: 'Tajawal'),
                             ),
                           ),
                         ),
                       Container(
                         width: 1300,
-                        margin:
-                            const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
                           color: Theme.of(context).dialogBackgroundColor,
@@ -92,13 +93,13 @@ class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
                           ),
                           leading: Text(
                             "${index + 1}",
-                            style:
-                                const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                            style: const TextStyle(
+                                fontSize: 18, fontFamily: 'Tajawal'),
                           ),
                           title: Text(
                             widget.users[index],
-                            style:
-                                const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                            style: const TextStyle(
+                                fontSize: 18, fontFamily: 'Tajawal'),
                           ),
                         ),
                       ),

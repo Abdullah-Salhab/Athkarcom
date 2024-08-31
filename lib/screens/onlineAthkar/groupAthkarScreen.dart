@@ -1,8 +1,10 @@
 import 'package:athkar/screens/onlineAthkar/Add_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/Counter_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/ThekerReadersScreen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -115,6 +117,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
         }
 
         return ListView.builder(
+          physics: BouncingScrollPhysics(),
           itemCount: documents.length < 10
               ? documents.length
               : userIndex >= 10
@@ -154,19 +157,18 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                     ],
                   ),
                   child: ListTile(
-                    trailing:
-                    index < 3
+                    trailing: index < 3
                         ? Image.asset(
-                            "assets/images/medal_${index+1}.png",
+                            "assets/images/medal_${index + 1}.png",
                             width: 30,
                           )
-                        :
-                    index< 10?
-                    const Icon(
-                            size: 30,
-                            Icons.stars_sharp,
-                            color: Colors.yellow,
-                          ):SizedBox(),
+                        : index < 10
+                            ? const Icon(
+                                size: 30,
+                                Icons.stars_sharp,
+                                color: Colors.yellow,
+                              )
+                            : SizedBox(),
                     leading: Text(
                       "${currentIndex == 11 ? userIndex : index + 1}",
                       style: TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
@@ -179,7 +181,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                           style: TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                         Text(
-                          documents[index].get("points").toString()+" نقطة",
+                          documents[index].get("points").toString() + " نقطة",
                           style: TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                       ],
@@ -268,11 +270,13 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                           child: ListTile(
                             onTap: () {
                               if (!users.contains(userName)) {
-                                currentCount = getCounterOnlineResult(object.id);
+                                currentCount =
+                                    getCounterOnlineResult(object.id);
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => CounterAthkarScreen(
+                                        builder: (context) =>
+                                            CounterAthkarScreen(
                                               count: object["count"],
                                               content: object['content'],
                                               id: object.id,
@@ -312,20 +316,16 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width > 600
                                       ? 300
-                                      : 120,
+                                      : 100,
                                   child: Text(
                                     object['content'],
-                                    style: const TextStyle(
-                                      fontFamily: 'Tajawal',
-                                    ),
+                                    style: const TextStyle(fontSize: 18),
                                   ),
                                 ),
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width > 600
                                       ? 150
-                                      : MediaQuery.sizeOf(context).width > 350
-                                          ? 125
-                                          : 70,
+                                      : 60,
                                   child: Text(
                                     '${users.contains(userName) ? 0 : currentCount >= 0 ? currentCount : object["count"]}/${object['count']}',
                                     style: const TextStyle(
@@ -333,20 +333,15 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                     ),
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      tooltip: 'حذف ذكر',
-                                      onPressed: () {
-                                        _showDeleteConfirmationDialog(
-                                            context, object.id);
-                                      },
-                                    ),
-                                  ],
-                                ),
                               ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete),
+                              tooltip: 'حذف ذكر',
+                              onPressed: () {
+                                _showDeleteConfirmationDialog(
+                                    context, object.id);
+                              },
                             ),
                             leading: IconButton(
                               color: Colors.green,
@@ -357,7 +352,10 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                           users: users,
                                           content: object['content'],
                                           userName: userName))),
-                              icon: Icon(Icons.supervised_user_circle_sharp,size: 30,),
+                              icon: Icon(
+                                Icons.supervised_user_circle_sharp,
+                                size: 30,
+                              ),
                             ),
                             // Add more fields if needed
                           ),

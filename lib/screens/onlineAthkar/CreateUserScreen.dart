@@ -42,7 +42,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         DateTime.now().hour,
         DateTime.now().minute,
       ),
-      'points':0
+      'points': 0
     });
     Navigator.of(context).pop();
   }
@@ -95,13 +95,19 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إضافة حساب جديد'),
+        title: const Text(
+          'إضافة حساب جديد',
+          style: TextStyle(
+            fontFamily: 'Tajawal',
+            fontSize: 22.0,
+          ),
+        ),
       ),
       body: Center(
         child: Container(
           width: 1000,
-          margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           decoration: BoxDecoration(
               color: Theme.of(context).dialogBackgroundColor,
               boxShadow: [
@@ -119,11 +125,18 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const SizedBox(height: 10),
+                  CircleAvatar(
+                    child: Image.asset(
+                      'assets/images/App_Icon.jpg',
+                    ),
+                    radius: 50,
+                  ),
                   Text(
                     "إنشاء حساب جديد",
                     style: TextStyle(fontSize: 20),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _firstNameController,
                     decoration: InputDecoration(
@@ -135,7 +148,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                       if (value!.trim().isEmpty) {
                         return 'يرجى إدخال الاسم';
                       }
-                      if (usersList.length>=10) {
+                      if (usersList.length >= 10) {
                         return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
                       }
                       return null;
@@ -154,7 +167,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                       if (value!.trim().isEmpty) {
                         return 'يرجى إدخال الاسم';
                       }
-                      if (usersList.length>=10) {
+                      if (usersList.length >= 10) {
                         return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
                       }
                       return null;
@@ -204,7 +217,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                         }
                       }
                     },
-                    child: const Text('إنشاء الحساب'),
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.green)),
+                    child: const Text(
+                      'إنشاء الحساب',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   const SizedBox(height: 20),
                 ],

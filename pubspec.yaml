@@ -50,6 +50,7 @@ dependencies:
   provider:
   awesome_dialog:
   connectivity:
+  audioplayers:
 
 
 flutter_launcher_icons:
@@ -90,6 +91,10 @@ flutter:
     - assets/files/wird_musafa.pdf
     - assets/database/
     - assets/images/
+    - assets/sounds/
+    - assets/sounds/common/
+    - assets/sounds/evening/
+    - assets/sounds/morning/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

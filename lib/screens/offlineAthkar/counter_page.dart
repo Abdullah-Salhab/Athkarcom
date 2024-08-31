@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:athkar/models/section_detail_model.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,10 +17,10 @@ class CounterPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _CounterPageState createState() => _CounterPageState();
+  CounterPageState createState() => CounterPageState();
 }
 
-class _CounterPageState extends State<CounterPage> {
+class CounterPageState extends State<CounterPage> {
   List<SectionDetailModel> sectionDetails = [];
   bool isLoad = false;
   final _pageController = PageController();
@@ -27,28 +28,89 @@ class _CounterPageState extends State<CounterPage> {
   int currentPage = 0;
   final FocusNode _focusNode = FocusNode();
   bool vibrationActive = true;
+  bool voiceActive = false;
+  late AudioPlayer _player;
+  int currentCounterValue = 0;
+  double playbackRate = 1;
 
   @override
   void initState() {
     super.initState();
     loadSectionDetail();
+    _player = AudioPlayer();
+    // Set the release mode to keep the source after playback has completed.
+    _player.setReleaseMode(ReleaseMode.stop); // Replay the sound required
+
+    // Listen to player completion event
+    _player.onPlayerComplete.listen((event) async {
+      if (currentCounterValue > 1) {
+        await _player.resume(); // Replay the sound
+      }
+      decrementCounter(currentPage);
+    });
   }
 
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  void _toggleSound(String? soundId) async {
+    if (voiceActive == false) {
+      // stop the sound when press the stop button
+      await _player.stop();
+    } else {
+      final path = _getSoundPath(soundId!);
+      if (path != null) {
+        await _player.setSource(AssetSource(path));
+        await _player.setPlaybackRate(playbackRate); // Set playback speed
+        await _player.resume(); // play
+      }
+    }
+  }
+
+  String? _getSoundPath(String soundId) {
+    if (soundId.contains("C")) {
+      return 'sounds/common/Athkar_$soundId.mp3';
+    } else if (soundId.contains("E")) {
+      return 'sounds/evening/Athkar_$soundId.mp3';
+    } else {
+      return 'sounds/morning/Athkar_$soundId.mp3';
+    }
+  }
+
+  // decrement the counter, the index is the current page value
   void decrementCounter(int index) {
     setState(() {
       if (counterValues[index] > 0) {
-        counterValues[index] = counterValues[index] - 1;
+        counterValues[index] = counterValues[index] -
+            1; // decrease the current value for this theker
+        currentCounterValue--; // decrease the current counter value
       }
       if (counterValues[index] == 0 &&
           _pageController.page != sectionDetails.length - 1) {
+        currentCounterValue = counterValues[
+            index + 1]; // set the next counter into current counter value
         if (!kIsWeb && vibrationActive) Vibrate.vibrate();
         _pageController.nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
         );
+        // play next sound if the value counter is more than 0 and voice is active
+        if (currentCounterValue > 0 && voiceActive) {
+          _toggleSound(sectionDetails[index + 1].soundId);
+        }
       }
       if (counterValues[index] == 0 &&
           _pageController.page == sectionDetails.length - 1) {
+        // show many pauses to inform the user that the Athkars finished
+        final Iterable<Duration> pauses = [
+          const Duration(milliseconds: 500),
+          const Duration(milliseconds: 1000),
+          const Duration(milliseconds: 500),
+        ];
+        if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
         Navigator.pop(context);
         showModalBottomSheet<void>(
           context: context,
@@ -60,25 +122,25 @@ class _CounterPageState extends State<CounterPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 5,
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.close,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   Image.asset(
                     "assets/images/celebrate.gif",
                     width: 150,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   const Text(
@@ -100,7 +162,7 @@ class _CounterPageState extends State<CounterPage> {
       appBar: AppBar(
         title: Text(
           widget.title,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Amiri',
             fontSize: 24.0,
           ),
@@ -174,7 +236,8 @@ class _CounterPageState extends State<CounterPage> {
                 children: [
                   Container(
                     width: 1300,
-                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -206,6 +269,51 @@ class _CounterPageState extends State<CounterPage> {
                                   );
                                 },
                                 icon: const Icon(Icons.copy)),
+                            IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    currentCounterValue = counterValues[index];
+                                    if (currentCounterValue > 0) {
+                                      voiceActive = !voiceActive;
+                                    }
+                                  });
+                                  if (currentCounterValue > 0) {
+                                    _toggleSound(sectionDetails[index].soundId);
+                                  } else {
+                                    decrementCounter(index);
+                                  }
+                                },
+                                icon: Icon(voiceActive
+                                    ? Icons.stop
+                                    : Icons.volume_up)),
+                            if (voiceActive)
+                              TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (playbackRate == 1) {
+                                        playbackRate = 1.5;
+                                      } else if (playbackRate == 1.5) {
+                                        playbackRate = 2;
+                                      } else if (playbackRate == 2) {
+                                        playbackRate = 2.5;
+                                      } else {
+                                        playbackRate = 1;
+                                      }
+                                      // Apply the new playback rate immediately
+                                      _player.setPlaybackRate(playbackRate);
+                                    });
+                                  },
+                                  child: Text(
+                                    playbackRate.toString(),
+                                    style: TextStyle(
+                                        color: playbackRate > 1.5
+                                            ? Colors.red
+                                            : playbackRate > 1
+                                                ? Colors.blue
+                                                : Theme.of(context).hintColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ))
                           ],
                         ),
                         Container(
@@ -225,16 +333,17 @@ class _CounterPageState extends State<CounterPage> {
                     ),
                   ),
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: 430),
+                    constraints:
+                        BoxConstraints(maxHeight: index == 0 ? 330 : 430),
                     child: SingleChildScrollView(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
                             width: 1300,
-                            margin: EdgeInsets.symmetric(
+                            margin: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 5, vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -262,13 +371,14 @@ class _CounterPageState extends State<CounterPage> {
                           if (sectionDetails[index].description!.isNotEmpty)
                             Container(
                               width: 1300,
-                              margin: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 5),
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 5, vertical: 5),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  color: Theme.of(context).dialogBackgroundColor,
+                                  color:
+                                      Theme.of(context).dialogBackgroundColor,
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.grey.withOpacity(.5),
@@ -353,34 +463,4 @@ class _CounterPageState extends State<CounterPage> {
     });
   }
 
-  Future<void> _showHintImage(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          // backgroundColor: Color.fromRGBO(0, 0, 0, 0.5),
-          content: Center(
-            child: Image.asset(
-              "assets/images/scroll.png",
-              width: 100,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text(
-                'إغلاق',
-                style: TextStyle(
-                  fontFamily: 'Tajawal',
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

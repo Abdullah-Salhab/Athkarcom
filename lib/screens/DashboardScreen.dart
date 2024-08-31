@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/SettingsProvider.dart';
 import 'Drawer.dart';
+import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/groupAthkarScreen.dart';
@@ -288,7 +289,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const OfflineAthkarList()),
+                          builder: (context) => const OtherAthkarScreen()),
                     ).then((value) async {
                       await getOfflineAthkarList();
                     });

@@ -66,13 +66,15 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
       ),
       body: athkarList.isNotEmpty
           ? ListView.builder(
+              physics: BouncingScrollPhysics(),
               itemCount: athkarList.length,
               itemBuilder: (BuildContext context, int index) {
                 return Column(
                   children: [
                     Container(
                       width: 1300,
-                      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      margin:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: Theme.of(context).dialogBackgroundColor,
@@ -81,8 +83,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                             color: Colors.grey.withOpacity(0.5),
                             spreadRadius: 2,
                             blurRadius: 5,
-                            offset:
-                                const Offset(0, 2), // changes position of shadow
+                            offset: const Offset(
+                                0, 2), // changes position of shadow
                           ),
                         ],
                       ),
@@ -93,8 +95,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                               MaterialPageRoute(
                                   builder: (context) => CounterAthkarScreen(
                                         count: int.parse(athkarCount[index]),
-                                        currentCount:
-                                            int.parse(athkarCurrentCount[index]),
+                                        currentCount: int.parse(
+                                            athkarCurrentCount[index]),
                                         content: athkarList[index],
                                         id: "0",
                                         value: "",
@@ -131,7 +133,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                                 IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
-                                    _showDeleteConfirmationDialog(context, index);
+                                    _showDeleteConfirmationDialog(
+                                        context, index);
                                   },
                                 ),
                               ],
@@ -167,13 +170,12 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                       onPressed: () {
                         _showAddAthkarDialog(context);
                       },
-                      child:  Text(
+                      child: Text(
                         "إضافة ذكر",
                         style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 22.0,
-                          color: Theme.of(context).hintColor
-                        ),
+                            fontFamily: 'Tajawal',
+                            fontSize: 22.0,
+                            color: Theme.of(context).hintColor),
                       ))
                 ],
               ),
