@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../ExceptionDialog.dart';
 import '../onlineAthkar/Counter_Athkar.dart';
 
 class OfflineAthkarList extends StatefulWidget {
@@ -21,7 +19,9 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
 
   @override
   void initState() {
-    getAthkarList();
+    getAthkarList().catchError((e){
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   getAthkarList() async {
@@ -66,7 +66,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
       ),
       body: athkarList.isNotEmpty
           ? ListView.builder(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               itemCount: athkarList.length,
               itemBuilder: (BuildContext context, int index) {
                 return Column(
@@ -74,7 +74,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                     Container(
                       width: 1300,
                       margin:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                          const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: Theme.of(context).dialogBackgroundColor,
@@ -113,7 +113,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                                   : 120,
                               child: Text(
                                 athkarList[index],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontFamily: 'Tajawal',
                                 ),
                               ),
@@ -233,7 +233,9 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                   athkarCount.removeAt(index);
                   athkarCurrentCount.removeAt(index);
                 });
-                await updateAthkarList();
+                await updateAthkarList().catchError((e){
+                  showExceptionPopup(context, e.toString());
+                });
                 Navigator.of(context).pop();
               },
             ),
@@ -244,9 +246,9 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
   }
 
   Future<void> _showAddAthkarDialog(BuildContext context) async {
-    final TextEditingController _countController = TextEditingController();
-    final TextEditingController _contentController = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
+    final TextEditingController countController = TextEditingController();
+    final TextEditingController contentController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -262,12 +264,12 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
-                      controller: _contentController,
+                      controller: contentController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -285,7 +287,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                       height: 20,
                     ),
                     TextFormField(
-                      controller: _countController,
+                      controller: countController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -326,14 +328,16 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                 ),
               ),
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
                   setState(() {
-                    athkarList.add(_contentController.text);
-                    athkarCount.add(_countController.text);
-                    athkarCurrentCount.add(_countController.text);
+                    athkarList.add(contentController.text);
+                    athkarCount.add(countController.text);
+                    athkarCurrentCount.add(countController.text);
                   });
-                  await updateAthkarList();
+                  await updateAthkarList().catchError((e){
+                    showExceptionPopup(context, e.toString());
+                  });
                   Navigator.of(context).pop();
                 }
               },

@@ -7,7 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/SettingsProvider.dart';
 import 'DashboardScreen.dart';
+import 'ExceptionDialog.dart';
 import 'Feedback Screen.dart';
+import 'check_connection.dart';
 import 'offlineAthkar/OfflineAthkarList.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/groupAthkarScreen.dart';
@@ -30,11 +32,20 @@ class _MyDrawerState extends State<MyDrawer> {
 
   @override
   void initState() {
-    getUserName();
-    getUsersList();
-    getCurrentTheme();
-    getOfflineAthkarList();
     super.initState();
+    getConnection(context);
+    getUserName().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    getUsersList().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    getCurrentTheme().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    getOfflineAthkarList().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   getUserName() async {
@@ -131,14 +142,18 @@ class _MyDrawerState extends State<MyDrawer> {
                     settingsProvider.isNight ? Colors.grey[800] : Colors.green),
             accountName: Text(
               userName,
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
             accountEmail: Row(
               children: [
-                Text("${userPoints} نقطة ",
-                    style: TextStyle(fontSize: 18,)),
-                SizedBox(width: 5,),
-                Icon(
+                Text("$userPoints نقطة ",
+                    style: const TextStyle(
+                      fontSize: 18,
+                    )),
+                const SizedBox(
+                  width: 5,
+                ),
+                const Icon(
                   size: 30,
                   Icons.stars_sharp,
                   color: Colors.yellow,
@@ -149,7 +164,7 @@ class _MyDrawerState extends State<MyDrawer> {
               radius: 10,
               backgroundColor:
                   settingsProvider.isNight ? Colors.black : Colors.white,
-              child: Icon(
+              child: const Icon(
                 Icons.person,
                 size: 40,
               ),
@@ -172,29 +187,33 @@ class _MyDrawerState extends State<MyDrawer> {
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
-                      _showDeleteConfirmationDialog(context, index);
+                      _showDeleteConfirmationDialog(context, index).catchError((e){
+                        showExceptionPopup(context, e.toString());
+                      });
                     },
                   ),
                   onTap: () {
                     setState(() {
                       userName = usersList[index];
                     });
-                    setCurrentUserName(usersList[index]);
-                    getUserPoints();
+                    setCurrentUserName(usersList[index]).catchError((e){
+                      showExceptionPopup(context, e.toString());
+                    });
+                    getUserPoints().catchError((e){
+                      showExceptionPopup(context, e.toString());
+                    });
                   },
                 );
               },
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           ListTile(
             leading: const Icon(Icons.add_box),
             title: const Text(
               'إضافة حساب جديد',
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
               Navigator.push(
@@ -204,7 +223,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => DashboardScreen())));
+                          builder: (context) => const DashboardScreen())));
             },
           ),
           const Divider(),
@@ -291,7 +310,7 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           const Divider(),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Row(
@@ -301,17 +320,19 @@ class _MyDrawerState extends State<MyDrawer> {
                 "assets/images/day-mode.png",
                 width: 30,
               ),
-              Text("الفاتح"),
+              const Text("الفاتح"),
               Switch(
                   value: isDarkThemeActive,
                   onChanged: (value) {
-                    setCurrentTheme(value);
+                    setCurrentTheme(value).catchError((e){
+                      showExceptionPopup(context, e.toString());
+                    });
                     setState(() {
                       isDarkThemeActive = !isDarkThemeActive;
                     });
                     context.read<SettingsProvider>().changeNight();
                   }),
-              Text("المظلم"),
+              const Text("المظلم"),
               Image.asset(
                 "assets/images/night-mode.png",
                 width: 30,
@@ -387,14 +408,17 @@ class _MyDrawerState extends State<MyDrawer> {
                 String deletedUser = usersList[index];
                 usersList.remove(usersList[index]);
                 deleteUserName(
-                    usersList.isNotEmpty ? usersList.first : "", deletedUser);
-                if (usersList.isEmpty)
+                    usersList.isNotEmpty ? usersList.first : "", deletedUser).catchError((e){
+                  showExceptionPopup(context, e.toString());
+                });
+                if (usersList.isEmpty) {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => DashboardScreen()));
-                else
+                          builder: (context) => const DashboardScreen()));
+                } else {
                   Navigator.of(context).pop();
+                }
               },
             ),
           ],

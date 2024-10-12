@@ -1,13 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../ExceptionDialog.dart';
 
 class CounterAthkarScreen extends StatefulWidget {
   final int count;
@@ -32,10 +32,10 @@ class CounterAthkarScreen extends StatefulWidget {
   });
 
   @override
-  _CounterAthkarScreenState createState() => _CounterAthkarScreenState();
+  CounterAthkarScreenState createState() => CounterAthkarScreenState();
 }
 
-class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
+class CounterAthkarScreenState extends State<CounterAthkarScreen> {
   int counter = 0;
 
   Future<void> _updateUsers() async {
@@ -135,17 +135,17 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                   ),
                 ),
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 430),
+                  constraints: const BoxConstraints(maxHeight: 430),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
                           width: 1300,
-                          margin:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 5),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               color: Theme.of(context).dialogBackgroundColor,
@@ -159,7 +159,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                               ]),
                           child: ListTile(
                             title: Text(
-                              "${widget.content}",
+                              widget.content,
                               textDirection: TextDirection.rtl,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
@@ -167,12 +167,12 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                             ),
                           ),
                         ),
-                        if (widget.value!.isNotEmpty)
+                        if (widget.value.isNotEmpty)
                           Container(
                             width: 1300,
-                            margin: EdgeInsets.symmetric(
+                            margin: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 5, vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -187,7 +187,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                 ]),
                             child: ListTile(
                               subtitle: Text(
-                                "${widget.value}",
+                                widget.value,
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
@@ -212,7 +212,7 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                     lineWidth: 9.0,
                     percent: counter / int.parse(widget.count.toString()),
                     center: Text(
-                      "${counter}",
+                      "$counter",
                       style:
                           const TextStyle(fontSize: 30, fontFamily: 'Tajawal'),
                     ),
@@ -224,14 +224,16 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
             if (counter == 0 && widget.index != -1)
               ElevatedButton.icon(
                   onPressed: () {
-                    resetCounter();
+                    resetCounter().catchError((e){
+                      showExceptionPopup(context, e.toString());
+                    });
                   },
-                  icon: Icon(Icons.refresh),
-                  label: Text(
+                  icon: const Icon(Icons.refresh),
+                  label: const Text(
                     "إعادة",
                     style: TextStyle(fontSize: 20),
                   )),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
           ],
@@ -245,19 +247,28 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
       if (counter > 0) {
         counter--;
 
-        if (widget.id == "0")
-          saveCounterResult();
-        else
-          saveCounterOnlineResult();
+        if (widget.id == "0") {
+          saveCounterResult().catchError((e){
+            showExceptionPopup(context, e.toString());
+          });
+        } else {
+          saveCounterOnlineResult().catchError((e){
+            showExceptionPopup(context, e.toString());
+          });
+        }
       }
       if (counter == 0) {
         Vibrate.vibrate();
         if (widget.id == "0") {
-          print("Finished Offline");
+          // print("Finished Offline");
         } else {
-          _updateUsers();
-          _updateUserPoints();
-          print("Finished Online");
+          _updateUsers().catchError((e){
+            showExceptionPopup(context, e.toString());
+          });
+          _updateUserPoints().catchError((e){
+            showExceptionPopup(context, e.toString());
+          });
+          // print("Finished Online");
         }
         if (widget.id != "0") Navigator.of(context).pop();
         showModalBottomSheet<void>(
@@ -270,25 +281,25 @@ class _CounterAthkarScreenState extends State<CounterAthkarScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 5,
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.close,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   Image.asset(
                     "assets/images/celebrate.gif",
                     width: 150,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   const Text(

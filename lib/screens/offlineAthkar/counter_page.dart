@@ -9,6 +9,8 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share/share.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 
+import '../ExceptionDialog.dart';
+
 class CounterPage extends StatefulWidget {
   final int id;
   final String title;
@@ -36,18 +38,22 @@ class CounterPageState extends State<CounterPage> {
   @override
   void initState() {
     super.initState();
-    loadSectionDetail();
-    _player = AudioPlayer();
-    // Set the release mode to keep the source after playback has completed.
-    _player.setReleaseMode(ReleaseMode.stop); // Replay the sound required
+    try {
+      loadSectionDetail();
+      _player = AudioPlayer();
+      // Set the release mode to keep the source after playback has completed.
+      _player.setReleaseMode(ReleaseMode.stop); // Replay the sound required
 
-    // Listen to player completion event
-    _player.onPlayerComplete.listen((event) async {
-      if (currentCounterValue > 1) {
-        await _player.resume(); // Replay the sound
-      }
-      decrementCounter(currentPage);
-    });
+      // Listen to player completion event
+      _player.onPlayerComplete.listen((event) async {
+        if (currentCounterValue > 1) {
+          await _player.resume(); // Replay the sound
+        }
+        decrementCounter(currentPage);
+      });
+    } catch (e) {
+      showExceptionPopup(context, e.toString());
+    }
   }
 
   @override
@@ -57,16 +63,20 @@ class CounterPageState extends State<CounterPage> {
   }
 
   void _toggleSound(String? soundId) async {
-    if (voiceActive == false) {
-      // stop the sound when press the stop button
-      await _player.stop();
-    } else {
-      final path = _getSoundPath(soundId!);
-      if (path != null) {
-        await _player.setSource(AssetSource(path));
-        await _player.setPlaybackRate(playbackRate); // Set playback speed
-        await _player.resume(); // play
+    try {
+      if (voiceActive == false) {
+        // stop the sound when press the stop button
+        await _player.stop();
+      } else {
+        final path = _getSoundPath(soundId!);
+        if (path != null) {
+          await _player.setSource(AssetSource(path));
+          await _player.setPlaybackRate(playbackRate); // Set playback speed
+          await _player.resume(); // play
+        }
       }
+    } catch (e) {
+      showExceptionPopup(context, e.toString());
     }
   }
 
@@ -304,7 +314,7 @@ class CounterPageState extends State<CounterPage> {
                                     });
                                   },
                                   child: Text(
-                                    playbackRate.toString(),
+                                    "${playbackRate}x",
                                     style: TextStyle(
                                         color: playbackRate > 1.5
                                             ? Colors.red
@@ -445,11 +455,11 @@ class CounterPageState extends State<CounterPage> {
         .then((data) {
       var response = json.decode(data);
       response.forEach((section) {
-        SectionDetailModel _sectionDetail =
+        SectionDetailModel sectionDetail =
             SectionDetailModel.fromJson(section);
 
-        if (_sectionDetail.sectionId == widget.id) {
-          sectionDetails.add(_sectionDetail);
+        if (sectionDetail.sectionId == widget.id) {
+          sectionDetails.add(sectionDetail);
         }
       });
       setState(() {
@@ -459,8 +469,7 @@ class CounterPageState extends State<CounterPage> {
         isLoad = true;
       });
     }).catchError((error) {
-      print(error);
+      showExceptionPopup(context, error.toString());
     });
   }
-
 }

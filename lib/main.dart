@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:athkar/screens/DashboardScreen.dart';
+import 'package:athkar/screens/ExceptionDialog.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +15,7 @@ import 'models/SettingsProvider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if(!kIsWeb) {
+  if (!kIsWeb) {
     await Firebase.initializeApp(
         options: const FirebaseOptions(
             apiKey: "AIzaSyC__xvSmqgiQofAHGCGwFfZWLcVgSvlccY",
@@ -24,24 +24,21 @@ Future<void> main() async {
             storageBucket: "athkar-com.appspot.com",
             messagingSenderId: "1098413929041",
             appId: "1:1098413929041:android:ad9889a02681659c443e70",
-            measurementId: "G-1VTDGVMNN7")
-    );
+            measurementId: "G-1VTDGVMNN7"));
   } else {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: "AIzaSyC__xvSmqgiQofAHGCGwFfZWLcVgSvlccY",
-          authDomain: "athkar-com.firebaseapp.com",
-          projectId: "athkar-com",
-          storageBucket: "athkar-com.appspot.com",
-          messagingSenderId: "1098413929041",
-          appId: "1:1098413929041:web:b6234f8f25837f0d443e70",
-          measurementId: "G-1VTDGVMNN7"));
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyC__xvSmqgiQofAHGCGwFfZWLcVgSvlccY",
+            authDomain: "athkar-com.firebaseapp.com",
+            projectId: "athkar-com",
+            storageBucket: "athkar-com.appspot.com",
+            messagingSenderId: "1098413929041",
+            appId: "1:1098413929041:web:b6234f8f25837f0d443e70",
+            measurementId: "G-1VTDGVMNN7"));
   }
-  runApp( MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => SettingsProvider()),
-    ],
-      child: MyApp()));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => SettingsProvider()),
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -76,14 +73,18 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   //this function will get the current theme
   Future getCurrentTheme() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
     bool? theme = sharedPreferences.getBool('theme');
-    if (theme==null) {
+    if (theme == null) {
       theme = false;
-      sharedPreferences.setBool('theme',false);
+      sharedPreferences.setBool('theme', false).catchError((e) {
+        showExceptionPopup(context, e.toString());
+      });
     }
     context.read<SettingsProvider>().setNight(theme);
   }

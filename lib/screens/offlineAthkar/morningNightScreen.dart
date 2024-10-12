@@ -54,7 +54,7 @@ class SplitRectangleIntoTriangles extends StatelessWidget {
         double width = constraints.maxWidth;
         double height = constraints.maxHeight;
 
-        return Container(
+        return SizedBox(
           width: width,
           height: height,
           child: Stack(
@@ -90,7 +90,7 @@ class SplitRectangleIntoTriangles extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MyPdfViewer(),
+                              builder: (context) => const MyPdfViewer(),
                             ),
                           );
                         },
@@ -137,10 +137,10 @@ class LeftTriangleButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _LeftTriangleButtonState createState() => _LeftTriangleButtonState();
+  LeftTriangleButtonState createState() => LeftTriangleButtonState();
 }
 
-class _LeftTriangleButtonState extends State<LeftTriangleButton> {
+class LeftTriangleButtonState extends State<LeftTriangleButton> {
   bool _isPressed = false;
 
   @override
@@ -148,7 +148,7 @@ class _LeftTriangleButtonState extends State<LeftTriangleButton> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CounterPage(
+            builder: (context) => const CounterPage(
                   id: 1,
                   title: "أذكار الصباح",
                 )));
@@ -172,7 +172,7 @@ class _LeftTriangleButtonState extends State<LeftTriangleButton> {
               top: widget.height / 3,
               child: const Center(
                 child: Text(
-                  "اذكار الصباح",
+                  "أذكار الصباح",
                   style: TextStyle(
                     fontFamily: 'Tajawal',
                     fontSize: 26,
@@ -201,19 +201,18 @@ class RightTriangleButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _RightTriangleButtonState createState() => _RightTriangleButtonState();
+  RightTriangleButtonState createState() => RightTriangleButtonState();
 }
 
-class _RightTriangleButtonState extends State<RightTriangleButton> {
+class RightTriangleButtonState extends State<RightTriangleButton> {
   bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigator.of(context).push(MaterialPageRoute(builder: (context) => SectionDetailScreen(id: 2,title: "أذكار المساء",)));
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CounterPage(
+            builder: (context) => const CounterPage(
                   id: 2,
                   title: "أذكار المساء",
                 )));
@@ -235,9 +234,9 @@ class _RightTriangleButtonState extends State<RightTriangleButton> {
             Positioned(
               right: widget.width / 4,
               top: widget.height / 1.5,
-              child: Center(
+              child: const Center(
                 child: Text(
-                  "اذكار المساء",
+                  "أذكار المساء",
                   style: TextStyle(
                     fontFamily: 'Tajawal',
                     fontSize: 26,

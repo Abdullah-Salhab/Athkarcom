@@ -2,18 +2,19 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'ExceptionDialog.dart';
 import 'check_connection.dart';
 
 class FeedbackScreen extends StatefulWidget {
-  final userName;
+  final String userName;
 
-  FeedbackScreen(this.userName);
+  const FeedbackScreen(this.userName, {super.key});
 
   @override
-  _FeedbackScreenState createState() => _FeedbackScreenState();
+  FeedbackScreenState createState() => FeedbackScreenState();
 }
 
-class _FeedbackScreenState extends State<FeedbackScreen> {
+class FeedbackScreenState extends State<FeedbackScreen> {
   String dropdownValue = 'مراجعة عامة';
   TextEditingController myController = TextEditingController();
   int charNum = 0;
@@ -25,20 +26,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     // final settingsProvider = context.read<SettingsProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "التغذية الراجعة - إقتراحات",
-          // style: GoogleFonts.playfairDisplay(
-          //     textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
         ),
         centerTitle: true,
       ),
       body: DefaultTextStyle(
-        style: GoogleFonts.acme(textStyle: TextStyle(color: Colors.black)),
+        style:
+            GoogleFonts.acme(textStyle: const TextStyle(color: Colors.black)),
         child: SingleChildScrollView(
           child: Center(
             child: Container(
               width: 1000,
-              padding: EdgeInsets.symmetric(vertical: 70, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 70, horizontal: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -48,11 +48,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       CircleAvatar(
                         minRadius: 25,
                         backgroundColor: Theme.of(context).splashColor,
-                        child: Icon(
+                        child: const Icon(
                           Icons.perm_identity,
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       Column(
@@ -60,7 +60,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         children: [
                           Text(
                             "${widget.userName} ",
-                            style: TextStyle(fontSize: 22, color: Theme.of(context).hintColor),
+                            style: TextStyle(
+                                fontSize: 22,
+                                color: Theme.of(context).hintColor),
                           ),
                         ],
                       ),
@@ -71,9 +73,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     children: [
                       Text(
                         "النوع",
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).hintColor),
+                        style: TextStyle(
+                            fontSize: 18, color: Theme.of(context).hintColor),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 20,
                       ),
                       DropdownButton<String>(
@@ -103,11 +106,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 40,
                   ),
                   TextField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
@@ -124,7 +127,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 50,
                       ),
                       ElevatedButton(
@@ -135,6 +138,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                               'Type': dropdownValue,
                               'Body': myController.text,
                               'From': widget.userName,
+                            }).catchError((e){
+                              showExceptionPopup(context, e.toString());
                             });
                             AwesomeDialog(
                               context: context,
@@ -143,9 +148,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                               title: 'النتيجة',
                               desc:
                                   "شكرا جزيلا على اقتراحاتكم وملاحظاتكم, سوف نأخذ ملاحظاتكم بعين الإعتبار",
-                              buttonsTextStyle: TextStyle(color: Colors.black),
+                              buttonsTextStyle:
+                                  const TextStyle(color: Colors.black),
                               showCloseIcon: true,
-                            )..show();
+                            ).show();
                             myController.text = "";
                             dropdownValue = 'مراجعة عامة';
                             FocusScope.of(context).unfocus();
@@ -158,15 +164,16 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                               title: 'النتيجة',
                               desc:
                                   'يرجى وضع ملاحظاتكم في الصندوق الذي في الأعلى',
-                              buttonsTextStyle: TextStyle(color: Colors.black),
+                              buttonsTextStyle:
+                                  const TextStyle(color: Colors.black),
                               showCloseIcon: true,
-                            )..show();
+                            ).show();
                             myController.text = "";
                             FocusScope.of(context).unfocus();
                           }
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
                               vertical: 10, horizontal: 20),
                           child: Text(
                             "إرسال",

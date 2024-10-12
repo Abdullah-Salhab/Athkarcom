@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:athkar/screens/OtherAthkar/SectionDetailScreen.dart';
 import 'package:flutter/material.dart';
 
+import '../ExceptionDialog.dart';
+
 class OtherAthkarScreen extends StatefulWidget {
   const OtherAthkarScreen({super.key});
 
@@ -33,21 +35,19 @@ class _OtherAthkarScreenState extends State<OtherAthkarScreen> {
       ),
       body: ListView.builder(
         itemCount: sectionsList.length,
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 width: 1300,
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 10),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 5, vertical: 5),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color:
-                    Theme.of(context).dialogBackgroundColor,
+                    color: Theme.of(context).dialogBackgroundColor,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(.5),
@@ -65,11 +65,17 @@ class _OtherAthkarScreenState extends State<OtherAthkarScreen> {
                       ),
                     ));
                   },
-                  trailing: Icon(Icons.arrow_forward_ios,size: 20,),
-                  title: Text(sectionsList[index].sectionName.toString(),style: const TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Tajawal',
-                      fontWeight: FontWeight.w100),),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 20,
+                  ),
+                  title: Text(
+                    sectionsList[index].sectionName.toString(),
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Tajawal',
+                        fontWeight: FontWeight.w100),
+                  ),
                 ),
               ),
             ],
@@ -93,7 +99,7 @@ class _OtherAthkarScreenState extends State<OtherAthkarScreen> {
       });
       setState(() {});
     }).catchError((error) {
-      print(error);
+      showExceptionPopup(context, error.toString());
     });
   }
 }

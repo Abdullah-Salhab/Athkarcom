@@ -28,16 +28,16 @@ class _AboutAppState extends State<AboutApp> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 1000,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  Container(
-                    child: Image.asset('assets/images/App_Icon.jpg'),
+                  SizedBox(
                     width: 150,
                     height: 150,
+                    child: Image.asset('assets/images/App_Icon.jpg'),
                   ),
                   const SizedBox(height: 20),
                   const Text(

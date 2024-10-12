@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ThekerReadersScreen extends StatefulWidget {
-  List users;
-  String content;
-  String userName;
+  final List users;
+  final String content;
+  final String userName;
 
-  ThekerReadersScreen(
+  const ThekerReadersScreen(
       {super.key,
       required this.users,
       required this.content,
@@ -32,7 +32,7 @@ class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
             ? noUsersEmptyWidget(context)
             : ListView.builder(
                 itemCount: widget.users.length,
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
@@ -57,7 +57,7 @@ class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              "${widget.content}",
+                              widget.content,
                               style: const TextStyle(
                                   fontSize: 22, fontFamily: 'Tajawal'),
                             ),

@@ -1,14 +1,12 @@
 import 'package:athkar/screens/onlineAthkar/Add_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/Counter_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/ThekerReadersScreen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/SettingsProvider.dart';
+import '../ExceptionDialog.dart';
+import '../check_connection.dart';
 
 class GroupAthkarListScreen extends StatefulWidget {
   const GroupAthkarListScreen({super.key});
@@ -44,8 +42,12 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
 
   @override
   void initState() {
+    super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    getUserName();
+    getConnection(context);
+    getUserName().catchError((e){
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   @override
@@ -63,10 +65,10 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.black54,
-          labelStyle: TextStyle(fontSize: 16.0),
-          unselectedLabelStyle: TextStyle(fontSize: 12.0),
+          labelStyle: const TextStyle(fontSize: 16.0),
+          unselectedLabelStyle: const TextStyle(fontSize: 12.0),
           controller: _tabController,
-          tabs: [
+          tabs: const [
             Tab(text: 'الأذكار', icon: Icon(Icons.list_alt)),
             Tab(text: 'الأوائل', icon: Icon(Icons.star)),
           ],
@@ -117,7 +119,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
         }
 
         return ListView.builder(
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           itemCount: documents.length < 10
               ? documents.length
               : userIndex >= 10
@@ -129,7 +131,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
             return Column(
               children: [
                 if (index == 3 || currentIndex == 10)
-                  SizedBox(
+                  const SizedBox(
                     width: 1300,
                     child: Divider(
                       thickness: 2,
@@ -137,7 +139,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                   ),
                 Container(
                   width: 1300,
-                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     color: Theme.of(context).dialogBackgroundColor,
@@ -168,21 +170,21 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                 Icons.stars_sharp,
                                 color: Colors.yellow,
                               )
-                            : SizedBox(),
+                            : const SizedBox(),
                     leading: Text(
                       "${currentIndex == 11 ? userIndex : index + 1}",
-                      style: TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                     ),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           documents[index].get("name"),
-                          style: TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                          style: const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                         Text(
-                          documents[index].get("points").toString() + " نقطة",
-                          style: TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                          "${documents[index].get("points")} نقطة",
+                          style: const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                       ],
                     ),
@@ -210,7 +212,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
         final documents = snapshot.data!.docs;
 
         Map<DateTime, List<DocumentSnapshot>> groupedObjects = {};
-        documents.forEach((doc) {
+        for (var doc in documents) {
           final date = (doc['date'] as Timestamp).toDate();
           final dateKey = DateTime(date.year, date.month, date.day);
 
@@ -218,7 +220,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
             groupedObjects[dateKey] = [];
           }
           groupedObjects[dateKey]!.add(doc);
-        });
+        }
 
         return ListView(
           children: groupedObjects.entries.map((entry) {
@@ -352,7 +354,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                           users: users,
                                           content: object['content'],
                                           userName: userName))),
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.supervised_user_circle_sharp,
                                 size: 30,
                               ),
@@ -397,10 +399,14 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
             TextButton(
               child: const Text('حذف'),
               onPressed: () async {
-                await FirebaseFirestore.instance
+                if(await getConnection(context)) {
+                  await FirebaseFirestore.instance
                     .collection('athkar_group')
                     .doc(objectId)
-                    .delete();
+                    .delete().catchError((e){
+                  showExceptionPopup(context, e.toString());
+                });
+                }
                 Navigator.of(context).pop();
               },
             ),

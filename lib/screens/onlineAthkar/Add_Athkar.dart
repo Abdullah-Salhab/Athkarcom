@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../ExceptionDialog.dart';
+import '../check_connection.dart';
 
 class AddAthkarScreen extends StatefulWidget {
   const AddAthkarScreen({super.key});
 
   @override
-  _AddAthkarScreenState createState() => _AddAthkarScreenState();
+  AddAthkarScreenState createState() => AddAthkarScreenState();
 }
 
-class _AddAthkarScreenState extends State<AddAthkarScreen> {
+class AddAthkarScreenState extends State<AddAthkarScreen> {
   final TextEditingController _countController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
@@ -22,7 +24,7 @@ class _AddAthkarScreenState extends State<AddAthkarScreen> {
     final CollectionReference objects =
         FirebaseFirestore.instance.collection('athkar_group');
 
-    var documentReference = await objects.add({
+    await objects.add({
       'count': int.parse(_countController.text),
       'content': _contentController.text,
       'value': _valueController.text,
@@ -96,10 +98,12 @@ class _AddAthkarScreenState extends State<AddAthkarScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate() & await getConnection(context)) {
                         _formKey.currentState!.save();
-                        _addObject();
+                        _addObject().catchError((e){
+                          showExceptionPopup(context, e.toString());
+                        });
                       }
                     },
                     style: ElevatedButton.styleFrom(

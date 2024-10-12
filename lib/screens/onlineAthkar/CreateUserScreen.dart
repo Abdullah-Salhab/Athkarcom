@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../ExceptionDialog.dart';
+import '../check_connection.dart';
+
 class CreateUserScreen extends StatefulWidget {
+  const CreateUserScreen({super.key});
+
   @override
-  _CreateUserScreenState createState() => _CreateUserScreenState();
+  CreateUserScreenState createState() => CreateUserScreenState();
 }
 
-class _CreateUserScreenState extends State<CreateUserScreen> {
+class CreateUserScreenState extends State<CreateUserScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -21,7 +26,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await prefs.setString('userName', fullName);
-    await saveOfflineAthkarList();
+    await saveOfflineAthkarList().catchError((e){
+      showExceptionPopup(context, e.toString());
+    });
     usersList.add(fullName);
     await prefs.setStringList('usersList', usersList);
     // Save to Firestore
@@ -87,8 +94,12 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   @override
   void initState() {
-    getOfflineAthkarList();
-    getUsersList();
+    getOfflineAthkarList().catchError((e){
+      showExceptionPopup(context, e.toString());
+    });
+    getUsersList().catchError((e){
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   @override
@@ -127,12 +138,12 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 children: [
                   const SizedBox(height: 10),
                   CircleAvatar(
+                    radius: 50,
                     child: Image.asset(
                       'assets/images/App_Icon.jpg',
                     ),
-                    radius: 50,
                   ),
-                  Text(
+                  const Text(
                     "إنشاء حساب جديد",
                     style: TextStyle(fontSize: 20),
                   ),
@@ -177,14 +188,16 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
+                      if (_formKey.currentState!.validate() && await getConnection(context)) {
                         _formKey.currentState!.save();
 
                         String firstName = _firstNameController.text.trim();
                         String lastName = _lastNameController.text.trim();
                         String fullName = '$firstName $lastName';
 
-                        bool nameExists = await _checkIfNameExists(fullName);
+                        bool nameExists = await _checkIfNameExists(fullName).catchError((e){
+                          showExceptionPopup(context, e.toString());
+                        });
 
                         if (nameExists) {
                           showDialog(
@@ -206,7 +219,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                             },
                           );
                         } else {
-                          await _saveUserData(fullName);
+                          await _saveUserData(fullName).catchError((e){
+                            showExceptionPopup(context, e.toString());
+                          });
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               backgroundColor: Colors.green,

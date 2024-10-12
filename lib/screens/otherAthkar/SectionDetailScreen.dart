@@ -5,6 +5,8 @@ import 'dart:convert';
 
 import 'package:share/share.dart';
 
+import '../ExceptionDialog.dart';
+
 class SectionDetailScreen extends StatefulWidget {
   final int? id;
   final String? title;
@@ -13,10 +15,10 @@ class SectionDetailScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  _SectionDetailScreenState createState() => _SectionDetailScreenState();
+  SectionDetailScreenState createState() => SectionDetailScreenState();
 }
 
-class _SectionDetailScreenState extends State<SectionDetailScreen> {
+class SectionDetailScreenState extends State<SectionDetailScreen> {
   List<SectionDetailModel> sectionDetails = [];
 
   @override
@@ -40,7 +42,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ListView.builder(
-            physics: BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(),
             itemBuilder: (context, index) {
               return Container(
                 width: 1300,
@@ -62,8 +64,10 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(
-                        width:
-                            MediaQuery.sizeOf(context).width > 600 ? 300 : 200,
+                        width: kIsWeb?MediaQuery.sizeOf(context).width/1.5
+                            : MediaQuery.sizeOf(context).width > 400
+                                ? 300
+                                : 200,
                         child: Text(
                           "${sectionDetails[index].content}",
                           textDirection: TextDirection.rtl,
@@ -73,7 +77,9 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                               fontWeight: FontWeight.w100),
                         ),
                       ),
-                      SizedBox(width: 20,),
+                      const SizedBox(
+                        width: 20,
+                      ),
                       if (!kIsWeb)
                         SizedBox(
                           width:
@@ -110,16 +116,15 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
         .then((data) {
       var response = json.decode(data);
       response.forEach((section) {
-        SectionDetailModel _sectionDetail =
-            SectionDetailModel.fromJson(section);
+        SectionDetailModel sectionDetail = SectionDetailModel.fromJson(section);
 
-        if (_sectionDetail.sectionId == widget.id) {
-          sectionDetails.add(_sectionDetail);
+        if (sectionDetail.sectionId == widget.id) {
+          sectionDetails.add(sectionDetail);
         }
       });
       setState(() {});
     }).catchError((error) {
-      print(error);
+      showExceptionPopup(context, error.toString());
     });
   }
 }

@@ -1,11 +1,11 @@
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../models/SettingsProvider.dart';
 import 'Drawer.dart';
+import 'ExceptionDialog.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
+import 'check_connection.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/groupAthkarScreen.dart';
@@ -38,7 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 MaterialPageRoute(builder: (context) => CreateUserScreen()))
             .then((value) {
           Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => DashboardScreen()));
+              MaterialPageRoute(builder: (context) => const DashboardScreen()));
         });
       }
     });
@@ -79,14 +79,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void initState() {
-    getUserName();
-    getOfflineAthkarList();
+    getConnection(context);
+    getUserName().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    getOfflineAthkarList().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: MyDrawer(),
+      drawer: const MyDrawer(),
       appBar: AppBar(
         title: const Text(
           'أذكاركم',
@@ -242,7 +247,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       MaterialPageRoute(
                           builder: (context) => const OfflineAthkarList()),
                     ).then((value) async {
-                      await getOfflineAthkarList();
+                      await getOfflineAthkarList().catchError((e){
+                        showExceptionPopup(context, e.toString());
+                      });
                     });
                   },
                   shape: RoundedRectangleBorder(
@@ -291,7 +298,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       MaterialPageRoute(
                           builder: (context) => const OtherAthkarScreen()),
                     ).then((value) async {
-                      await getOfflineAthkarList();
+                      await getOfflineAthkarList().catchError((e){
+                        showExceptionPopup(context, e.toString());
+                      });
                     });
                   },
                   shape: RoundedRectangleBorder(
@@ -340,7 +349,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       MaterialPageRoute(
                           builder: (context) => CreateUserScreen()),
                     ).then((value) async {
-                      await getOfflineAthkarList();
+                      await getOfflineAthkarList().catchError((e){
+                        showExceptionPopup(context, e.toString());
+                      });
                     });
                   },
                   shape: RoundedRectangleBorder(
