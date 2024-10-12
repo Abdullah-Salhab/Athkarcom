@@ -1,5 +1,6 @@
 import 'package:athkar/screens/offlineAthkar/openPDF.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'counter_page.dart';
@@ -88,11 +89,13 @@ class SplitRectangleIntoTriangles extends StatelessWidget {
                         ),
                         onPressed: () {
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MyPdfViewer(),
-                            ),
-                          );
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.fade,
+                                reverseDuration: const Duration(milliseconds: 250),
+                                duration: const Duration(milliseconds: 250),
+                                child: const MyPdfViewer(),
+                              ));
                         },
                         child: const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -147,11 +150,17 @@ class LeftTriangleButtonState extends State<LeftTriangleButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const CounterPage(
-                  id: 1,
-                  title: "أذكار الصباح",
-                )));
+        Navigator.push(
+            context,
+            PageTransition(
+              type: PageTransitionType.leftToRightWithFade,
+              reverseDuration: const Duration(milliseconds: 500),
+              duration: const Duration(milliseconds: 500),
+              child: const CounterPage(
+                id: 1,
+                title: "أذكار الصباح",
+              ),
+            ));
       },
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) => setState(() => _isPressed = false),
@@ -211,8 +220,13 @@ class RightTriangleButtonState extends State<RightTriangleButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const CounterPage(
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.rightToLeftWithFade,
+                reverseDuration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
+                child: const CounterPage(
                   id: 2,
                   title: "أذكار المساء",
                 )));

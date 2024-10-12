@@ -3,6 +3,7 @@ import 'package:athkar/screens/onlineAthkar/Counter_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/ThekerReadersScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../ExceptionDialog.dart';
@@ -45,7 +46,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     getConnection(context);
-    getUserName().catchError((e){
+    getUserName().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
   }
@@ -77,11 +78,13 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
           IconButton(
               onPressed: () {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddAthkarScreen(),
-                  ),
-                );
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.leftToRightWithFade,
+                      reverseDuration: const Duration(milliseconds: 500),
+                      duration: const Duration(milliseconds: 500),
+                      child: const AddAthkarScreen(),
+                    ));
               },
               tooltip: 'إضافة ذكر',
               icon: const Icon(Icons.add_box))
@@ -139,7 +142,8 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                   ),
                 Container(
                   width: 1300,
-                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     color: Theme.of(context).dialogBackgroundColor,
@@ -173,18 +177,21 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                             : const SizedBox(),
                     leading: Text(
                       "${currentIndex == 11 ? userIndex : index + 1}",
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                      style:
+                          const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                     ),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           documents[index].get("name"),
-                          style: const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                          style: const TextStyle(
+                              fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                         Text(
                           "${documents[index].get("points")} نقطة",
-                          style: const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
+                          style: const TextStyle(
+                              fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                       ],
                     ),
@@ -276,20 +283,25 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                     getCounterOnlineResult(object.id);
                                 Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            CounterAthkarScreen(
-                                              count: object["count"],
-                                              content: object['content'],
-                                              id: object.id,
-                                              value: object['value'],
-                                              index: -1,
-                                              currentCount: currentCount >= 0
-                                                  ? currentCount
-                                                  : object["count"],
-                                              userName: userName,
-                                              users: users,
-                                            ))).then((value) {
+                                    PageTransition(
+                                      type: PageTransitionType.size,
+                                      alignment: Alignment.bottomCenter,
+                                      curve: Curves.bounceOut,
+                                      duration: const Duration(milliseconds: 500),
+                                      reverseDuration: const Duration(milliseconds: 500),
+                                      child: CounterAthkarScreen(
+                                        count: object["count"],
+                                        content: object['content'],
+                                        id: object.id,
+                                        value: object['value'],
+                                        index: -1,
+                                        currentCount: currentCount >= 0
+                                            ? currentCount
+                                            : object["count"],
+                                        userName: userName,
+                                        users: users,
+                                      ),
+                                    )).then((value) {
                                   setState(() {
                                     currentCount =
                                         getCounterOnlineResult(object.id);
@@ -348,12 +360,17 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                             leading: IconButton(
                               color: Colors.green,
                               tooltip: "الذاكرين",
-                              onPressed: () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) => ThekerReadersScreen(
-                                          users: users,
-                                          content: object['content'],
-                                          userName: userName))),
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  PageTransition(
+                                    type: PageTransitionType.rightToLeftWithFade,
+                                    reverseDuration: const Duration(milliseconds: 500),
+                                    duration: const Duration(milliseconds: 500),
+                                    child: ThekerReadersScreen(
+                                        users: users,
+                                        content: object['content'],
+                                        userName: userName),
+                                  )),
                               icon: const Icon(
                                 Icons.supervised_user_circle_sharp,
                                 size: 30,
@@ -399,13 +416,14 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
             TextButton(
               child: const Text('حذف'),
               onPressed: () async {
-                if(await getConnection(context)) {
+                if (await getConnection(context)) {
                   await FirebaseFirestore.instance
-                    .collection('athkar_group')
-                    .doc(objectId)
-                    .delete().catchError((e){
-                  showExceptionPopup(context, e.toString());
-                });
+                      .collection('athkar_group')
+                      .doc(objectId)
+                      .delete()
+                      .catchError((e) {
+                    showExceptionPopup(context, e.toString());
+                  });
                 }
                 Navigator.of(context).pop();
               },

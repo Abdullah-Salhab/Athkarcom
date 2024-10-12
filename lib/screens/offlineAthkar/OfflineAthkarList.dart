@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../ExceptionDialog.dart';
@@ -19,7 +20,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
 
   @override
   void initState() {
-    getAthkarList().catchError((e){
+    getAthkarList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
   }
@@ -73,8 +74,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                   children: [
                     Container(
                       width: 1300,
-                      margin:
-                          const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: Theme.of(context).dialogBackgroundColor,
@@ -92,16 +93,22 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                         onTap: () {
                           Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                  builder: (context) => CounterAthkarScreen(
-                                        count: int.parse(athkarCount[index]),
-                                        currentCount: int.parse(
-                                            athkarCurrentCount[index]),
-                                        content: athkarList[index],
-                                        id: "0",
-                                        value: "",
-                                        index: index,
-                                      ))).then((value) => getAthkarList());
+                              PageTransition(
+                                type: PageTransitionType.size,
+                                alignment: Alignment.bottomCenter,
+                                curve: Curves.bounceOut,
+                                reverseDuration: const Duration(milliseconds: 500),
+                                duration: const Duration(milliseconds: 500),
+                                child: CounterAthkarScreen(
+                                  count: int.parse(athkarCount[index]),
+                                  currentCount:
+                                      int.parse(athkarCurrentCount[index]),
+                                  content: athkarList[index],
+                                  id: "0",
+                                  value: "",
+                                  index: index,
+                                ),
+                              )).then((value) => getAthkarList());
                         },
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -233,7 +240,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                   athkarCount.removeAt(index);
                   athkarCurrentCount.removeAt(index);
                 });
-                await updateAthkarList().catchError((e){
+                await updateAthkarList().catchError((e) {
                   showExceptionPopup(context, e.toString());
                 });
                 Navigator.of(context).pop();
@@ -335,7 +342,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                     athkarCount.add(countController.text);
                     athkarCurrentCount.add(countController.text);
                   });
-                  await updateAthkarList().catchError((e){
+                  await updateAthkarList().catchError((e) {
                     showExceptionPopup(context, e.toString());
                   });
                   Navigator.of(context).pop();

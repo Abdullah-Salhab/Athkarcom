@@ -2,6 +2,7 @@ import 'package:athkar/screens/About.dart';
 import 'package:athkar/screens/onlineAthkar/CreateUserScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -187,7 +188,8 @@ class _MyDrawerState extends State<MyDrawer> {
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
-                      _showDeleteConfirmationDialog(context, index).catchError((e){
+                      _showDeleteConfirmationDialog(context, index)
+                          .catchError((e) {
                         showExceptionPopup(context, e.toString());
                       });
                     },
@@ -196,10 +198,10 @@ class _MyDrawerState extends State<MyDrawer> {
                     setState(() {
                       userName = usersList[index];
                     });
-                    setCurrentUserName(usersList[index]).catchError((e){
+                    setCurrentUserName(usersList[index]).catchError((e) {
                       showExceptionPopup(context, e.toString());
                     });
-                    getUserPoints().catchError((e){
+                    getUserPoints().catchError((e) {
                       showExceptionPopup(context, e.toString());
                     });
                   },
@@ -218,12 +220,20 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => CreateUserScreen())).then((value) =>
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DashboardScreen())));
+                  PageTransition(
+                    type: PageTransitionType.bottomToTop,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const CreateUserScreen(),
+                  )).then((value) => Navigator.pushReplacement(
+                  context,
+                  PageTransition(
+                    type: PageTransitionType.scale,
+                    alignment: Alignment.center,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const DashboardScreen(),
+                  )));
             },
           ),
           const Divider(),
@@ -237,8 +247,13 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const DashboardScreen()));
+                  PageTransition(
+                    type: PageTransitionType.scale,
+                    alignment: Alignment.center,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const DashboardScreen(),
+                  ));
             },
           ),
           ListTile(
@@ -251,8 +266,12 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const GroupAthkarListScreen()));
+                  PageTransition(
+                    type: PageTransitionType.leftToRightWithFade,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const GroupAthkarListScreen(),
+                  ));
             },
           ),
           ListTile(
@@ -265,8 +284,12 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const MorningEveningAthkars()));
+                  PageTransition(
+                    type: PageTransitionType.leftToRightWithFade,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const MorningEveningAthkars(),
+                  ));
             },
           ),
           ListTile(
@@ -279,16 +302,24 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const OfflineAthkarList()));
+                  PageTransition(
+                    type: PageTransitionType.leftToRightWithFade,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const OfflineAthkarList(),
+                  ));
             },
           ),
           ListTile(
             onTap: () {
               Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => FeedbackScreen(userName)));
+                  PageTransition(
+                    type: PageTransitionType.leftToRightWithFade,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: FeedbackScreen(userName),
+                  ));
             },
             leading: const Icon(Icons.feedback_rounded),
             title: const Text(
@@ -305,8 +336,14 @@ class _MyDrawerState extends State<MyDrawer> {
               //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const AboutApp()));
+              Navigator.push(
+                  context,
+                  PageTransition(
+                    type: PageTransitionType.leftToRightWithFade,
+                    duration: const Duration(milliseconds: 500),
+                    reverseDuration: const Duration(milliseconds: 500),
+                    child: const AboutApp(),
+                  ));
             },
           ),
           const Divider(),
@@ -324,7 +361,7 @@ class _MyDrawerState extends State<MyDrawer> {
               Switch(
                   value: isDarkThemeActive,
                   onChanged: (value) {
-                    setCurrentTheme(value).catchError((e){
+                    setCurrentTheme(value).catchError((e) {
                       showExceptionPopup(context, e.toString());
                     });
                     setState(() {
@@ -407,15 +444,20 @@ class _MyDrawerState extends State<MyDrawer> {
               onPressed: () {
                 String deletedUser = usersList[index];
                 usersList.remove(usersList[index]);
-                deleteUserName(
-                    usersList.isNotEmpty ? usersList.first : "", deletedUser).catchError((e){
+                deleteUserName(usersList.isNotEmpty ? usersList.first : "",
+                        deletedUser)
+                    .catchError((e) {
                   showExceptionPopup(context, e.toString());
                 });
                 if (usersList.isEmpty) {
                   Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const DashboardScreen()));
+                      PageTransition(
+                        type: PageTransitionType.fade,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const DashboardScreen(),
+                      ));
                 } else {
                   Navigator.of(context).pop();
                 }

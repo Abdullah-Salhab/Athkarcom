@@ -1,6 +1,7 @@
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
 import 'Drawer.dart';
 import 'ExceptionDialog.dart';
@@ -34,11 +35,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         dropdownValue = userName;
         updateLastLogin();
       } else {
-        Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CreateUserScreen()))
-            .then((value) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const DashboardScreen()));
+        Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.bottomToTop,
+            duration: const Duration(milliseconds: 500),
+            reverseDuration: const Duration(milliseconds: 500),
+            child: const CreateUserScreen(),
+          ),
+        ).then((value) {
+          Navigator.pushReplacement(
+              context,
+              PageTransition(
+                type: PageTransitionType.scale,
+                alignment: Alignment.center,
+                duration: const Duration(milliseconds: 500),
+                reverseDuration: const Duration(milliseconds: 500),
+                child: const DashboardScreen(),
+              ));
         });
       }
     });
@@ -130,25 +144,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onPressed: () {
                     if (userName != "") {
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const GroupAthkarListScreen()),
-                      );
+                          context,
+                          PageTransition(
+                            type: PageTransitionType.scale,
+                            alignment: Alignment.topRight,
+                            duration: const Duration(milliseconds: 500),
+                            reverseDuration: const Duration(milliseconds: 500),
+                            child: const GroupAthkarListScreen(),
+                          ));
                     } else {
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CreateUserScreen()),
-                      ).then((value) async {
+                          context,
+                          PageTransition(
+                            type: PageTransitionType.bottomToTop,
+                            duration: const Duration(milliseconds: 500),
+                            reverseDuration: const Duration(milliseconds: 500),
+                            child: const CreateUserScreen(),
+                          )).then((value) async {
                         await getOfflineAthkarList();
                         if (userName != "") {
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const GroupAthkarListScreen()),
-                          );
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.scale,
+                                alignment: Alignment.center,
+                                duration: const Duration(milliseconds: 500),
+                                reverseDuration:
+                                    const Duration(milliseconds: 500),
+                                child: const GroupAthkarListScreen(),
+                              ));
                         }
                         return null;
                       });
@@ -197,8 +221,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const MorningEveningAthkars()),
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.topLeft,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const MorningEveningAthkars(),
+                      ),
                     );
                   },
                   shape: RoundedRectangleBorder(
@@ -243,11 +272,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: RawMaterialButton(
                   onPressed: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const OfflineAthkarList()),
-                    ).then((value) async {
-                      await getOfflineAthkarList().catchError((e){
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.centerRight,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const OfflineAthkarList(),
+                        )).then((value) async {
+                      await getOfflineAthkarList().catchError((e) {
                         showExceptionPopup(context, e.toString());
                       });
                     });
@@ -294,11 +327,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: RawMaterialButton(
                   onPressed: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const OtherAthkarScreen()),
-                    ).then((value) async {
-                      await getOfflineAthkarList().catchError((e){
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.centerLeft,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const OtherAthkarScreen(),
+                        )).then((value) async {
+                      await getOfflineAthkarList().catchError((e) {
                         showExceptionPopup(context, e.toString());
                       });
                     });
@@ -345,11 +382,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: RawMaterialButton(
                   onPressed: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreateUserScreen()),
-                    ).then((value) async {
-                      await getOfflineAthkarList().catchError((e){
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.bottomRight,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const CreateUserScreen(),
+                        )).then((value) async {
+                      await getOfflineAthkarList().catchError((e) {
                         showExceptionPopup(context, e.toString());
                       });
                     });

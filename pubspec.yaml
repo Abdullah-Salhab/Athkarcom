@@ -51,6 +51,7 @@ dependencies:
   awesome_dialog:
   connectivity:
   audioplayers:
+  page_transition:
 
 
 flutter_launcher_icons:

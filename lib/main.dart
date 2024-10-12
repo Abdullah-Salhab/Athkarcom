@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -94,8 +95,16 @@ class _MainScreenState extends State<MainScreen> {
     getCurrentTheme();
     Timer(
         kIsWeb ? const Duration(seconds: 1) : const Duration(seconds: 3),
-        () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen())));
+        () => Navigator.pushReplacement(
+              context,
+              PageTransition(
+                type: PageTransitionType.scale,
+                alignment: Alignment.center,
+                duration: const Duration(milliseconds: 500),
+                reverseDuration: const Duration(milliseconds: 500),
+                child: const DashboardScreen(),
+              ),
+            ));
     FirebaseAnalytics.instance.logEvent(name: 'open_app');
   }
 
