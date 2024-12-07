@@ -52,6 +52,9 @@ dependencies:
   connectivity:
   audioplayers:
   page_transition:
+  confetti:
+  flutter_local_notifications:
+  timezone:
 
 
 flutter_launcher_icons:

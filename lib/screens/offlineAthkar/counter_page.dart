@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:athkar/models/section_detail_model.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share/share.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:confetti/confetti.dart';
 
 import '../ExceptionDialog.dart';
 
@@ -34,10 +36,14 @@ class CounterPageState extends State<CounterPage> {
   late AudioPlayer _player;
   int currentCounterValue = 0;
   double playbackRate = 1;
+  late ConfettiController _confettiController;
+  bool isCheckingRemaining = false;
 
   @override
   void initState() {
     super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
     try {
       loadSectionDetail();
       _player = AudioPlayer();
@@ -59,6 +65,7 @@ class CounterPageState extends State<CounterPage> {
   @override
   void dispose() {
     _player.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -114,56 +121,84 @@ class CounterPageState extends State<CounterPage> {
       }
       if (counterValues[index] == 0 &&
           _pageController.page == sectionDetails.length - 1) {
-        // show many pauses to inform the user that the Athkars finished
-        final Iterable<Duration> pauses = [
-          const Duration(milliseconds: 500),
-          const Duration(milliseconds: 1000),
-          const Duration(milliseconds: 500),
-        ];
-        if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
-        Navigator.pop(context);
-        showModalBottomSheet<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: 250,
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.close,
+        // check all values if are 0 or not
+        bool isFinishAll = true;
+        for (int x = 0; x < sectionDetails.length; x++) {
+          if (counterValues[x] != 0) {
+            isFinishAll = false;
+            isCheckingRemaining = true;
+            _pageController.animateToPage(x,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeOut);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('😊 لم تكمل جميع الأذكار 😊'),
+              backgroundColor: Colors.black38,
+              duration: Duration(seconds: 3),
+            ));
+            break;
+          }
+        }
+
+        // check if finish all athkars
+        if (isFinishAll) {
+          // show many pauses to inform the user that the Athkars finished
+          final Iterable<Duration> pauses = [
+            const Duration(milliseconds: 500),
+            const Duration(milliseconds: 1000),
+            const Duration(milliseconds: 500),
+          ];
+          if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
+          // Navigator.pop(context);
+          _triggerConfetti();
+          voiceActive = false;
+          showModalBottomSheet<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return SizedBox(
+                height: 250,
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          width: 5,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Image.asset(
-                    "assets/images/celebrate.gif",
-                    width: 150,
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  const Text(
-                    'تم إكمال الأذكار هنيئاً لك',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.close,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Image.asset(
+                      "assets/images/celebrate.gif",
+                      width: 150,
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    const Text(
+                      'تم إكمال الأذكار هنيئاً لك',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
       }
     });
+  }
+
+  void _triggerConfetti() {
+    _confettiController.play();
   }
 
   @override
@@ -198,18 +233,69 @@ class CounterPageState extends State<CounterPage> {
                 value: 5,
               ),
             )
-          : PageView(
-              scrollDirection: Axis.vertical,
-              controller: _pageController,
-              onPageChanged: (int page) {
-                setState(() {
-                  currentPage = page;
-                });
-              },
+          : Stack(
               children: [
-                  for (int index = 0; index < sectionDetails.length; index++)
-                    buildGestureDetector(index),
-                ]),
+                PageView(
+                    scrollDirection: Axis.vertical,
+                    controller: _pageController,
+                    onPageChanged: (int page) {
+                      setState(() {
+                        // move to the page that not 0
+                        if (counterValues[page] == 0 &&
+                            page > currentPage &&
+                            isCheckingRemaining) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 1000),
+                            curve: Curves.easeOut,
+                          );
+                        } else if (counterValues[page] == 0 &&
+                            page < currentPage &&
+                            isCheckingRemaining) {
+                          _pageController.previousPage(
+                            duration: const Duration(milliseconds: 1000),
+                            curve: Curves.easeOut,
+                          );
+                        }
+                        currentPage = page;
+                        if (counterValues[page] != 0 && voiceActive) {
+                          _toggleSound(sectionDetails[page].soundId);
+                        } else {
+                          voiceActive = false;
+                          _toggleSound(sectionDetails[page].soundId);
+                        }
+                      });
+                    },
+                    children: [
+                      for (int index = 0;
+                          index < sectionDetails.length;
+                          index++)
+                        buildGestureDetector(index),
+                    ]),
+                // Confetti Widget positioned at the top center
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirection: pi / 2,
+                    // Downward
+                    emissionFrequency: 0.05,
+                    // Customize the effect
+                    numberOfParticles: 20,
+                    maxBlastForce: 10,
+                    // Higher number for more spread
+                    minBlastForce: 5,
+                    // Lower number for closer particles
+                    colors: const [
+                      Colors.red,
+                      Colors.blue,
+                      Colors.green,
+                      Colors.yellow
+                    ],
+                    shouldLoop: false,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -455,8 +541,7 @@ class CounterPageState extends State<CounterPage> {
         .then((data) {
       var response = json.decode(data);
       response.forEach((section) {
-        SectionDetailModel sectionDetail =
-            SectionDetailModel.fromJson(section);
+        SectionDetailModel sectionDetail = SectionDetailModel.fromJson(section);
 
         if (sectionDetail.sectionId == widget.id) {
           sectionDetails.add(sectionDetail);

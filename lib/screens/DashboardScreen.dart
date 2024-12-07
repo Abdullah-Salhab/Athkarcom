@@ -5,6 +5,7 @@ import 'package:page_transition/page_transition.dart';
 
 import 'Drawer.dart';
 import 'ExceptionDialog.dart';
+import 'NotificationService.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'check_connection.dart';
 import 'offlineAthkar/morningNightScreen.dart';
@@ -93,6 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void initState() {
+    super.initState();
     getConnection(context);
     getUserName().catchError((e) {
       showExceptionPopup(context, e.toString());
@@ -100,6 +102,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     getOfflineAthkarList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
+    NotificationService().initializeNotifications();
+    NotificationService().scheduleDailyNotifications();
   }
 
   @override

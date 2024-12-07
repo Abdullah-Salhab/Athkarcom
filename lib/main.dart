@@ -11,6 +11,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'models/SettingsProvider.dart';
 
@@ -42,6 +43,8 @@ Future<void> main() async {
   ], child: MyApp()));
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -56,6 +59,7 @@ class MyApp extends StatelessWidget {
       theme: context.watch<SettingsProvider>().getTheme,
       debugShowCheckedModeBanner: false,
       title: "أذكاركم",
+      navigatorKey: navigatorKey, // key for the notification
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -92,6 +96,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
+    super.initState();
+    _requestNotificationPermission();
     getCurrentTheme();
     Timer(
         kIsWeb ? const Duration(seconds: 1) : const Duration(seconds: 3),
@@ -106,6 +112,24 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ));
     FirebaseAnalytics.instance.logEvent(name: 'open_app');
+  }
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+  // Request notification permission
+  Future<void> _requestNotificationPermission() async {
+    final bool? isGranted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+    if (isGranted == false) {
+      // Handle case where permission is not granted
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى تفعيل خاصية الإشعارات حتى يصلكم تذكير'),
+        ),
+      );
+    }
   }
 
   @override
