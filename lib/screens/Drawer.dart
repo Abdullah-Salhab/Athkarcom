@@ -88,6 +88,26 @@ class _MyDrawerState extends State<MyDrawer> {
     CollectionReference users = FirebaseFirestore.instance.collection('Users');
     var doc = await users.where("name", isEqualTo: deletedUser).get();
     doc.docs.first.reference.delete();
+
+    // Get all documents in the athkar_group collection
+    final athkarGroupCollection =
+        FirebaseFirestore.instance.collection('athkar_group');
+    final querySnapshot = await athkarGroupCollection.get();
+
+    // Loop through each document in the athkar_group collection
+    for (var doc in querySnapshot.docs) {
+      // Reference to the document in athkar_group
+      final docRef = doc.reference;
+      // Retrieve the 'users' array from the document
+      List<dynamic> users = doc.get("users");
+      
+      if (users.contains(deletedUser)) {
+        // Remove the user name from the 'users' array
+        await docRef.update({
+          'users': FieldValue.arrayRemove([deletedUser])
+        });
+      }
+    }
   }
 
   getUsersList() async {
