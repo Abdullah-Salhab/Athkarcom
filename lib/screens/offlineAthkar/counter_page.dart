@@ -10,7 +10,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share/share.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:confetti/confetti.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../ExceptionDialog.dart';
 
 class CounterPage extends StatefulWidget {
@@ -38,6 +38,7 @@ class CounterPageState extends State<CounterPage> {
   double playbackRate = 1;
   late ConfettiController _confettiController;
   bool isCheckingRemaining = false;
+  double fontSize = 18;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class CounterPageState extends State<CounterPage> {
     } catch (e) {
       showExceptionPopup(context, e.toString());
     }
+    getFontSize();
   }
 
   @override
@@ -67,6 +69,31 @@ class CounterPageState extends State<CounterPage> {
     _player.dispose();
     _confettiController.dispose();
     super.dispose();
+  }
+
+  //this function will get the current font size
+  Future getFontSize() async {
+    SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    double? fontSizeSaved = sharedPreferences.getDouble('fontSize');
+    if (fontSizeSaved != null) {
+      setState(() {
+        fontSize = fontSizeSaved!;
+      });
+    }
+  }
+
+  //this function will set new font size
+  Future setNewFontSize() async {
+    SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    sharedPreferences.setDouble('fontSize', fontSize).catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   void _toggleSound(String? soundId) async {
@@ -224,7 +251,29 @@ class CounterPageState extends State<CounterPage> {
                   Icons.vibration,
                   color: vibrationActive ? Colors.amber : Colors.white,
                   size: 27,
-                ))
+                )),
+          TextButton(
+              onPressed: () {
+                setState(() {
+                  if (fontSize == 18) {
+                    fontSize = 20;
+                  } else if (fontSize == 20) {
+                    fontSize = 24;
+                  } else if (fontSize == 24) {
+                    fontSize = 28;
+                  } else {
+                    fontSize = 18;
+                  }
+                  setNewFontSize();
+                });
+              },
+              child: Text(
+                fontSize == 28 ? "- ع" : "+ ع",
+                style: TextStyle(
+                    color: fontSize > 18 ? Colors.amber : Colors.white,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold),
+              )),
         ],
       ),
       body: !isLoad
@@ -429,8 +478,12 @@ class CounterPageState extends State<CounterPage> {
                     ),
                   ),
                   ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxHeight: index == 0 ? 330 : 430),
+                    constraints: BoxConstraints(
+                        maxHeight: index == 0
+                            ? 330
+                            : fontSize > 23
+                                ? 480
+                                : 430),
                     child: SingleChildScrollView(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -457,8 +510,8 @@ class CounterPageState extends State<CounterPage> {
                                 "${sectionDetails[index].content}",
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontSize: 18,
+                                style: TextStyle(
+                                    fontSize: fontSize,
                                     fontFamily: 'Amiri',
                                     height: 2),
                               ),
@@ -488,8 +541,8 @@ class CounterPageState extends State<CounterPage> {
                                   "${sectionDetails[index].description}",
                                   textDirection: TextDirection.rtl,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontSize: 16,
+                                  style: TextStyle(
+                                      fontSize: fontSize - 2,
                                       fontFamily: 'Tajawal',
                                       fontWeight: FontWeight.w100),
                                 ),
@@ -506,7 +559,7 @@ class CounterPageState extends State<CounterPage> {
                   GestureDetector(
                     onTap: () => decrementCounter(index),
                     child: CircularPercentIndicator(
-                      radius: 80.0,
+                      radius: fontSize > 23 ? 70 : 80.0,
                       lineWidth: 9.0,
                       percent: counterValues[index] /
                           int.parse(sectionDetails[index].count.toString()),

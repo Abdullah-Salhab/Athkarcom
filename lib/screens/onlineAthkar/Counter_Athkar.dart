@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:confetti/confetti.dart';
 
 import '../ExceptionDialog.dart';
 
@@ -37,6 +40,8 @@ class CounterAthkarScreen extends StatefulWidget {
 
 class CounterAthkarScreenState extends State<CounterAthkarScreen> {
   int counter = 0;
+  double fontSize = 18;
+  late ConfettiController _confettiController;
 
   Future<void> _updateUsers() async {
     final objectRef =
@@ -66,6 +71,44 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
     setState(() {
       counter = widget.currentCount;
     });
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
+    getFontSize();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  void _triggerConfetti() {
+    _confettiController.play();
+  }
+
+  //this function will get the current font size
+  Future getFontSize() async {
+    SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    double? fontSizeSaved = sharedPreferences.getDouble('fontSize');
+    if (fontSizeSaved != null) {
+      setState(() {
+        fontSize = fontSizeSaved;
+      });
+    }
+  }
+
+  //this function will set new font size
+  Future setNewFontSize() async {
+    SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance().catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
+    sharedPreferences.setDouble('fontSize', fontSize).catchError((e) {
+      showExceptionPopup(context, e.toString());
+    });
   }
 
   @override
@@ -89,85 +132,82 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
       onTap: () {
         decreaseCounter();
       },
-      child: Container(
-        width: double.infinity,
-        color: Theme.of(context).scaffoldBackgroundColor,
-        height: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Column(
-              children: [
-                Container(
-                  width: 1300,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          !kIsWeb
-                              ? IconButton(
-                                  onPressed: () {
-                                    Share.share(widget.content.toString());
-                                  },
-                                  icon: const Icon(Icons.share))
-                              : const SizedBox(),
-                          IconButton(
-                              onPressed: () {
-                                // Copy the content to the clipboard
-                                Clipboard.setData(ClipboardData(
-                                    text: widget.content.toString()));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      backgroundColor: Colors.blue,
-                                      duration: Duration(seconds: 2),
-                                      content: Text(
-                                        'تم النسخ الى الحافظة',
-                                      )),
-                                );
-                              },
-                              icon: const Icon(Icons.copy)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 430),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
+      child: Stack(children: [
+        Container(
+          width: double.infinity,
+          color: Theme.of(context).scaffoldBackgroundColor,
+          height: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                children: [
+                  Container(
+                    width: 1300,
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 1300,
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 5),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 5),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).dialogBackgroundColor,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 7,
-                                  offset: const Offset(0, 3),
-                                )
-                              ]),
-                          child: ListTile(
-                            title: Text(
-                              widget.content,
-                              textDirection: TextDirection.rtl,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontSize: 18, fontFamily: 'Amiri', height: 2),
-                            ),
-                          ),
+                        Row(
+                          children: [
+                            !kIsWeb
+                                ? IconButton(
+                                    onPressed: () {
+                                      Share.share(widget.content.toString());
+                                    },
+                                    icon: const Icon(Icons.share))
+                                : const SizedBox(),
+                            IconButton(
+                                onPressed: () {
+                                  // Copy the content to the clipboard
+                                  Clipboard.setData(ClipboardData(
+                                      text: widget.content.toString()));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        backgroundColor: Colors.blue,
+                                        duration: Duration(seconds: 2),
+                                        content: Text(
+                                          'تم النسخ الى الحافظة',
+                                        )),
+                                  );
+                                },
+                                icon: const Icon(Icons.copy)),
+                          ],
                         ),
-                        if (widget.value.isNotEmpty)
+                        TextButton(
+                            onPressed: () {
+                              setState(() {
+                                if (fontSize == 18) {
+                                  fontSize = 20;
+                                } else if (fontSize == 20) {
+                                  fontSize = 24;
+                                } else if (fontSize == 24) {
+                                  fontSize = 28;
+                                } else {
+                                  fontSize = 18;
+                                }
+                                setNewFontSize();
+                              });
+                            },
+                            child: Text(
+                              fontSize == 28 ? "- ع" : "+ ع",
+                              style: TextStyle(
+                                  color: fontSize > 18
+                                      ? Colors.blue
+                                      : Theme.of(context).hintColor,
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ],
+                    ),
+                  ),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 430),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
                           Container(
                             width: 1300,
                             margin: const EdgeInsets.symmetric(
@@ -186,91 +226,149 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                   )
                                 ]),
                             child: ListTile(
-                              subtitle: Text(
-                                widget.value,
+                              title: Text(
+                                widget.content,
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: 'Tajawal',
-                                    fontWeight: FontWeight.w100),
+                                style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontFamily: 'Amiri',
+                                    height: 2),
                               ),
                             ),
                           ),
-                      ],
+                          if (widget.value.isNotEmpty)
+                            Container(
+                              width: 1300,
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 5),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color:
+                                      Theme.of(context).dialogBackgroundColor,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 7,
+                                      offset: const Offset(0, 3),
+                                    )
+                                  ]),
+                              child: ListTile(
+                                subtitle: Text(
+                                  widget.value,
+                                  textDirection: TextDirection.rtl,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: fontSize - 2,
+                                      fontFamily: 'Tajawal',
+                                      fontWeight: FontWeight.w100),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                GestureDetector(
-                  onTap: () => decreaseCounter(),
-                  child: CircularPercentIndicator(
-                    radius: 80.0,
-                    lineWidth: 9.0,
-                    percent: counter / int.parse(widget.count.toString()),
-                    center: Text(
-                      "$counter",
-                      style:
-                          const TextStyle(fontSize: 30, fontFamily: 'Tajawal'),
+                ],
+              ),
+              Column(
+                children: [
+                  GestureDetector(
+                    onTap: () => decreaseCounter(),
+                    child: CircularPercentIndicator(
+                      radius: 80.0,
+                      lineWidth: 9.0,
+                      percent: counter / int.parse(widget.count.toString()),
+                      center: Text(
+                        "$counter",
+                        style: const TextStyle(
+                            fontSize: 30, fontFamily: 'Tajawal'),
+                      ),
+                      progressColor: Colors.green,
                     ),
-                    progressColor: Colors.green,
                   ),
-                ),
-              ],
-            ),
-            if (counter == 0 && widget.index != -1)
-              ElevatedButton.icon(
-                  onPressed: () {
-                    resetCounter().catchError((e){
-                      showExceptionPopup(context, e.toString());
-                    });
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text(
-                    "إعادة",
-                    style: TextStyle(fontSize: 20),
-                  )),
-            const SizedBox(
-              height: 10,
-            ),
-          ],
+                ],
+              ),
+              if (counter == 0 && widget.index != -1)
+                ElevatedButton.icon(
+                    onPressed: () {
+                      resetCounter().catchError((e) {
+                        showExceptionPopup(context, e.toString());
+                      });
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text(
+                      "إعادة",
+                      style: TextStyle(fontSize: 20),
+                    )),
+              const SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
         ),
-      ),
+        // Confetti Widget positioned at the top center
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirection: pi / 2,
+            // Downward
+            emissionFrequency: 0.05,
+            // Customize the effect
+            numberOfParticles: 20,
+            maxBlastForce: 10,
+            // Higher number for more spread
+            minBlastForce: 5,
+            // Lower number for closer particles
+            colors: const [
+              Colors.red,
+              Colors.blue,
+              Colors.green,
+              Colors.yellow
+            ],
+            shouldLoop: false,
+          ),
+        ),
+      ]),
     );
   }
 
   void decreaseCounter() {
     setState(() {
-      if (counter > 0) {
+      if (counter > 1) {
         counter--;
 
         if (widget.id == "0") {
-          saveCounterResult().catchError((e){
+          saveCounterResult().catchError((e) {
             showExceptionPopup(context, e.toString());
           });
         } else {
-          saveCounterOnlineResult().catchError((e){
+          saveCounterOnlineResult().catchError((e) {
             showExceptionPopup(context, e.toString());
           });
         }
-      }
-      if (counter == 0) {
+      } else if (counter == 1) {
         Vibrate.vibrate();
         if (widget.id == "0") {
           // print("Finished Offline");
         } else {
-          _updateUsers().catchError((e){
+          _updateUsers().catchError((e) {
             showExceptionPopup(context, e.toString());
           });
-          _updateUserPoints().catchError((e){
+          _updateUserPoints().catchError((e) {
             showExceptionPopup(context, e.toString());
           });
           // print("Finished Online");
         }
-        if (widget.id != "0") Navigator.of(context).pop();
+        if (widget.id != "0" && counter == 0) Navigator.of(context).pop();
+        setState(() {
+          counter--;
+        });
+        _triggerConfetti();
         showModalBottomSheet<void>(
           context: context,
           builder: (BuildContext context) {
@@ -311,6 +409,8 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
             );
           },
         );
+      } else {
+        Navigator.of(context).pop();
       }
     });
   }
