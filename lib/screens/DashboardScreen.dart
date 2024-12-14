@@ -1,10 +1,12 @@
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'Drawer.dart';
 import 'ExceptionDialog.dart';
+import 'FirebaseMessagingAPI.dart';
 import 'NotificationService.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'check_connection.dart';
@@ -102,8 +104,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     getOfflineAthkarList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
-    NotificationService().initializeNotifications();
-    NotificationService().scheduleDailyNotifications();
+    if (kIsWeb == false) {
+      NotificationService().initializeNotifications();
+      NotificationService().scheduleDailyNotifications();
+      FirebaseMessagingAPI().initNotifications();
+    }
   }
 
   @override

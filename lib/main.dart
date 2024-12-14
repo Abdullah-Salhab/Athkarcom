@@ -18,15 +18,7 @@ import 'models/SettingsProvider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
-    await Firebase.initializeApp(
-        options: const FirebaseOptions(
-            apiKey: "AIzaSyC__xvSmqgiQofAHGCGwFfZWLcVgSvlccY",
-            authDomain: "athkar-com.firebaseapp.com",
-            projectId: "athkar-com",
-            storageBucket: "athkar-com.appspot.com",
-            messagingSenderId: "1098413929041",
-            appId: "1:1098413929041:android:ad9889a02681659c443e70",
-            measurementId: "G-1VTDGVMNN7"));
+    await Firebase.initializeApp();
   } else {
     await Firebase.initializeApp(
         options: const FirebaseOptions(

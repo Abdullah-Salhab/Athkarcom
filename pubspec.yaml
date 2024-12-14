@@ -55,6 +55,7 @@ dependencies:
   confetti:
   flutter_local_notifications:
   timezone:
+  firebase_messaging:
 
 
 flutter_launcher_icons:
