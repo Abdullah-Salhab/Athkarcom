@@ -158,8 +158,8 @@ class CounterPageState extends State<CounterPage> {
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeOut);
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('😊 لم تكمل جميع الأذكار 😊'),
-              backgroundColor: Colors.black38,
+              content: Text('😊 لم تكمل جميع الأذكار 😊',style: TextStyle(color: Colors.white),),
+              backgroundColor: Colors.black,
               duration: Duration(seconds: 3),
             ));
             break;
@@ -352,19 +352,10 @@ class CounterPageState extends State<CounterPage> {
     return KeyboardListener(
       focusNode: _focusNode,
       onKeyEvent: (KeyEvent event) {
-        if (event.logicalKey == LogicalKeyboardKey.enter ||
-            event.logicalKey == LogicalKeyboardKey.space ||
-            event.logicalKey == LogicalKeyboardKey.arrowDown) {
-          _pageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeOut,
-          );
-          // decrementCounter(index);
-        } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-          _pageController.previousPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeOut,
-          );
+        if (event is KeyDownEvent) { // Handle only KeyDownEvent
+          if (event.logicalKey == LogicalKeyboardKey.enter ) {
+            decrementCounter(index);
+          }
         }
       },
       autofocus: true,

@@ -20,6 +20,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
     with SingleTickerProviderStateMixin {
   String userName = "";
   int currentCount = 1;
+  bool isAdmin=false;
   late SharedPreferences prefs;
   late TabController _tabController;
 
@@ -31,6 +32,24 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
         userName = prefs.getString('userName')!.trim();
       }
     });
+    checkIfNameExistsInAdminList(userName);
+  }
+
+  checkIfNameExistsInAdminList(String userName) async {
+    try {
+      // Reference the 'admins' collection
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Admins')
+          .where('name', isEqualTo: userName)
+          .get();
+
+      setState(() {
+        isAdmin = querySnapshot.docs.isNotEmpty;
+      });
+
+    } catch (e) {
+      showExceptionPopup(context, e.toString());
+    }
   }
 
   int getCounterOnlineResult(String id) {
@@ -75,6 +94,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
           ],
         ),
         actions: [
+          if(isAdmin)
           IconButton(
               onPressed: () {
                 Navigator.push(
@@ -349,14 +369,14 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                 ),
                               ],
                             ),
-                            trailing: IconButton(
+                            trailing: isAdmin?IconButton(
                               icon: const Icon(Icons.delete),
                               tooltip: 'حذف ذكر',
                               onPressed: () {
                                 _showDeleteConfirmationDialog(
                                     context, object.id);
                               },
-                            ),
+                            ):const SizedBox(),
                             leading: IconButton(
                               color: Colors.green,
                               tooltip: "الذاكرين",
