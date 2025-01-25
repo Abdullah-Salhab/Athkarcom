@@ -97,7 +97,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                                 type: PageTransitionType.size,
                                 alignment: Alignment.bottomCenter,
                                 curve: Curves.bounceOut,
-                                reverseDuration: const Duration(milliseconds: 500),
+                                reverseDuration:
+                                    const Duration(milliseconds: 500),
                                 duration: const Duration(milliseconds: 500),
                                 child: CounterAthkarScreen(
                                   count: int.parse(athkarCount[index]),
@@ -118,12 +119,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                               width: MediaQuery.sizeOf(context).width > 600
                                   ? 300
                                   : 120,
-                              child: Text(
-                                athkarList[index],
-                                style: const TextStyle(
-                                  fontFamily: 'Tajawal',
-                                ),
-                              ),
+                              child: Text(athkarList[index],
+                                  style: const TextStyle(fontFamily: 'Amiri')),
                             ),
                             SizedBox(
                               width: MediaQuery.sizeOf(context).width > 600
@@ -132,7 +129,8 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                                       ? 125
                                       : 70,
                               child: Text(
-                                  "${athkarCurrentCount[index]}/${athkarCount[index]}"),
+                                  "${athkarCurrentCount[index]}/${athkarCount[index]}",
+                                  style: const TextStyle(fontFamily: 'Amiri')),
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -197,6 +195,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          surfaceTintColor: Colors.white,
           title: const Text(
             'حذف ذكر',
             style: TextStyle(
@@ -261,6 +260,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          surfaceTintColor: Colors.white,
           title: const Text(
             'إضافة ذكر',
             style: TextStyle(
@@ -290,9 +290,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                       },
                       maxLength: 100,
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: countController,
                       decoration: InputDecoration(
@@ -310,6 +308,184 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 20),
+                    const Text("أذكار مقترحة :",
+                        style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18)),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3, horizontal: 5),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).dialogBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  contentController.text = "سبحان الله";
+                                  countController.text = "100";
+                                });
+                              },
+                              child: const Text("سبحان الله",
+                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3, horizontal: 5),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).dialogBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  contentController.text = "الحمد لله";
+                                  countController.text = "100";
+                                });
+                              },
+                              child: const Text("الحمد لله",
+                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3, horizontal: 5),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).dialogBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  contentController.text = "الله أكبر";
+                                  countController.text = "100";
+                                });
+                              },
+                              child: const Text("الله أكبر",
+                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3, horizontal: 5),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).dialogBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  contentController.text = "استغفر الله";
+                                  countController.text = "100";
+                                });
+                              },
+                              child: const Text("استغفر الله",
+                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3, horizontal: 5),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).dialogBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  contentController.text = "لا إاله إلا الله";
+                                  countController.text = "100";
+                                });
+                              },
+                              child: const Text("لا إاله إلا الله",
+                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 3, horizontal: 5),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).dialogBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  contentController.text =
+                                      "سُبْحـانَ اللهِ وَبِحَمْـدِهِ";
+                                  countController.text = "100";
+                                });
+                              },
+                              child: const Text("سُبْحـانَ اللهِ وَبِحَمْـدِهِ",
+                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
