@@ -1,4 +1,4 @@
-package com.athkar.athkar
+package com.athkar.athkarcom
 
 import io.flutter.embedding.android.FlutterActivity
 

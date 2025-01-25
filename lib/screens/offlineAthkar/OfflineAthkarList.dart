@@ -314,178 +314,245 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                             fontWeight: FontWeight.bold,
                             fontSize: 18)),
                     const SizedBox(height: 20),
-                    Row(
+                    Wrap(
+                      spacing: 10, // Horizontal space between buttons
+                      runSpacing: 10, // Vertical space between rows
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 5),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  contentController.text = "سبحان الله";
-                                  countController.text = "100";
-                                });
-                              },
-                              child: const Text("سبحان الله",
-                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        buildResponsiveButton(
+                          context,
+                          label: "سبحان الله",
+                          onPressed: () {
+                            setState(() {
+                              contentController.text = "سبحان الله";
+                              countController.text = "100";
+                            });
+                          },
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 5),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  contentController.text = "الحمد لله";
-                                  countController.text = "100";
-                                });
-                              },
-                              child: const Text("الحمد لله",
-                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        buildResponsiveButton(
+                          context,
+                          label: "الحمد لله",
+                          onPressed: () {
+                            setState(() {
+                              contentController.text = "الحمد لله";
+                              countController.text = "100";
+                            });
+                          },
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 5),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  contentController.text = "الله أكبر";
-                                  countController.text = "100";
-                                });
-                              },
-                              child: const Text("الله أكبر",
-                                  style: TextStyle(fontFamily: 'Amiri'))),
+                        buildResponsiveButton(
+                          context,
+                          label: "الله أكبر",
+                          onPressed: () {
+                            setState(() {
+                              contentController.text = "الله أكبر";
+                              countController.text = "100";
+                            });
+                          },
+                        ),
+                        buildResponsiveButton(
+                          context,
+                          label: "استغفر الله",
+                          onPressed: () {
+                            setState(() {
+                              contentController.text = "استغفر الله";
+                              countController.text = "100";
+                            });
+                          },
+                        ),
+                        buildResponsiveButton(
+                          context,
+                          label: "لا إاله إلا الله",
+                          onPressed: () {
+                            setState(() {
+                              contentController.text = "لا إاله إلا الله";
+                              countController.text = "100";
+                            });
+                          },
+                        ),
+                        buildResponsiveButton(
+                          context,
+                          label: "سُبْحـانَ اللهِ وَبِحَمْـدِهِ",
+                          onPressed: () {
+                            setState(() {
+                              contentController.text = "سُبْحـانَ اللهِ وَبِحَمْـدِهِ";
+                              countController.text = "100";
+                            });
+                          },
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 5),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  contentController.text = "استغفر الله";
-                                  countController.text = "100";
-                                });
-                              },
-                              child: const Text("استغفر الله",
-                                  style: TextStyle(fontFamily: 'Amiri'))),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 5),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  contentController.text = "لا إاله إلا الله";
-                                  countController.text = "100";
-                                });
-                              },
-                              child: const Text("لا إاله إلا الله",
-                                  style: TextStyle(fontFamily: 'Amiri'))),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 3, horizontal: 5),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  contentController.text =
-                                      "سُبْحـانَ اللهِ وَبِحَمْـدِهِ";
-                                  countController.text = "100";
-                                });
-                              },
-                              child: const Text("سُبْحـانَ اللهِ وَبِحَمْـدِهِ",
-                                  style: TextStyle(fontFamily: 'Amiri'))),
-                        ),
-                      ],
-                    ),
+                    // const SizedBox(height: 20),
+                    // Row(
+                    //   children: [
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //           vertical: 3, horizontal: 5),
+                    //       margin: const EdgeInsets.symmetric(
+                    //           vertical: 0, horizontal: 5),
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(15),
+                    //         color: Theme.of(context).dialogBackgroundColor,
+                    //         boxShadow: [
+                    //           BoxShadow(
+                    //             color: Colors.grey.withOpacity(0.5),
+                    //             spreadRadius: 2,
+                    //             blurRadius: 5,
+                    //             offset: const Offset(0, 2),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       child: TextButton(
+                    //           onPressed: () {
+                    //             setState(() {
+                    //               contentController.text = "سبحان الله";
+                    //               countController.text = "100";
+                    //             });
+                    //           },
+                    //           child: const Text("سبحان الله",
+                    //               style: TextStyle(fontFamily: 'Amiri'))),
+                    //     ),
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //           vertical: 3, horizontal: 5),
+                    //       margin: const EdgeInsets.symmetric(
+                    //           vertical: 0, horizontal: 5),
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(15),
+                    //         color: Theme.of(context).dialogBackgroundColor,
+                    //         boxShadow: [
+                    //           BoxShadow(
+                    //             color: Colors.grey.withOpacity(0.5),
+                    //             spreadRadius: 2,
+                    //             blurRadius: 5,
+                    //             offset: const Offset(0, 2),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       child: TextButton(
+                    //           onPressed: () {
+                    //             setState(() {
+                    //               contentController.text = "الحمد لله";
+                    //               countController.text = "100";
+                    //             });
+                    //           },
+                    //           child: const Text("الحمد لله",
+                    //               style: TextStyle(fontFamily: 'Amiri'))),
+                    //     ),
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //           vertical: 3, horizontal: 5),
+                    //       margin: const EdgeInsets.symmetric(
+                    //           vertical: 0, horizontal: 5),
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(15),
+                    //         color: Theme.of(context).dialogBackgroundColor,
+                    //         boxShadow: [
+                    //           BoxShadow(
+                    //             color: Colors.grey.withOpacity(0.5),
+                    //             spreadRadius: 2,
+                    //             blurRadius: 5,
+                    //             offset: const Offset(0, 2),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       child: TextButton(
+                    //           onPressed: () {
+                    //             setState(() {
+                    //               contentController.text = "الله أكبر";
+                    //               countController.text = "100";
+                    //             });
+                    //           },
+                    //           child: const Text("الله أكبر",
+                    //               style: TextStyle(fontFamily: 'Amiri'))),
+                    //     ),
+                    //   ],
+                    // ),
+                    // const SizedBox(height: 20),
+                    // Row(
+                    //   children: [
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //           vertical: 3, horizontal: 5),
+                    //       margin: const EdgeInsets.symmetric(
+                    //           vertical: 0, horizontal: 5),
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(15),
+                    //         color: Theme.of(context).dialogBackgroundColor,
+                    //         boxShadow: [
+                    //           BoxShadow(
+                    //             color: Colors.grey.withOpacity(0.5),
+                    //             spreadRadius: 2,
+                    //             blurRadius: 5,
+                    //             offset: const Offset(0, 2),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       child: TextButton(
+                    //           onPressed: () {
+                    //             setState(() {
+                    //               contentController.text = "استغفر الله";
+                    //               countController.text = "100";
+                    //             });
+                    //           },
+                    //           child: const Text("استغفر الله",
+                    //               style: TextStyle(fontFamily: 'Amiri'))),
+                    //     ),
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //           vertical: 3, horizontal: 5),
+                    //       margin: const EdgeInsets.symmetric(
+                    //           vertical: 0, horizontal: 5),
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(15),
+                    //         color: Theme.of(context).dialogBackgroundColor,
+                    //         boxShadow: [
+                    //           BoxShadow(
+                    //             color: Colors.grey.withOpacity(0.5),
+                    //             spreadRadius: 2,
+                    //             blurRadius: 5,
+                    //             offset: const Offset(0, 2),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       child: TextButton(
+                    //           onPressed: () {
+                    //             setState(() {
+                    //               contentController.text = "لا إاله إلا الله";
+                    //               countController.text = "100";
+                    //             });
+                    //           },
+                    //           child: const Text("لا إاله إلا الله",
+                    //               style: TextStyle(fontFamily: 'Amiri'))),
+                    //     ),
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //           vertical: 3, horizontal: 5),
+                    //       margin: const EdgeInsets.symmetric(
+                    //           vertical: 0, horizontal: 5),
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(15),
+                    //         color: Theme.of(context).dialogBackgroundColor,
+                    //         boxShadow: [
+                    //           BoxShadow(
+                    //             color: Colors.grey.withOpacity(0.5),
+                    //             spreadRadius: 2,
+                    //             blurRadius: 5,
+                    //             offset: const Offset(0, 2),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       child: TextButton(
+                    //           onPressed: () {
+                    //             setState(() {
+                    //               contentController.text =
+                    //                   "سُبْحـانَ اللهِ وَبِحَمْـدِهِ";
+                    //               countController.text = "100";
+                    //             });
+                    //           },
+                    //           child: const Text("سُبْحـانَ اللهِ وَبِحَمْـدِهِ",
+                    //               style: TextStyle(fontFamily: 'Amiri'))),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),
@@ -528,6 +595,32 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
           ],
         );
       },
+    );
+  }
+  // Helper method to build a button
+  Widget buildResponsiveButton(BuildContext context,
+      {required String label, required VoidCallback onPressed}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Theme.of(context).dialogBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 3,
+            offset: const Offset(2, 2),
+          ),
+        ],
+      ),
+      child: TextButton(
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: const TextStyle(fontFamily: 'Amiri'),
+        ),
+      ),
     );
   }
 }
