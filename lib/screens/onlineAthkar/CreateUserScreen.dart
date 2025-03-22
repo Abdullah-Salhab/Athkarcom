@@ -49,6 +49,7 @@ class CreateUserScreenState extends State<CreateUserScreen> {
         DateTime.now().hour,
         DateTime.now().minute,
       ),
+      'last_update': DateTime.now().toIso8601String(),
       'points': 0
     });
     Navigator.of(context).pop();

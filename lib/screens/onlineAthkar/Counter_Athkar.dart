@@ -19,7 +19,6 @@ class CounterAthkarScreen extends StatefulWidget {
   final String id;
   final int index;
   final int currentCount;
-  final List? users;
   final String? userName;
 
   const CounterAthkarScreen({
@@ -30,7 +29,6 @@ class CounterAthkarScreen extends StatefulWidget {
     required this.id,
     required this.index,
     required this.currentCount,
-    this.users,
     this.userName,
   });
 
@@ -46,11 +44,22 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
   Future<void> _updateUsers() async {
     final objectRef =
         FirebaseFirestore.instance.collection('athkar_group').doc(widget.id);
-    List? users = widget.users;
-    users?.add(widget.userName);
-    await objectRef.update({
-      'users': users,
-    });
+    // Fetch the document snapshot
+    DocumentSnapshot docSnapshot = await objectRef.get();
+
+    if (docSnapshot.exists) {
+      // Get the 'users' field, ensuring it's a List
+      List<dynamic> users =
+          (docSnapshot.data() as Map<String, dynamic>)['users'] ?? [];
+
+      // Add the new user if not already in the list
+      if (!users.contains(widget.userName)) {
+        users.add(widget.userName);
+
+        // Update Firestore document
+        await objectRef.update({'users': users});
+      }
+    }
   }
 
   Future<void> _updateUserPoints() async {
@@ -61,7 +70,10 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
     if (userQuerySnapshot.docs.isNotEmpty) {
       var userDocument = userQuerySnapshot.docs.first;
       int currentPoints = userDocument.get('points');
-      await userDocument.reference.update({'points': currentPoints + 10});
+      await userDocument.reference.update({
+        'points': currentPoints + 10,
+        'last_update': DateTime.now().toIso8601String(),
+      });
     }
   }
 
@@ -175,6 +187,54 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                 icon: const Icon(Icons.copy)),
                           ],
                         ),
+                        counter > 0 && widget.id != "0"
+                            ? ElevatedButton(
+                                onPressed: () async {
+                                  setState(() {
+                                    counter = 0;
+                                  });
+                                  Vibrate.vibrate();
+                                  _triggerConfetti();
+                                  saveCounterOnlineResult().catchError((e) {
+                                    showExceptionPopup(context, e.toString());
+                                  });
+                                  await _updateUsers().catchError((e) {
+                                    showExceptionPopup(context, e.toString());
+                                  });
+                                  await _updateUserPoints().catchError((e) {
+                                    showExceptionPopup(context, e.toString());
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      backgroundColor: Colors.green,
+                                      content: Text('تم إكمال الذكر هنيئاً لك'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                  // Delay for 1 second before navigating back
+                                  await Future.delayed(
+                                      const Duration(seconds: 1));
+                                  Navigator.of(context).pop();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 5),
+                                  backgroundColor: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  elevation: 8,
+                                  // Adjust the shadow depth
+                                  shadowColor: Colors.black
+                                      .withOpacity(0.7), // Adjust shadow color
+                                ),
+                                child: const Text(
+                                  " تم عمله بخاتم التسبيح ✅",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.white),
+                                ),
+                              )
+                            : const SizedBox(),
                         TextButton(
                             onPressed: () {
                               setState(() {
@@ -290,6 +350,9 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
                       progressColor: Colors.green,
                     ),
                   ),
+                  const SizedBox(
+                    height: 50,
+                  ),
                 ],
               ),
               if (counter == 0 && widget.index != -1)
@@ -337,82 +400,50 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
     );
   }
 
-  void decreaseCounter() {
-    setState(() {
-      if (counter > 1) {
+  Future<void> decreaseCounter() async {
+    if (counter > 1) {
+      setState(() {
         counter--;
-
-        if (widget.id == "0") {
-          saveCounterResult().catchError((e) {
-            showExceptionPopup(context, e.toString());
-          });
-        } else {
-          saveCounterOnlineResult().catchError((e) {
-            showExceptionPopup(context, e.toString());
-          });
-        }
-      } else if (counter == 1) {
-        Vibrate.vibrate();
-        if (widget.id == "0") {
-          // print("Finished Offline");
-        } else {
-          _updateUsers().catchError((e) {
-            showExceptionPopup(context, e.toString());
-          });
-          _updateUserPoints().catchError((e) {
-            showExceptionPopup(context, e.toString());
-          });
-          // print("Finished Online");
-        }
-        if (widget.id != "0" && counter == 0) Navigator.of(context).pop();
-        setState(() {
-          counter--;
-        });
-        _triggerConfetti();
-        showModalBottomSheet<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: 250,
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.close,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Image.asset(
-                    "assets/images/celebrate.gif",
-                    width: 150,
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  const Text(
-                    'تم إكمال الذكر هنيئاً لك',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+      });
+    } else if (counter == 1) {
+      if (kIsWeb == false) Vibrate.vibrate();
+      setState(() {
+        counter--;
+      });
+      if (widget.id == "0") {
+        // print("Finished Offline");
       } else {
-        Navigator.of(context).pop();
+        await _updateUsers().catchError((e) {
+          showExceptionPopup(context, e.toString());
+        });
+        await _updateUserPoints().catchError((e) {
+          showExceptionPopup(context, e.toString());
+        });
+        // print("Finished Online");
       }
-    });
+      _triggerConfetti();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text('تم إكمال الذكر هنيئاً لك'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      // Delay for 1 second before navigating back
+      await Future.delayed(const Duration(seconds: 1));
+      if (widget.id != "0" && counter == 0) Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pop();
+    }
+    if (widget.id == "0") {
+      saveCounterResult().catchError((e) {
+        showExceptionPopup(context, e.toString());
+      });
+    } else {
+      saveCounterOnlineResult().catchError((e) {
+        showExceptionPopup(context, e.toString());
+      });
+    }
   }
 
   Future<void> saveCounterResult() async {

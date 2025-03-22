@@ -125,35 +125,33 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
       stream: FirebaseFirestore.instance
           .collection('Users')
           .orderBy('points', descending: true)
+          .orderBy('last_update',)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text("لا يوجد أي شخص")); // Handle empty data
+        }
 
         final documents = snapshot.data!.docs;
-        int userIndex = 0;
+        int firstUser0Index = 0;
 
         for (int x = 0; x < documents.length; x++) {
-          if (documents[x].get("name") == userName) {
-            userIndex = x;
+          if (documents[x].get("points") == 0) {
+            firstUser0Index = x;
             break;
           }
         }
 
         return ListView.builder(
           physics: const BouncingScrollPhysics(),
-          itemCount: documents.length < 10
-              ? documents.length
-              : userIndex >= 10
-                  ? 11
-                  : 10,
+          itemCount: documents.length ,
           itemBuilder: (context, currentIndex) {
-            // to show my index
-            int index = currentIndex == 10 ? userIndex : currentIndex;
             return Column(
               children: [
-                if (index == 3 || currentIndex == 10)
+                if (currentIndex == 3)
                   const SizedBox(
                     width: 1300,
                     child: Divider(
@@ -168,7 +166,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                     borderRadius: BorderRadius.circular(15),
                     color: Theme.of(context).dialogBackgroundColor,
                     border: Border.all(
-                        color: documents[index].get("name") == userName
+                        color: documents[currentIndex].get("name") == userName
                             ? Colors.green
                             : Colors.white,
                         width: 2),
@@ -183,12 +181,12 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                     ],
                   ),
                   child: ListTile(
-                    trailing: index < 3
+                    trailing: currentIndex < 3
                         ? Image.asset(
-                            "assets/images/medal_${index + 1}.png",
+                            "assets/images/medal_${currentIndex + 1}.png",
                             width: 30,
                           )
-                        : index < 10
+                        : currentIndex < firstUser0Index
                             ? const Icon(
                                 size: 30,
                                 Icons.stars_sharp,
@@ -196,7 +194,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                               )
                             : const SizedBox(),
                     leading: Text(
-                      "${currentIndex == 11 ? userIndex : index + 1}",
+                      "${currentIndex + 1}",
                       style:
                           const TextStyle(fontSize: 18, fontFamily: 'Tajawal'),
                     ),
@@ -204,12 +202,12 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          documents[index].get("name"),
+                          documents[currentIndex].get("name"),
                           style: const TextStyle(
                               fontSize: 18, fontFamily: 'Tajawal'),
                         ),
                         Text(
-                          "${documents[index].get("points")} نقطة",
+                          "${documents[currentIndex].get("points")} نقطة",
                           style: const TextStyle(
                               fontSize: 18, fontFamily: 'Tajawal'),
                         ),
@@ -234,6 +232,9 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text("لا يوجد أي ذكر")); // Handle empty data
         }
 
         final documents = snapshot.data!.docs;
@@ -319,7 +320,6 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                             ? currentCount
                                             : object["count"],
                                         userName: userName,
-                                        users: users,
                                       ),
                                     )).then((value) {
                                   setState(() {
@@ -341,12 +341,6 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                users.contains(userName)
-                                    ? const Icon(
-                                        Icons.done_outline,
-                                        color: Colors.green,
-                                      )
-                                    : const SizedBox(),
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width > 600
                                       ? 300
@@ -359,7 +353,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width > 600
                                       ? 150
-                                      : 60,
+                                      : 80,
                                   child: Text(
                                     '${users.contains(userName) ? 0 : currentCount >= 0 ? currentCount : object["count"]}/${object['count']}',
                                     style: const TextStyle(
@@ -376,7 +370,12 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                 _showDeleteConfirmationDialog(
                                     context, object.id);
                               },
-                            ):const SizedBox(),
+                            ):users.contains(userName)
+                                ? const Icon(
+                              Icons.done_outline,
+                              color: Colors.green,
+                            )
+                                : const SizedBox(),
                             leading: IconButton(
                               color: Colors.green,
                               tooltip: "الذاكرين",
@@ -392,7 +391,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                         userName: userName),
                                   )),
                               icon: const Icon(
-                                Icons.supervised_user_circle_sharp,
+                                Icons.format_list_numbered_rtl,
                                 size: 30,
                               ),
                             ),
