@@ -5,7 +5,9 @@ import '../ExceptionDialog.dart';
 import '../check_connection.dart';
 
 class AddAthkarScreen extends StatefulWidget {
-  const AddAthkarScreen({super.key});
+  final String groupId;
+
+  const AddAthkarScreen({super.key, required final this.groupId});
 
   @override
   AddAthkarScreenState createState() => AddAthkarScreenState();
@@ -21,8 +23,10 @@ class AddAthkarScreenState extends State<AddAthkarScreen> {
     final now = DateTime.now();
     final dateToday = DateTime(now.year, now.month, now.day);
 
-    final CollectionReference objects =
-        FirebaseFirestore.instance.collection('athkar_group');
+    final CollectionReference objects = FirebaseFirestore.instance
+        .collection('Groups')
+        .doc(widget.groupId)
+        .collection("Athkars");
 
     await objects.add({
       'count': int.parse(_countController.text),
@@ -99,9 +103,10 @@ class AddAthkarScreenState extends State<AddAthkarScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate() & await getConnection(context)) {
+                      if (_formKey.currentState!.validate() &
+                          await getConnection(context)) {
                         _formKey.currentState!.save();
-                        _addObject().catchError((e){
+                        _addObject().catchError((e) {
                           showExceptionPopup(context, e.toString());
                         });
                       }

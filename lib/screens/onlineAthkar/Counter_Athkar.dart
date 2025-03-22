@@ -20,6 +20,7 @@ class CounterAthkarScreen extends StatefulWidget {
   final int index;
   final int currentCount;
   final String? userName;
+  final String groupId;
 
   const CounterAthkarScreen({
     super.key,
@@ -30,6 +31,7 @@ class CounterAthkarScreen extends StatefulWidget {
     required this.index,
     required this.currentCount,
     this.userName,
+    required this.groupId,
   });
 
   @override
@@ -43,7 +45,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
 
   Future<void> _updateUsers() async {
     final objectRef =
-        FirebaseFirestore.instance.collection('athkar_group').doc(widget.id);
+        FirebaseFirestore.instance.collection('Groups').doc(widget.groupId).collection("Athkars").doc(widget.id);
     // Fetch the document snapshot
     DocumentSnapshot docSnapshot = await objectRef.get();
 
@@ -66,6 +68,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
     var userQuerySnapshot = await FirebaseFirestore.instance
         .collection('Users')
         .where("name", isEqualTo: widget.userName)
+        .where('groupId', isEqualTo: widget.groupId)
         .get();
     if (userQuerySnapshot.docs.isNotEmpty) {
       var userDocument = userQuerySnapshot.docs.first;
@@ -193,7 +196,9 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen> {
                                   setState(() {
                                     counter = 0;
                                   });
-                                  Vibrate.vibrate();
+                                  if(!kIsWeb) {
+                                    Vibrate.vibrate();
+                                  }
                                   _triggerConfetti();
                                   saveCounterOnlineResult().catchError((e) {
                                     showExceptionPopup(context, e.toString());

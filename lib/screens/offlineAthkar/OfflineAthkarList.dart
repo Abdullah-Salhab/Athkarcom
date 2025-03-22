@@ -108,6 +108,7 @@ class _OfflineAthkarListState extends State<OfflineAthkarList> {
                                   id: "0",
                                   value: "",
                                   index: index,
+                                  groupId: "",
                                 ),
                               )).then((value) => getAthkarList());
                         },

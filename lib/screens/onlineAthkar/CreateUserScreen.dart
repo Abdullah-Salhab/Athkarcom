@@ -50,7 +50,9 @@ class CreateUserScreenState extends State<CreateUserScreen> {
         DateTime.now().minute,
       ),
       'last_update': DateTime.now().toIso8601String(),
-      'points': 0
+      'points': 0,
+      'groupId':'',
+      'groupName':''
     });
     Navigator.of(context).pop();
   }

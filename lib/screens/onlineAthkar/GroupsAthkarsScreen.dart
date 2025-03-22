@@ -9,18 +9,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../ExceptionDialog.dart';
 import '../check_connection.dart';
 
-class GroupAthkarListScreen extends StatefulWidget {
-  const GroupAthkarListScreen({super.key});
+class GroupsAthkarsScreen extends StatefulWidget {
+  final String groupId;
+  final String groupName;
+
+  const GroupsAthkarsScreen(
+      {super.key, required this.groupId, required this.groupName});
 
   @override
-  State<GroupAthkarListScreen> createState() => _GroupAthkarListScreenState();
+  State<GroupsAthkarsScreen> createState() => _GroupsAthkarsScreenState();
 }
 
-class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
+class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
     with SingleTickerProviderStateMixin {
   String userName = "";
   int currentCount = 1;
-  bool isAdmin=false;
+  bool isAdmin = false;
   late SharedPreferences prefs;
   late TabController _tabController;
 
@@ -38,15 +42,14 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
   checkIfNameExistsInAdminList(String userName) async {
     try {
       // Reference the 'admins' collection
-      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('Admins')
-          .where('name', isEqualTo: userName)
+      final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(widget.groupId)
           .get();
 
       setState(() {
-        isAdmin = querySnapshot.docs.isNotEmpty;
+        isAdmin = documentSnapshot.get('createdBy') == userName;
       });
-
     } catch (e) {
       showExceptionPopup(context, e.toString());
     }
@@ -74,9 +77,9 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'الأذكار الجماعية',
-          style: TextStyle(
+        title: Text(
+          widget.groupName,
+          style: const TextStyle(
             fontFamily: 'Tajawal',
             fontSize: 24.0,
           ),
@@ -94,7 +97,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
           ],
         ),
         actions: [
-          if(isAdmin)
+          // if (isAdmin)
           IconButton(
               onPressed: () {
                 Navigator.push(
@@ -103,7 +106,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                       type: PageTransitionType.leftToRightWithFade,
                       reverseDuration: const Duration(milliseconds: 500),
                       duration: const Duration(milliseconds: 500),
-                      child: const AddAthkarScreen(groupId: "",),
+                      child: AddAthkarScreen(groupId: widget.groupId),
                     ));
               },
               tooltip: 'إضافة ذكر',
@@ -124,18 +127,30 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('Users')
-          .orderBy('points', descending: true)
-          .orderBy('last_update',)
+          .where('groupId', isEqualTo: widget.groupId.toString())
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("لا يوجد أي شخص")); // Handle empty data
+          return const Center(
+              child: Text("لا يوجد أي شخص")); // Handle empty data
         }
 
         final documents = snapshot.data!.docs;
+
+        // Sort the documents after fetching them
+        documents.sort((a, b) {
+          // Compare 'points' in descending order
+          int pointsComparison = b.get("points").compareTo(a.get("points"));
+          if (pointsComparison != 0) {
+            return pointsComparison;
+          }
+          // If points are equal, sort by 'last_update' ascending
+          return a.get("last_update").compareTo(b.get("last_update"));
+        });
+
         int firstUser0Index = 0;
 
         for (int x = 0; x < documents.length; x++) {
@@ -147,7 +162,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
 
         return ListView.builder(
           physics: const BouncingScrollPhysics(),
-          itemCount: documents.length ,
+          itemCount: documents.length,
           itemBuilder: (context, currentIndex) {
             return Column(
               children: [
@@ -226,7 +241,9 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
   StreamBuilder<QuerySnapshot<Object?>> athkarListStreamBuilder() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('athkar_group')
+          .collection('Groups')
+          .doc(widget.groupId)
+          .collection("Athkars")
           .orderBy('date', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
@@ -234,7 +251,8 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("لا يوجد أي ذكر")); // Handle empty data
+          return const Center(
+              child: Text("لا يوجد أي ذكر")); // Handle empty data
         }
 
         final documents = snapshot.data!.docs;
@@ -308,8 +326,10 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                       type: PageTransitionType.size,
                                       alignment: Alignment.bottomCenter,
                                       curve: Curves.bounceOut,
-                                      duration: const Duration(milliseconds: 500),
-                                      reverseDuration: const Duration(milliseconds: 500),
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      reverseDuration:
+                                          const Duration(milliseconds: 500),
                                       child: CounterAthkarScreen(
                                         count: object["count"],
                                         content: object['content'],
@@ -320,7 +340,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                             ? currentCount
                                             : object["count"],
                                         userName: userName,
-                                        groupId: "",
+                                        groupId: widget.groupId,
                                       ),
                                     )).then((value) {
                                   setState(() {
@@ -364,27 +384,36 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                 ),
                               ],
                             ),
-                            trailing: isAdmin?IconButton(
-                              icon: const Icon(Icons.delete),
-                              tooltip: 'حذف ذكر',
-                              onPressed: () {
-                                _showDeleteConfirmationDialog(
-                                    context, object.id);
-                              },
-                            ):users.contains(userName)
-                                ? const Icon(
-                              Icons.done_outline,
-                              color: Colors.green,
-                            )
-                                : const SizedBox(),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isAdmin)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    tooltip: 'حذف ذكر',
+                                    onPressed: () {
+                                      _showDeleteConfirmationDialog(
+                                          context, object.id);
+                                    },
+                                  ),
+                                if (users.contains(userName))
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                  )
+                              ],
+                            ),
+
                             leading: IconButton(
                               color: Colors.green,
                               tooltip: "الذاكرين",
                               onPressed: () => Navigator.push(
                                   context,
                                   PageTransition(
-                                    type: PageTransitionType.rightToLeftWithFade,
-                                    reverseDuration: const Duration(milliseconds: 500),
+                                    type:
+                                        PageTransitionType.rightToLeftWithFade,
+                                    reverseDuration:
+                                        const Duration(milliseconds: 500),
                                     duration: const Duration(milliseconds: 500),
                                     child: ThekerReadersScreen(
                                         users: users,
@@ -392,7 +421,7 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
                                         userName: userName),
                                   )),
                               icon: const Icon(
-                                Icons.format_list_numbered_rtl,
+                                Icons.groups_rounded,
                                 size: 30,
                               ),
                             ),
@@ -438,7 +467,9 @@ class _GroupAthkarListScreenState extends State<GroupAthkarListScreen>
               onPressed: () async {
                 if (await getConnection(context)) {
                   await FirebaseFirestore.instance
-                      .collection('athkar_group')
+                      .collection('Groups')
+                      .doc(widget.groupId)
+                      .collection("Athkars")
                       .doc(objectId)
                       .delete()
                       .catchError((e) {

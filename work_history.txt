@@ -5,3 +5,4 @@
 26 - 30 /4/2024 => change design of athkar page + vibrating + other bugs
 7/7/2024 => change design of offline athkar page
 9/8/2024 => change into notion tool
+22/3/2025 => make the group screen take around 12 hours

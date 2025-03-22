@@ -12,6 +12,7 @@ import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'check_connection.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
+import 'onlineAthkar/GroupsListScreen.dart';
 import 'onlineAthkar/groupAthkarScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -159,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             alignment: Alignment.topRight,
                             duration: const Duration(milliseconds: 500),
                             reverseDuration: const Duration(milliseconds: 500),
-                            child: const GroupAthkarListScreen(),
+                            child: const GroupsListScreen(),
                           ));
                     } else {
                       Navigator.push(
