@@ -30,12 +30,13 @@ class AddGroupScreenState extends State<AddGroupScreen> {
       'name': _nameController.text,
       'desc': _descController.text,
       'members': {userName: true},
+      'requests': {},
       'createdAt': dateToday,
       'createdBy': userName,
     });
     // Now create a sub collection named 'Athkars'
     docRef.collection('Athkars');
-    print(docRef.id);
+
     var userQuerySnapshot = await FirebaseFirestore.instance
         .collection('Users')
         .where("name", isEqualTo: userName)
@@ -45,7 +46,8 @@ class AddGroupScreenState extends State<AddGroupScreen> {
       if (userQuerySnapshot.docs.length == 1 &&
           userQuerySnapshot.docs.first.get('groupId') == '') {
         var userDocument = userQuerySnapshot.docs.first;
-        await userDocument.reference.update({'groupId': docRef.id});
+        await userDocument.reference
+            .update({'groupId': docRef.id, 'groupName': _nameController.text});
       } else {
         // create new user with the group id
         CollectionReference users =
@@ -59,17 +61,10 @@ class AddGroupScreenState extends State<AddGroupScreen> {
             DateTime.now().hour,
             DateTime.now().minute,
           ),
-          'last_login': DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day,
-            DateTime.now().hour,
-            DateTime.now().minute,
-          ),
           'last_update': DateTime.now().toIso8601String(),
           'points': 0,
           'groupId': docRef.id,
-          'groupName':_nameController.text
+          'groupName': _nameController.text
         });
       }
     }
@@ -81,6 +76,18 @@ class AddGroupScreenState extends State<AddGroupScreen> {
       ),
     );
     Navigator.of(context).pop();
+  }
+
+  Future<bool> _checkIfGroupExist(String name) async {
+    // Check Firestore
+    CollectionReference groups =
+        FirebaseFirestore.instance.collection('Groups');
+    var doc = await groups.where("name", isEqualTo: name).get();
+    if (doc.size != 0) {
+      return true;
+    }
+
+    return false;
   }
 
   getUserName() async {
@@ -97,7 +104,13 @@ class AddGroupScreenState extends State<AddGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إضافة مجموعة'),
+        title: const Text(
+          'إضافة مجموعة',
+          style: TextStyle(
+            fontFamily: 'Tajawal',
+            fontSize: 24.0,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -120,7 +133,7 @@ class AddGroupScreenState extends State<AddGroupScreen> {
                     }
                     return null;
                   },
-                  maxLength: 20,
+                  maxLength: 15,
                 ),
                 const SizedBox(
                   height: 20,
@@ -138,7 +151,7 @@ class AddGroupScreenState extends State<AddGroupScreen> {
                     }
                     return null;
                   },
-                  maxLength: 100,
+                  maxLength: 25,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -148,9 +161,37 @@ class AddGroupScreenState extends State<AddGroupScreen> {
                       if (_formKey.currentState!.validate() &
                           await getConnection(context)) {
                         _formKey.currentState!.save();
-                        _addGroup().catchError((e) {
+
+                        bool nameExist = await _checkIfGroupExist(
+                                _nameController.text.trim())
+                            .catchError((e) {
                           showExceptionPopup(context, e.toString());
                         });
+
+                        if (nameExist) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('المجموعة موجودة'),
+                                content: const Text(
+                                    'يوجد مجموعة بهذا الاسم يرجى تعديل الاسم'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('حسنا'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          _addGroup().catchError((e) {
+                            showExceptionPopup(context, e.toString());
+                          });
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(

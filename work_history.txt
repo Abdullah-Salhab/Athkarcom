@@ -6,3 +6,5 @@
 7/7/2024 => change design of offline athkar page
 9/8/2024 => change into notion tool
 22/3/2025 => make the group screen take around 12 hours
+1/4/2025=> make the group initial request feature take around 4 hours
+1/4/2025=> make the group request feature + create the user + admin panel (approve request + delete user + change group info) take round 12 hours

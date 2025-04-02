@@ -26,7 +26,7 @@ class CreateUserScreenState extends State<CreateUserScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await prefs.setString('userName', fullName);
-    await saveOfflineAthkarList().catchError((e){
+    await saveOfflineAthkarList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
     usersList.add(fullName);
@@ -42,17 +42,10 @@ class CreateUserScreenState extends State<CreateUserScreen> {
         DateTime.now().hour,
         DateTime.now().minute,
       ),
-      'last_login': DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        DateTime.now().hour,
-        DateTime.now().minute,
-      ),
       'last_update': DateTime.now().toIso8601String(),
       'points': 0,
-      'groupId':'',
-      'groupName':''
+      'groupId': '',
+      'groupName': ''
     });
     Navigator.of(context).pop();
   }
@@ -97,10 +90,10 @@ class CreateUserScreenState extends State<CreateUserScreen> {
 
   @override
   void initState() {
-    getOfflineAthkarList().catchError((e){
+    getOfflineAthkarList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
-    getUsersList().catchError((e){
+    getUsersList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
   }
@@ -191,14 +184,16 @@ class CreateUserScreenState extends State<CreateUserScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate() && await getConnection(context)) {
+                      if (_formKey.currentState!.validate() &&
+                          await getConnection(context)) {
                         _formKey.currentState!.save();
 
                         String firstName = _firstNameController.text.trim();
                         String lastName = _lastNameController.text.trim();
                         String fullName = '$firstName $lastName';
 
-                        bool nameExists = await _checkIfNameExists(fullName).catchError((e){
+                        bool nameExists =
+                            await _checkIfNameExists(fullName).catchError((e) {
                           showExceptionPopup(context, e.toString());
                         });
 
@@ -222,7 +217,7 @@ class CreateUserScreenState extends State<CreateUserScreen> {
                             },
                           );
                         } else {
-                          await _saveUserData(fullName).catchError((e){
+                          await _saveUserData(fullName).catchError((e) {
                             showExceptionPopup(context, e.toString());
                           });
                           ScaffoldMessenger.of(context).showSnackBar(

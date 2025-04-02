@@ -29,7 +29,6 @@ class _MyDrawerState extends State<MyDrawer> {
   List<String> athkarCount = [];
   List<String> athkarCurrentCount = [];
   bool isDarkThemeActive = false;
-  int userPoints = 0;
 
   @override
   void initState() {
@@ -57,7 +56,6 @@ class _MyDrawerState extends State<MyDrawer> {
         userName = prefs.getString('userName')!.trim();
       }
     });
-    getUserPoints();
   }
 
   setCurrentUserName(selectedUser) async {
@@ -86,27 +84,15 @@ class _MyDrawerState extends State<MyDrawer> {
     });
     saveOfflineAthkarList();
     CollectionReference users = FirebaseFirestore.instance.collection('Users');
-    var doc = await users.where("name", isEqualTo: deletedUser).get();
-    doc.docs.first.reference.delete();
-
-    // Get all documents in the athkar_group collection
-    final athkarGroupCollection =
-        FirebaseFirestore.instance.collection('athkar_group');
-    final querySnapshot = await athkarGroupCollection.get();
-
-    // Loop through each document in the athkar_group collection
-    for (var doc in querySnapshot.docs) {
-      // Reference to the document in athkar_group
-      final docRef = doc.reference;
-      // Retrieve the 'users' array from the document
-      List<dynamic> users = doc.get("users");
-      
-      if (users.contains(deletedUser)) {
-        // Remove the user name from the 'users' array
-        await docRef.update({
-          'users': FieldValue.arrayRemove([deletedUser])
-        });
-      }
+    CollectionReference groups =
+        FirebaseFirestore.instance.collection('Groups');
+    var user = await users.where("name", isEqualTo: deletedUser).get();
+    for (var element in user.docs) {
+      groups.doc(element.get('groupId')).update({
+        "members.$deletedUser": FieldValue.delete(),
+        // Remove the user from the map
+      });
+      element.reference.delete();
     }
   }
 
@@ -128,19 +114,6 @@ class _MyDrawerState extends State<MyDrawer> {
         athkarCurrentCount = prefs.getStringList('athkarCurrentCount')!;
       }
     });
-  }
-
-  Future<void> getUserPoints() async {
-    var userQuerySnapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .where("name", isEqualTo: userName)
-        .get();
-    if (userQuerySnapshot.docs.isNotEmpty) {
-      var userDocument = userQuerySnapshot.docs.first;
-      setState(() {
-        userPoints = userDocument.get("points");
-      });
-    }
   }
 
   saveOfflineAthkarList() async {
@@ -165,22 +138,7 @@ class _MyDrawerState extends State<MyDrawer> {
               userName,
               style: const TextStyle(fontSize: 18),
             ),
-            accountEmail: Row(
-              children: [
-                Text("$userPoints نقطة ",
-                    style: const TextStyle(
-                      fontSize: 18,
-                    )),
-                const SizedBox(
-                  width: 5,
-                ),
-                const Icon(
-                  size: 30,
-                  Icons.stars_sharp,
-                  color: Colors.yellow,
-                ),
-              ],
-            ),
+            accountEmail: null,
             currentAccountPicture: CircleAvatar(
               radius: 10,
               backgroundColor:
@@ -221,9 +179,6 @@ class _MyDrawerState extends State<MyDrawer> {
                     setCurrentUserName(usersList[index]).catchError((e) {
                       showExceptionPopup(context, e.toString());
                     });
-                    getUserPoints().catchError((e) {
-                      showExceptionPopup(context, e.toString());
-                    });
                   },
                 );
               },
@@ -261,8 +216,6 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: const Icon(Icons.home),
             title: const Text(
               'الرئيسية',
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
               Navigator.pushReplacement(
@@ -280,8 +233,6 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: const Icon(Icons.group),
             title: const Text(
               'الأذكار الجماعية',
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
               Navigator.push(
@@ -298,8 +249,6 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: const Icon(Icons.checklist),
             title: const Text(
               'أذكار الصباح والمساء',
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
               Navigator.push(
@@ -316,8 +265,6 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: const Icon(Icons.my_library_books_rounded),
             title: const Text(
               'أذكاري',
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
               Navigator.push(
@@ -344,16 +291,12 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: const Icon(Icons.feedback_rounded),
             title: const Text(
               "التغذية الراجعة/إقتراحات",
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
           ),
           ListTile(
             leading: const Icon(Icons.help),
             title: const Text(
               'حول التطبيق',
-              // style: GoogleFonts.getFont(settingsProvider.getFontFamily,
-              //     fontSize: settingsProvider.getFontSize),
             ),
             onTap: () {
               Navigator.push(

@@ -32,7 +32,6 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
           style: TextStyle(
             fontFamily: 'Tajawal',
             fontSize: 24.0,
-            fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
@@ -100,25 +99,50 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                   );
                 }
 
-                final documents = snapshot.data!.docs.where((doc) {
-                  String groupName = doc.get("name").toString().toLowerCase();
-                  return groupName.contains(searchQuery);
+                // Filter groups based on search query
+                List<QueryDocumentSnapshot> documents =
+                    snapshot.data!.docs.where((doc) {
+                  String groupName =
+                      doc.get("name").toString().toLowerCase().trim();
+                  return groupName.contains(searchQuery.trim());
                 }).toList();
 
+                // Sort groups: user members first, then others
+                documents.sort((a, b) {
+                  bool isMemberA =
+                      (a.get("members") as Map).containsKey(userName);
+                  bool isMemberB =
+                      (b.get("members") as Map).containsKey(userName);
+
+                  if (isMemberA && !isMemberB) {
+                    return -1; // `a` comes first
+                  } else if (!isMemberA && isMemberB) {
+                    return 1; // `b` comes first
+                  } else {
+                    return a
+                        .get("name")
+                        .compareTo(b.get("name")); // Alphabetical sorting
+                  }
+                });
                 return ListView.builder(
                   physics: const BouncingScrollPhysics(),
                   itemCount: documents.length,
                   padding: const EdgeInsets.all(15),
                   itemBuilder: (BuildContext context, int index) {
                     var group = documents[index];
+                    bool isGroupAdmin = group.get("createdBy") == userName;
                     Map members = group.get("members");
+                    Map requesters = group.get("requests");
                     bool userIsMember = members.containsKey(userName);
+                    bool userIsRequester = requesters.containsKey(userName);
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        gradient: const LinearGradient(
-                          colors: [Colors.teal, Colors.cyan],
+                        gradient: LinearGradient(
+                          colors: isGroupAdmin
+                              ? [Colors.deepPurple, Colors.blueAccent]
+                              : [Colors.teal, Colors.cyan],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -132,24 +156,28 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                         ],
                       ),
                       child: ListTile(
-                        onTap: (){
-                          userIsMember
-                              ? Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GroupsAthkarsScreen(
-                                groupName: group.get("name"),
-                                groupId: group.id,
-                              ),
-                            ),
-                          ):    ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: Colors.blueGrey,
-                              content: Text('يجب الانضمام للمجموعة'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
+                          onTap: () {
+                            userIsMember
+                                ? Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GroupsAthkarsScreen(
+                                        groupName: group.get("name"),
+                                        groupId: group.id,
+                                        groupDesc: group.get("desc"),
+                                      ),
+                                    ),
+                                  )
+                                : ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: Colors.blueGrey,
+                                      content: Text(userIsRequester
+                                          ? 'تم طلب الانضمام للمجموعة, ادمن المجموعة ينظر في طلبك'
+                                          : 'يجب الانضمام للمجموعة'),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                          },
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 12, horizontal: 16),
                           leading: const CircleAvatar(
@@ -157,7 +185,9 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                             child: Icon(Icons.group, color: Colors.teal),
                           ),
                           title: Text(
-                            group.get("name"),
+                            isGroupAdmin
+                                ? "👑 ${group.get("name")}"
+                                : group.get("name"),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -173,34 +203,47 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                               fontFamily: 'Tajawal',
                             ),
                           ),
-                          trailing: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.teal,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () => userIsMember
-                                ? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GroupsAthkarsScreen(
-                                        groupName: group.get("name"),
-                                        groupId: group.id,
-                                      ),
+                          trailing: userIsRequester
+                              ? const Text(
+                                  'تم ارسال طلبك',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontFamily: 'Tajawal',
+                                  ),
+                                )
+                              : ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.teal,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  )
-                                : joinGroup(group.id,group.get("name")),
-                            child: Text(
-                              userIsMember ? "فتح" : "انضمام",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'Tajawal',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          )),
+                                  ),
+                                  onPressed: () => userIsMember
+                                      ? Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                GroupsAthkarsScreen(
+                                              groupName: group.get("name"),
+                                              groupId: group.id,
+                                              groupDesc: group.get("desc"),
+                                            ),
+                                          ),
+                                        )
+                                      : requestJoinGroup(
+                                          group.id, group.get("name")),
+                                  child: Text(
+                                    userIsMember ? "فتح" : "طلب الانضمام",
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'Tajawal',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )),
                     );
                   },
                 );
@@ -212,7 +255,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
     );
   }
 
-  Future<void> joinGroup(String groupId, String groupName) async {
+  Future<void> requestJoinGroup(String groupId, String groupName) async {
     final CollectionReference objects =
         FirebaseFirestore.instance.collection('Groups');
     final docRef = objects.doc(groupId);
@@ -221,66 +264,21 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
     if (docSnapshot.exists) {
       final data = docSnapshot.data() as Map<String, dynamic>;
 
-      if (!data['members'].containsKey(userName)) {
+      if (!data['requests'].containsKey(userName) &&
+          !data['members'].containsKey(userName)) {
         await docRef.update({
-          'members.$userName': false,
+          'requests.$userName': DateTime.now().toIso8601String(),
         });
       }
     } else {
       print('Document does not exist');
     }
 
-    var userQuerySnapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .where("name", isEqualTo: userName)
-        .get();
-    // set group id to the user
-    if (userQuerySnapshot.docs.isNotEmpty) {
-      if (userQuerySnapshot.docs.length == 1 &&
-          userQuerySnapshot.docs.first.get('groupId') == '') {
-        var userDocument = userQuerySnapshot.docs.first;
-        await userDocument.reference.update({'groupId': docRef.id});
-      } else {
-        // create new user with the group id
-        CollectionReference users =
-        FirebaseFirestore.instance.collection('Users');
-        await users.add({
-          'name': userName,
-          'created_in': DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day,
-            DateTime.now().hour,
-            DateTime.now().minute,
-          ),
-          'last_login': DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day,
-            DateTime.now().hour,
-            DateTime.now().minute,
-          ),
-          'last_update': DateTime.now().toIso8601String(),
-          'points': 0,
-          'groupId': docRef.id,
-          'groupName':groupName
-        });
-      }
-    }
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         backgroundColor: Colors.green,
-        content: Text('تم الانضمام للمجموعة بنجاح'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GroupsAthkarsScreen(
-          groupId: groupId,
-          groupName: groupName,
-        ),
+        content: Text('تم إرسال طلب الانضمام لمسؤول المجموعة'),
+        duration: Duration(seconds: 3),
       ),
     );
   }

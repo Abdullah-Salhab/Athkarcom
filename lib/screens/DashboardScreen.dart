@@ -33,33 +33,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> getUserName() async {
     // Check Shared Preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      if (prefs.containsKey("userName")) {
+    if (prefs.containsKey("userName")) {
+      setState(() {
         userName = prefs.getString('userName')!.trim();
         dropdownValue = userName;
-        updateLastLogin();
-      } else {
-        Navigator.push(
-          context,
-          PageTransition(
-            type: PageTransitionType.bottomToTop,
-            duration: const Duration(milliseconds: 500),
-            reverseDuration: const Duration(milliseconds: 500),
-            child: const CreateUserScreen(),
-          ),
-        ).then((value) {
-          Navigator.pushReplacement(
-              context,
-              PageTransition(
-                type: PageTransitionType.scale,
-                alignment: Alignment.center,
-                duration: const Duration(milliseconds: 500),
-                reverseDuration: const Duration(milliseconds: 500),
-                child: const DashboardScreen(),
-              ));
-        });
+      });
+      bool userExist = await userIsExist();
+      if (userExist == false) {
+        prefs.clear();
       }
-    });
+    }
+    if (prefs.containsKey("userName") == false) {
+      Navigator.push(
+        context,
+        PageTransition(
+          type: PageTransitionType.bottomToTop,
+          duration: const Duration(milliseconds: 500),
+          reverseDuration: const Duration(milliseconds: 500),
+          child: const CreateUserScreen(),
+        ),
+      ).then((value) {
+        Navigator.pushReplacement(
+            context,
+            PageTransition(
+              type: PageTransitionType.scale,
+              alignment: Alignment.center,
+              duration: const Duration(milliseconds: 500),
+              reverseDuration: const Duration(milliseconds: 500),
+              child: const DashboardScreen(),
+            ));
+      });
+    }
   }
 
   getOfflineAthkarList() async {
@@ -73,26 +77,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  Future<void> updateLastLogin() async {
-    // Save to Firestore
+  Future<bool> userIsExist() async {
     var userQuerySnapshot = await FirebaseFirestore.instance
         .collection('Users')
         .where("name", isEqualTo: userName)
         .get();
-
-    if (userQuerySnapshot.docs.isNotEmpty) {
-      var userDocument = userQuerySnapshot.docs.first;
-
-      await userDocument.reference.update({
-        'last_login': DateTime(
-          DateTime.now().year,
-          DateTime.now().month,
-          DateTime.now().day,
-          DateTime.now().hour,
-          DateTime.now().minute,
-        ),
-      });
-    }
+    return userQuerySnapshot.docs.isNotEmpty;
   }
 
   @override
