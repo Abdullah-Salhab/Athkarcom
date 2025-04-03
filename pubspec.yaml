@@ -50,13 +50,13 @@ dependencies:
   provider:
   awesome_dialog:
   connectivity:
-  audioplayers: 5.2.1
+  audioplayers:
   page_transition:
   confetti:
   flutter_local_notifications:
   timezone:
   firebase_messaging:
-  change_app_package_name:
+  wakelock_plus:
 
 
 flutter_launcher_icons:

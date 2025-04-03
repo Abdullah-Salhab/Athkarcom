@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:athkar/models/section_detail_model.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,6 +59,8 @@ class CounterPageState extends State<CounterPage> {
         }
         decrementCounter(currentPage);
       });
+      // Keep the screen on
+      WakelockPlus.enable();
     } catch (e) {
       showExceptionPopup(context, e.toString());
     }
@@ -68,6 +71,7 @@ class CounterPageState extends State<CounterPage> {
   void dispose() {
     _player.dispose();
     _confettiController.dispose();
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -158,7 +162,10 @@ class CounterPageState extends State<CounterPage> {
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeOut);
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('😊 لم تكمل جميع الأذكار 😊',style: TextStyle(color: Colors.white),),
+              content: Text(
+                '😊 لم تكمل جميع الأذكار 😊',
+                style: TextStyle(color: Colors.white),
+              ),
               backgroundColor: Colors.black,
               duration: Duration(seconds: 3),
             ));
@@ -352,8 +359,9 @@ class CounterPageState extends State<CounterPage> {
     return KeyboardListener(
       focusNode: _focusNode,
       onKeyEvent: (KeyEvent event) {
-        if (event is KeyDownEvent) { // Handle only KeyDownEvent
-          if (event.logicalKey == LogicalKeyboardKey.enter ) {
+        if (event is KeyDownEvent) {
+          // Handle only KeyDownEvent
+          if (event.logicalKey == LogicalKeyboardKey.enter) {
             decrementCounter(index);
           }
         }
