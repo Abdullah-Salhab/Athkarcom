@@ -550,7 +550,6 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
           children: [
             const SizedBox(height: 5),
             const Card(
-              color: Color.fromRGBO(255, 255, 255, 1.0),
               elevation: 4,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -567,7 +566,6 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
             const Divider(thickness: 2),
             const SizedBox(height: 5),
             const Card(
-                color: Color.fromRGBO(255, 255, 255, 1.0),
                 elevation: 4,
                 child: Padding(
                   padding:
@@ -1007,10 +1005,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
           surfaceTintColor: Colors.white,
           title: const Text(
             'تعديل معلومات المجموعة',
-            style: TextStyle(
-              fontFamily: 'Tajawal',
-              fontSize: 20
-            ),
+            style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
           ),
           content: SingleChildScrollView(
             child: Padding(
@@ -1053,7 +1048,25 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                       },
                       maxLength: 25,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
+                    ElevatedButton.icon(
+                        style: const ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll(Colors.blue),
+                        ),
+                        onPressed: () {
+                          _showDeleteGroupConfirmationDialog(context);
+                        },
+                        icon: const Icon(
+                          size: 25,
+                          Icons.delete,
+                          color: Colors.white,
+                        ),
+                        label: const Text("حذف المجموعة",
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Tajawal',
+                                color: Colors.white))),
                   ],
                 ),
               ),
@@ -1163,5 +1176,91 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
     }
 
     return false;
+  }
+
+  Future<void> _showDeleteGroupConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('حذف المجموعة ❌',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontFamily: 'Tajawal',
+                  fontWeight: FontWeight.bold)),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('هل انت متأكد من حذف المجموعة؟\nلا يمكن التراجع 🛑❗❗❗❗❗🛑',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Tajawal',
+                        fontWeight: FontWeight.bold))
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('الغاء'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('حذف'),
+              onPressed: () async {
+                if (await getConnection(context)) {
+                  try {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    var groupMembers = await FirebaseFirestore.instance
+                        .collection('Users')
+                        .where("groupId", isEqualTo: widget.groupId)
+                        .get();
+
+                    if (groupMembers.docs.isNotEmpty) {
+                      for (var element in groupMembers.docs) {
+                        String userName = element.get('name');
+                        var user = await FirebaseFirestore.instance
+                            .collection('Users')
+                            .where("name", isEqualTo: userName)
+                            .get();
+                        if (user.size > 1) {
+                          // If multiple users exist, find those with the matching groupId
+                          var filteredDocs = user.docs
+                              .where((doc) => doc['groupId'] == widget.groupId);
+
+                          if (filteredDocs.isNotEmpty) {
+                            await filteredDocs.first.reference.delete();
+                          }
+                        } else {
+                          // If only one user exists, update their groupId and groupName
+                          await user.docs.first.reference.update({
+                            'groupId': '',
+                            'groupName': '',
+                            'last_update': DateTime.now().toIso8601String(),
+                            'points': 0,
+                          });
+                        }
+                      }
+
+                      var doc = await FirebaseFirestore.instance
+                          .collection('Groups')
+                          .doc(widget.groupId)
+                          .get();
+                      doc.reference.delete();
+                    }
+                  } catch (e) {
+                    showExceptionPopup(context, e.toString());
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

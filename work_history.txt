@@ -1,5 +1,5 @@
 
-14/4/2024 => make the online athkar logic and store the users that finish that thker + create user collection db + other design changes
+14/4/2024 => make the online athkar logic and store the users that finish that theker + create user collection db + other design changes
 15/4/2024 => store online athkar current count for each in shared pref + change create user screen design + other design changes
 16/4/2024 => store the new user + select the user wanted + update the required data filed when the user changed + other
 26 - 30 /4/2024 => change design of athkar page + vibrating + other bugs
@@ -7,4 +7,5 @@
 9/8/2024 => change into notion tool
 22/3/2025 => make the group screen take around 12 hours
 1/4/2025=> make the group initial request feature take around 4 hours
-1/4/2025=> make the group request feature + create the user + admin panel (approve request + delete user + change group info) take round 12 hours
+2/4/2025=> make the group request feature + create the user + admin panel (approve request + delete user + change group info) take round 12 hours
+3/4/2025=> make the delete group + delete the user groups take round 12 hours

@@ -86,6 +86,13 @@ class _MyDrawerState extends State<MyDrawer> {
     CollectionReference users = FirebaseFirestore.instance.collection('Users');
     CollectionReference groups =
         FirebaseFirestore.instance.collection('Groups');
+    // Find and delete groups where the user is the creator
+    var createdGroupsQuery =
+        await groups.where("createdBy", isEqualTo: deletedUser).get();
+
+    for (var createdGroup in createdGroupsQuery.docs) {
+      await groups.doc(createdGroup.id).delete();
+    }
     var user = await users.where("name", isEqualTo: deletedUser).get();
     for (var element in user.docs) {
       groups.doc(element.get('groupId')).update({

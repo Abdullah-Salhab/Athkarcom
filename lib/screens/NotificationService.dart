@@ -62,7 +62,7 @@ class NotificationService {
           0, // Notification ID
           'أذكار الصباح',
           'ابدأ يومك بأذكار الصباح',
-          _nextInstanceOfTime(8, 0), // 8:00 AM
+          _nextInstanceOfTime(7, 30), // 7:30 AM
           notificationDetails,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
@@ -79,7 +79,7 @@ class NotificationService {
           1, // Notification ID
           'أذكار المساء',
           'اختتم يومك بأذكار المساء',
-          _nextInstanceOfTime(20, 0), // 8:00 PM
+          _nextInstanceOfTime(19, 0), // 7:00 PM
           notificationDetails,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
@@ -89,16 +89,6 @@ class NotificationService {
               AndroidScheduleMode.inexactAllowWhileIdle, // Add this parameter
         )
         .onError((error, stackTrace) => print(error.toString()));
-  }
-
-  Future<void> getAllScheduledNotifications() async {
-    List<PendingNotificationRequest> pendingNotifications =
-        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-    print(pendingNotifications.length);
-    for (var notification in pendingNotifications) {
-      print(
-          'ID: ${notification.id}, Title: ${notification.title}, Body: ${notification.body}, Time: ${notification.payload}');
-    }
   }
 
   Future<void> onDidReceiveNotificationResponse(

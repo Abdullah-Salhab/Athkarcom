@@ -1,18 +1,20 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-class FirebaseMessagingAPI{
+
+class FirebaseMessagingAPI {
   // get firebase messaging
   final firebaseMessaging = FirebaseMessaging.instance;
+
   Future<void> initNotifications() async {
     // Request permission for iOS
     FirebaseMessaging.instance.requestPermission();
 
     // Get the FCM token
     FirebaseMessaging.instance.getToken().then((token) {
-      print("FCM Token: $token");
+      // print("FCM Token: $token");
     });
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+        FlutterLocalNotificationsPlugin();
 
     // Listen to foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
