@@ -108,7 +108,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
       }
 
       // Delete the main group document
-      await groupDocRef.delete();
+      var group = await groupDocRef.get();
+      group.reference.delete();
     }
 
     var user = await users.where("name", isEqualTo: deletedUser).get();
@@ -205,12 +206,13 @@ class _AccountsScreenState extends State<AccountsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title:
-              const Text('الحسابات',
-                style: TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 22.0,
-                ),)),
+          title: const Text(
+        'الحسابات',
+        style: TextStyle(
+          fontFamily: 'Tajawal',
+          fontSize: 22.0,
+        ),
+      )),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -295,7 +297,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
               },
               icon: const Icon(Icons.add),
               label: const Text("إضافة حساب جديد",
-                  style: TextStyle(fontFamily: 'Tajawal',fontSize: 16)),
+                  style: TextStyle(fontFamily: 'Tajawal', fontSize: 16)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green.shade700,
                 foregroundColor: Colors.white,

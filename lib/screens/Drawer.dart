@@ -92,7 +92,8 @@ class _MyDrawerState extends State<MyDrawer> {
 
     for (var createdGroup in createdGroupsQuery.docs) {
       await groups.doc(createdGroup.id).delete();
-      final groupDocRef = FirebaseFirestore.instance.collection('Groups').doc(createdGroup.id);
+      final groupDocRef =
+          FirebaseFirestore.instance.collection('Groups').doc(createdGroup.id);
       final athkarsCollection = groupDocRef.collection('Athkars');
 
       // Delete all docs in 'Athkars'
@@ -102,7 +103,8 @@ class _MyDrawerState extends State<MyDrawer> {
       }
 
       // Delete the main group document
-      await groupDocRef.delete();
+      var group = await groupDocRef.get();
+      group.reference.delete();
     }
     var user = await users.where("name", isEqualTo: deletedUser).get();
     for (var element in user.docs) {
