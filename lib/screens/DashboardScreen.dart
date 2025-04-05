@@ -1,4 +1,5 @@
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
+import 'package:athkar/screens/onlineAthkar/AccountsScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ import 'check_connection.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/GroupsListScreen.dart';
-import 'onlineAthkar/groupAthkarScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -171,10 +171,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 duration: const Duration(milliseconds: 500),
                                 reverseDuration:
                                     const Duration(milliseconds: 500),
-                                child: const GroupAthkarListScreen(),
+                                child: const GroupsListScreen(),
                               ));
                         }
-                        return null;
                       });
                     }
                   },
@@ -188,7 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                          "assets/images/network.png",
+                          "assets/images/society.gif",
                           fit: BoxFit.cover,
                         )),
                         const SizedBox(height: 8.0),
@@ -350,7 +349,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                          "assets/images/other.png",
+                          "assets/images/other2.png",
                           fit: BoxFit.cover,
                         )),
                         const SizedBox(height: 8.0),
@@ -388,7 +387,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           alignment: Alignment.bottomRight,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
-                          child: const CreateUserScreen(),
+                          child: const AccountsScreen(),
                         )).then((value) async {
                       await getOfflineAthkarList().catchError((e) {
                         showExceptionPopup(context, e.toString());
@@ -405,12 +404,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                          "assets/images/network2.png",
+                          "assets/images/accounts2.png",
                           fit: BoxFit.cover,
                         )),
                         const SizedBox(height: 8.0),
                         const Text(
-                          "إنشاء حساب جديد",
+                          "حسابات العائلة",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 20.0,

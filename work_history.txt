@@ -8,4 +8,5 @@
 22/3/2025 => make the group screen take around 12 hours
 1/4/2025=> make the group initial request feature take around 4 hours
 2/4/2025=> make the group request feature + create the user + admin panel (approve request + delete user + change group info) take round 12 hours
-3/4/2025=> make the delete group + delete the user groups take round 12 hours
+3/4/2025=> make the delete group + delete the user groups + Phone not lock when listen => take round 4 hours
+5/4/2025=> change to the new version + create change users screen + change the screens  => take round 4 hours

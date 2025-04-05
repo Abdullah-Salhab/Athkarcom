@@ -1,5 +1,6 @@
 import 'package:athkar/screens/About.dart';
 import 'package:athkar/screens/onlineAthkar/CreateUserScreen.dart';
+import 'package:athkar/screens/onlineAthkar/GroupsListScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -13,7 +14,6 @@ import 'Feedback Screen.dart';
 import 'check_connection.dart';
 import 'offlineAthkar/OfflineAthkarList.dart';
 import 'offlineAthkar/morningNightScreen.dart';
-import 'onlineAthkar/groupAthkarScreen.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({Key? key}) : super(key: key);
@@ -92,13 +92,25 @@ class _MyDrawerState extends State<MyDrawer> {
 
     for (var createdGroup in createdGroupsQuery.docs) {
       await groups.doc(createdGroup.id).delete();
+      final groupDocRef = FirebaseFirestore.instance.collection('Groups').doc(createdGroup.id);
+      final athkarsCollection = groupDocRef.collection('Athkars');
+
+      // Delete all docs in 'Athkars'
+      final athkarsSnapshot = await athkarsCollection.get();
+      for (var athkarDoc in athkarsSnapshot.docs) {
+        await athkarsCollection.doc(athkarDoc.id).delete();
+      }
+
+      // Delete the main group document
+      await groupDocRef.delete();
     }
     var user = await users.where("name", isEqualTo: deletedUser).get();
     for (var element in user.docs) {
-      groups.doc(element.get('groupId')).update({
-        "members.$deletedUser": FieldValue.delete(),
-        // Remove the user from the map
-      });
+      if (element.get('groupId') != "") {
+        groups.doc(element.get('groupId')).update({
+          "members.$deletedUser": FieldValue.delete(),
+        });
+      }
       element.reference.delete();
     }
   }
@@ -248,7 +260,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     type: PageTransitionType.leftToRightWithFade,
                     duration: const Duration(milliseconds: 500),
                     reverseDuration: const Duration(milliseconds: 500),
-                    child: const GroupAthkarListScreen(),
+                    child: const GroupsListScreen(),
                   ));
             },
           ),
@@ -414,11 +426,8 @@ class _MyDrawerState extends State<MyDrawer> {
               onPressed: () {
                 String deletedUser = usersList[index];
                 usersList.remove(usersList[index]);
-                deleteUserName(usersList.isNotEmpty ? usersList.first : "",
-                        deletedUser)
-                    .catchError((e) {
-                  showExceptionPopup(context, e.toString());
-                });
+                deleteUserName(
+                    usersList.isNotEmpty ? usersList.first : "", deletedUser);
                 if (usersList.isEmpty) {
                   Navigator.pushReplacement(
                       context,

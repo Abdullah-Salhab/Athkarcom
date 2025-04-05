@@ -44,7 +44,7 @@ class _AboutAppState extends State<AboutApp> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'version 1.0.0',
+                    'version 1.2.0',
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 20),
@@ -53,7 +53,7 @@ class _AboutAppState extends State<AboutApp> {
                     child: Text(
                       "\"تطبيق أذكاركم\" تطبيق يوفر العديد من الخدمات الجديدة والحماسية للتشجيع على الذكر "
                       "\nالخدمات التي يوفرها التطبيق:"
-                      "\n✅ الذكر الجماعي:هي خاصية الأول من نوعها التي تسمح بالانضمام لجلسات ذكر جماعي والمنافسة بين الجميع🏅."
+                      "\n✅ الذكر الجماعي:هي خاصية الأول من نوعها التي تسمح بالانضمام لمجموعات ذكر جماعي والمنافسة بين الجميع🏅."
                       "\n✅ اذكاري (ذكر خاص بك): بإمكان المستخدم اضافة الذكر الذي يفصله وبالعدد الذي يفضله."
                       "\n✅ أذكار الصباح والمساء: قسم خاص بأذكار الصباح والمساء وعرضه بطريقة فعالة ومرتبة بالإضافة إمكانية السماع للإذكار بالسرعة التي تفضلها مع تذكيرات يومية."
                       "\n✅ إنشاء عدة حسابات: تسجيل حساب شخصي وحفظ الأنشطة مع امكانية اضافات حسابات اخرى للأولاد على نفس الجهاز."
@@ -94,6 +94,7 @@ class _AboutAppState extends State<AboutApp> {
                             Share.share("تطبيق أذكاركم "
                                 " التطبيق الذي يساعدك على الذكر "
                                 " قم بتحميل التطبيق من جوجل بلاي "
+                                " https://play.google.com/store/apps/details?id=com.athkar.athkarcom "
                                 " أو فتحه عن طريق المتصفح على الرابط أدناه "
                                 " https://athkar-com.web.app/ "
                                 " شكرا لكم ");
@@ -103,6 +104,7 @@ class _AboutAppState extends State<AboutApp> {
                                 text: " تطبيق أذكاركم "
                                     " التطبيق الذي يساعدك على الذكر "
                                     " قم بتحميل التطبيق من جوجل بلاي "
+                                    " https://play.google.com/store/apps/details?id=com.athkar.athkarcom "
                                     " أو فتحه عن طريق المتصفح على الرابط أدناه "
                                     " https://athkar-com.web.app/ "
                                     " شكرا لكم "));
