@@ -44,7 +44,7 @@ class _AboutAppState extends State<AboutApp> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'version 1.2.0',
+                    'version 2.0.0',
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 20),
@@ -91,23 +91,23 @@ class _AboutAppState extends State<AboutApp> {
                         icon: const Icon(kIsWeb ? Icons.copy : Icons.share),
                         onPressed: () {
                           if (!kIsWeb) {
-                            Share.share("تطبيق أذكاركم "
-                                " التطبيق الذي يساعدك على الذكر "
-                                " قم بتحميل التطبيق من جوجل بلاي "
-                                " https://play.google.com/store/apps/details?id=com.athkar.athkarcom "
-                                " أو فتحه عن طريق المتصفح على الرابط أدناه "
-                                " https://athkar-com.web.app/ "
-                                " شكرا لكم ");
+                            Share.share("تطبيق أذكاركم\n"
+                                " التطبيق الذي يساعدك على الذكر والمنافسة مع الجميع🏅✨\n"
+                                " قم بتحميل التطبيق من جوجل بلاي الان من خلال الرابط التالي:📱\n"
+                                "https://play.google.com/store/apps/details?id=com.athkar.athkarcom "
+                                "\n أو يمكن استخدامه عن طريق المتصفح على الرابط التالي:🌐\n"
+                                "https://athkar-com.web.app/ "
+                                "\n\n اكسب الاجر والثواب ماذا تنتظر✨");
                           } else {
                             // Copy the content to the clipboard
                             Clipboard.setData(const ClipboardData(
                                 text: " تطبيق أذكاركم "
-                                    " التطبيق الذي يساعدك على الذكر "
-                                    " قم بتحميل التطبيق من جوجل بلاي "
+                                    " التطبيق الذي يساعدك على الذكر والمنافسة مع الجميع "
+                                    " قم بتحميل التطبيق من جوجل بلاي الان من خلال الرابط التالي: "
                                     " https://play.google.com/store/apps/details?id=com.athkar.athkarcom "
-                                    " أو فتحه عن طريق المتصفح على الرابط أدناه "
+                                    " أو يمكن استخدامه عن طريق المتصفح على الرابط التالي: "
                                     " https://athkar-com.web.app/ "
-                                    " شكرا لكم "));
+                                    " اكسب الاجر والثواب ماذا تنتظر "));
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   backgroundColor: Colors.blue,

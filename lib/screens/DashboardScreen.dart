@@ -44,6 +44,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     }
     if (prefs.containsKey("userName") == false) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          'يرجى إنشاء حساب ',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ));
       Navigator.push(
         context,
         PageTransition(

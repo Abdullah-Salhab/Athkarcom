@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:athkar/models/section_detail_model.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,15 +49,16 @@ class CounterPageState extends State<CounterPage> {
     try {
       loadSectionDetail();
       _player = AudioPlayer();
-      // Set the release mode to keep the source after playback has completed.
-      _player.setReleaseMode(ReleaseMode.stop); // Replay the sound required
 
       // Listen to player completion event
-      _player.onPlayerComplete.listen((event) async {
-        if (currentCounterValue > 1) {
-          await _player.resume(); // Replay the sound
+      _player.playerStateStream.listen((state) async {
+        if (state.processingState == ProcessingState.completed) {
+          if (currentCounterValue > 1) {
+            await _player.seek(Duration.zero);
+            await _player.play();
+          }
+          decrementCounter(currentPage);
         }
-        decrementCounter(currentPage);
       });
       // Keep the screen on
       WakelockPlus.enable();
@@ -77,27 +78,19 @@ class CounterPageState extends State<CounterPage> {
 
   //this function will get the current font size
   Future getFontSize() async {
-    SharedPreferences sharedPreferences =
-        await SharedPreferences.getInstance().catchError((e) {
-      showExceptionPopup(context, e.toString());
-    });
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     double? fontSizeSaved = sharedPreferences.getDouble('fontSize');
     if (fontSizeSaved != null) {
       setState(() {
-        fontSize = fontSizeSaved!;
+        fontSize = fontSizeSaved;
       });
     }
   }
 
   //this function will set new font size
   Future setNewFontSize() async {
-    SharedPreferences sharedPreferences =
-        await SharedPreferences.getInstance().catchError((e) {
-      showExceptionPopup(context, e.toString());
-    });
-    sharedPreferences.setDouble('fontSize', fontSize).catchError((e) {
-      showExceptionPopup(context, e.toString());
-    });
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setDouble('fontSize', fontSize);
   }
 
   void _toggleSound(String? soundId) async {
@@ -108,9 +101,9 @@ class CounterPageState extends State<CounterPage> {
       } else {
         final path = _getSoundPath(soundId!);
         if (path != null) {
-          await _player.setSource(AssetSource(path));
-          await _player.setPlaybackRate(playbackRate); // Set playback speed
-          await _player.resume(); // play
+          await _player.setAsset(path);
+          await _player.setSpeed(playbackRate);
+          await _player.play(); // or stop()
         }
       }
     } catch (e) {
@@ -120,11 +113,11 @@ class CounterPageState extends State<CounterPage> {
 
   String? _getSoundPath(String soundId) {
     if (soundId.contains("C")) {
-      return 'sounds/common/Athkar_$soundId.mp3';
+      return 'assets/sounds/common/Athkar_$soundId.mp3';
     } else if (soundId.contains("E")) {
-      return 'sounds/evening/Athkar_$soundId.mp3';
+      return 'assets/sounds/evening/Athkar_$soundId.mp3';
     } else {
-      return 'sounds/morning/Athkar_$soundId.mp3';
+      return 'assets/sounds/morning/Athkar_$soundId.mp3';
     }
   }
 
@@ -141,14 +134,17 @@ class CounterPageState extends State<CounterPage> {
         currentCounterValue = counterValues[
             index + 1]; // set the next counter into current counter value
         if (!kIsWeb && vibrationActive) Vibrate.vibrate();
-        _pageController.nextPage(
+        _pageController
+            .nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
-        );
-        // play next sound if the value counter is more than 0 and voice is active
-        if (currentCounterValue > 0 && voiceActive) {
-          _toggleSound(sectionDetails[index + 1].soundId);
-        }
+        )
+            .whenComplete(() {
+          // play next sound if the value counter is more than 0 and voice is active
+          if (currentCounterValue > 0 && voiceActive) {
+            _toggleSound(sectionDetails[index + 1].soundId);
+          }
+        });
       }
       if (counterValues[index] == 0 &&
           _pageController.page == sectionDetails.length - 1) {
@@ -182,7 +178,6 @@ class CounterPageState extends State<CounterPage> {
             const Duration(milliseconds: 500),
           ];
           if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
-          // Navigator.pop(context);
           _triggerConfetti();
           voiceActive = false;
           showModalBottomSheet<void>(
@@ -444,7 +439,7 @@ class CounterPageState extends State<CounterPage> {
                                         playbackRate = 1;
                                       }
                                       // Apply the new playback rate immediately
-                                      _player.setPlaybackRate(playbackRate);
+                                      _player.setSpeed(playbackRate);
                                     });
                                   },
                                   child: Text(
