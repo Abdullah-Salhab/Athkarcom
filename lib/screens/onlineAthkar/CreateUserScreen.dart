@@ -110,135 +110,137 @@ class CreateUserScreenState extends State<CreateUserScreen> {
           ),
         ),
       ),
-      body: Container(
-        width: 1000,
-        margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        decoration: BoxDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(.5),
-                spreadRadius: 5,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              )
-            ],
-            borderRadius: BorderRadius.circular(10)),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 10),
-                CircleAvatar(
-                  radius: 50,
-                  child: Image.asset(
-                    'assets/images/App_Icon.jpg',
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          width: 1000,
+          margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          decoration: BoxDecoration(
+              color: Theme.of(context).dialogBackgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(.5),
+                  spreadRadius: 5,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                )
+              ],
+              borderRadius: BorderRadius.circular(10)),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  CircleAvatar(
+                    radius: 50,
+                    child: Image.asset(
+                      'assets/images/App_Icon.jpg',
+                    ),
                   ),
-                ),
-                const Text(
-                  "إنشاء حساب جديد",
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _firstNameController,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      labelText: "* الاسم الاول"),
-                  validator: (value) {
-                    if (value!.trim().isEmpty) {
-                      return 'يرجى إدخال الاسم';
-                    }
-                    if (usersList.length >= 10) {
-                      return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
-                    }
-                    return null;
-                  },
-                  maxLength: 10,
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _lastNameController,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      labelText: "* الاسم الآخير"),
-                  validator: (value) {
-                    if (value!.trim().isEmpty) {
-                      return 'يرجى إدخال الاسم';
-                    }
-                    if (usersList.length >= 10) {
-                      return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
-                    }
-                    return null;
-                  },
-                  maxLength: 10,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate() &&
-                        await getConnection(context)) {
-                      _formKey.currentState!.save();
+                  const Text(
+                    "إنشاء حساب جديد",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _firstNameController,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        labelText: "* الاسم الاول"),
+                    validator: (value) {
+                      if (value!.trim().isEmpty) {
+                        return 'يرجى إدخال الاسم';
+                      }
+                      if (usersList.length >= 10) {
+                        return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
+                      }
+                      return null;
+                    },
+                    maxLength: 10,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        labelText: "* الاسم الآخير"),
+                    validator: (value) {
+                      if (value!.trim().isEmpty) {
+                        return 'يرجى إدخال الاسم';
+                      }
+                      if (usersList.length >= 10) {
+                        return 'لقد تجاوزت عدد الحسابات على هذا الجهاز';
+                      }
+                      return null;
+                    },
+                    maxLength: 10,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate() &&
+                          await getConnection(context)) {
+                        _formKey.currentState!.save();
 
-                      String firstName = _firstNameController.text.trim();
-                      String lastName = _lastNameController.text.trim();
-                      String fullName = '$firstName $lastName';
+                        String firstName = _firstNameController.text.trim();
+                        String lastName = _lastNameController.text.trim();
+                        String fullName = '$firstName $lastName';
 
-                      bool nameExists =
-                          await _checkIfNameExists(fullName).catchError((e) {
-                        showExceptionPopup(context, e.toString());
-                      });
-
-                      if (nameExists) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('الحساب موجود'),
-                              content: const Text(
-                                  'يوجد حساب بهذا الاسم يرجى تعديل الاسم'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('حسنا'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      } else {
-                        await _saveUserData(fullName).catchError((e) {
+                        bool nameExists =
+                            await _checkIfNameExists(fullName).catchError((e) {
                           showExceptionPopup(context, e.toString());
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Colors.green,
-                            content: Text('تم إنشاء الحساب بنجاح!'),
-                          ),
-                        );
-                        // You can navigate to another screen here
+
+                        if (nameExists) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('الحساب موجود'),
+                                content: const Text(
+                                    'يوجد حساب بهذا الاسم يرجى تعديل الاسم'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('حسنا'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          await _saveUserData(fullName).catchError((e) {
+                            showExceptionPopup(context, e.toString());
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.green,
+                              content: Text('تم إنشاء الحساب بنجاح!'),
+                            ),
+                          );
+                          // You can navigate to another screen here
+                        }
                       }
-                    }
-                  },
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.green)),
-                  child: const Text(
-                    'إنشاء الحساب',
-                    style: TextStyle(color: Colors.white),
+                    },
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.green)),
+                    child: const Text(
+                      'إنشاء الحساب',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
