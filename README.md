@@ -83,7 +83,8 @@ Toggle dark mode, adjust font sizes, and personalize your experience.
 
 - **Flutter** for cross-platform mobile development  
 - **Firebase** for authentication and database  
-- **Dart** language  
+- **Dart** language
+- **Google Analysis** Analysis the app usage
 - **SharedPreferences** for local storage  
 
 ---
