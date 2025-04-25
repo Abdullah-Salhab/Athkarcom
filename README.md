@@ -100,7 +100,7 @@ For inquiries or feedback, please contact us at: **abdullahsalhab18@gmail.com**
 ---
 
 ## 📸 Screenshots
-
+![Home](https://github.com/user-attachments/assets/e8573a53-ff4c-4edd-9644-3f7a6b7b7472)
 ![Group Dhikr](https://github.com/user-attachments/assets/6e120af5-b1ba-42e1-9e6c-cdb66478f3ff)
 ![My Dhikr](https://github.com/user-attachments/assets/71142869-28be-4e4b-81d7-faeb5086fc5a)
 ![Morning and Evening](https://github.com/user-attachments/assets/da435468-d7df-4023-aa0e-09c4ea5741e5)
