@@ -73,6 +73,7 @@ Toggle dark mode, adjust font sizes, and personalize your experience.
 ## 🌙 Download Now | حمّل التطبيق الآن
 
 [**Google Play** ](https://play.google.com/store/apps/details?id=com.athkar.athkarcom)
+[**Web App** ](https://athkar-com.web.app/)
 
 
 ---
