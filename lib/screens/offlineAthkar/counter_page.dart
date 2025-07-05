@@ -52,7 +52,7 @@ class CounterPageState extends State<CounterPage> {
 
       // Listen to player completion event
       _player.playerStateStream.listen((state) async {
-        if (state.processingState == ProcessingState.completed) {
+        if (state.processingState == ProcessingState.completed && voiceActive) {
           if (currentCounterValue > 1) {
             await _player.seek(Duration.zero);
             await _player.play();
@@ -93,7 +93,7 @@ class CounterPageState extends State<CounterPage> {
     sharedPreferences.setDouble('fontSize', fontSize);
   }
 
-  void _toggleSound(String? soundId) async {
+  Future<void> _toggleSound(String? soundId) async {
     try {
       if (voiceActive == false) {
         // stop the sound when press the stop button
@@ -134,6 +134,11 @@ class CounterPageState extends State<CounterPage> {
         currentCounterValue = counterValues[
             index + 1]; // set the next counter into current counter value
         if (!kIsWeb && vibrationActive) Vibrate.vibrate();
+        if (sectionDetails[index + 1].soundId == "") {
+          setState(() {
+            voiceActive = false;
+          });
+        }
         _pageController
             .nextPage(
           duration: const Duration(milliseconds: 500),
@@ -308,6 +313,11 @@ class CounterPageState extends State<CounterPage> {
                           );
                         }
                         currentPage = page;
+                        if (sectionDetails[page].soundId == "") {
+                          setState(() {
+                            voiceActive = false;
+                          });
+                        }
                         if (counterValues[page] != 0 && voiceActive) {
                           _toggleSound(sectionDetails[page].soundId);
                         } else {
@@ -408,29 +418,33 @@ class CounterPageState extends State<CounterPage> {
                                   );
                                 },
                                 icon: const Icon(Icons.copy)),
-                            IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    currentCounterValue = counterValues[index];
+                            if (sectionDetails[index].soundId != "")
+                              IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      currentCounterValue =
+                                          counterValues[index];
+                                      if (currentCounterValue > 0 &&
+                                          sectionDetails[index].soundId != "") {
+                                        voiceActive = !voiceActive;
+                                      }
+                                    });
                                     if (currentCounterValue > 0) {
-                                      voiceActive = !voiceActive;
+                                      _toggleSound(
+                                          sectionDetails[index].soundId);
+                                    } else {
+                                      decrementCounter(index);
                                     }
-                                  });
-                                  if (currentCounterValue > 0) {
-                                    _toggleSound(sectionDetails[index].soundId);
-                                  } else {
-                                    decrementCounter(index);
-                                  }
-                                },
-                                icon: Icon(voiceActive
-                                    ? Icons.stop
-                                    : Icons.volume_up)),
+                                  },
+                                  icon: Icon(voiceActive
+                                      ? Icons.stop
+                                      : Icons.volume_up)),
                             if (voiceActive)
                               TextButton(
                                   onPressed: () {
                                     setState(() {
                                       if (playbackRate == 1) {
-                                        playbackRate = 1.5;
+                                        playbackRate = 5.5;
                                       } else if (playbackRate == 1.5) {
                                         playbackRate = 2;
                                       } else if (playbackRate == 2) {

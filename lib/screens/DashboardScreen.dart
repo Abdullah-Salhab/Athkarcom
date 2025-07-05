@@ -11,6 +11,7 @@ import 'FirebaseMessagingAPI.dart';
 import 'NotificationService.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'check_connection.dart';
+import 'offlineAthkar/counter_page.dart';
 import 'offlineAthkar/morningNightScreen.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/GroupsListScreen.dart';
@@ -282,6 +283,122 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
+                          alignment: Alignment.bottomRight,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const CounterPage(
+                            id: 5,
+                            title: "أذكار بعد الصلاة",
+                          ),
+                        )).then((value) async {
+                      await getOfflineAthkarList().catchError((e) {
+                        showExceptionPopup(context, e.toString());
+                      });
+                    });
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/praying.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "أذكار بعد الصلاة",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.bottomLeft,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const CounterPage(
+                            id: 6,
+                            title: "أذكار النوم",
+                          ),
+                        )).then((value) async {
+                      await getOfflineAthkarList().catchError((e) {
+                        showExceptionPopup(context, e.toString());
+                      });
+                    });
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/sleep.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "أذكار النوم",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
                           alignment: Alignment.centerRight,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
@@ -357,7 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                          "assets/images/other2.png",
+                          "assets/images/other3.png",
                           fit: BoxFit.cover,
                         )),
                         const SizedBox(height: 8.0),
@@ -412,9 +529,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                          "assets/images/accounts2.png",
-                          fit: BoxFit.cover,
-                        )),
+                              "assets/images/accounts2.png",
+                              fit: BoxFit.cover,
+                            )),
                         const SizedBox(height: 8.0),
                         const Text(
                           "حسابات العائلة",
