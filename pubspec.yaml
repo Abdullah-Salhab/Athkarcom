@@ -57,6 +57,8 @@ dependencies:
   timezone:
   firebase_messaging:
   wakelock_plus:
+  fl_chart: ^0.69.2
+  intl:
 
 
 flutter_launcher_icons:

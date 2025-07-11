@@ -1,3 +1,4 @@
+import 'package:athkar/screens/ReportScreen.dart';
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
 import 'package:athkar/screens/onlineAthkar/AccountsScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -370,6 +371,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 8.0),
                         const Text(
                           "أذكار النوم",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.bottomLeft,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const ReportsScreen(
+                          ),
+                        )).then((value) async {
+                      await getOfflineAthkarList().catchError((e) {
+                        showExceptionPopup(context, e.toString());
+                      });
+                    });
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/calender.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "تقارير الأذكار",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 20.0,

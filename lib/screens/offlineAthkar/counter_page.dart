@@ -12,7 +12,9 @@ import 'package:share/share.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart'; // Add this import
 import '../ExceptionDialog.dart';
+import '../ReportScreen.dart';
 
 class CounterPage extends StatefulWidget {
   final int id;
@@ -133,6 +135,36 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
   Color get appBarColor => isDarkTheme ? const Color(0xFF2C2C2C) : const Color(0xFF4CAF50);
   Color get shadowColor => isDarkTheme ? Colors.black26 : Colors.black.withOpacity(0.05);
 
+  // NEW: Record completion for reports
+  Future<void> _recordCompletion() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? data = prefs.getString('athkar_completion_data');
+
+      Map<String, dynamic> completionData = {};
+      if (data != null) {
+        completionData = json.decode(data);
+      }
+
+      String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      // Initialize data structure if needed
+      if (!completionData.containsKey(today)) {
+        completionData[today] = {};
+      }
+
+      // Record completion for this section
+      completionData[today][widget.id.toString()] = true;
+
+      // Save back to preferences
+      await prefs.setString('athkar_completion_data', json.encode(completionData));
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error recording completion: $e');
+      }
+    }
+  }
+
   Future<void> _toggleSound(String? soundId) async {
     try {
       if (voiceActive == false) {
@@ -212,6 +244,9 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
           if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
           _triggerConfetti();
           voiceActive = false;
+
+          // NEW: Record completion when all athkar are finished
+          _recordCompletion();
           _showCompletionDialog();
         }
       }
@@ -288,18 +323,45 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                   ),
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: primaryColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                  ),
-                  child: const Text(
-                    'حسناً',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                // NEW: Add reports button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ReportsScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                      ),
+                      child: const Text(
+                        'عرض التقارير',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                      ),
+                      child: const Text(
+                        'حسناً',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -355,6 +417,19 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
         ),
       ),
       actions: [
+        // NEW: Add reports button to app bar
+        IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ReportsScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.analytics_outlined),
+          tooltip: 'التقارير',
+        ),
         if (!kIsWeb) _buildVibrationButton(),
         _buildFontSizeButton(),
         const SizedBox(width: 8),
@@ -408,7 +483,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
         },
         child: Text(
           fontSize == 28 ? "- ع" : "+ ع",
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -598,7 +673,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
         },
         child: Text(
           "${playbackRate}x",
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.purple,
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -666,7 +741,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       ),
       child: Text(
         "${sectionDetails[index].content}",
-        textDirection: TextDirection.rtl,
+        // textDirection: TextDirection.rtl,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: fontSize,
@@ -691,7 +766,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       ),
       child: Text(
         "${sectionDetails[index].description}",
-        textDirection: TextDirection.rtl,
+        // textDirection: TextDirection.LTR,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: fontSize - 2,
