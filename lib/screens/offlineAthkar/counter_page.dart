@@ -349,7 +349,10 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: primaryColor,
@@ -431,7 +434,6 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
           tooltip: 'التقارير',
         ),
         if (!kIsWeb) _buildVibrationButton(),
-        _buildFontSizeButton(),
         const SizedBox(width: 8),
       ],
     );
@@ -461,9 +463,9 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
 
   Widget _buildFontSizeButton() {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
+      margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: fontSize > 18 ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        color: fontSize > 18 ? Colors.orange.withOpacity(0.1) : Colors.orange.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextButton(
@@ -484,7 +486,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
         child: Text(
           fontSize == 28 ? "- ع" : "+ ع",
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.orange,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -594,11 +596,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
               () => Share.share(sectionDetails[index].content.toString()),
           const Color(0xFF2196F3),
         ),
-        _buildActionButton(
-          Icons.copy,
-              () => _copyToClipboard(index),
-          const Color(0xFF607D8B),
-        ),
+        _buildFontSizeButton(),
         if (sectionDetails[index].soundId != "") _buildSoundButton(index),
         if (voiceActive) _buildSpeedButton(),
       ],
@@ -860,11 +858,6 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       )
           : const SizedBox(),
     );
-  }
-
-  void _copyToClipboard(int index) {
-    Clipboard.setData(ClipboardData(text: sectionDetails[index].content.toString()));
-    _showCustomSnackBar('تم النسخ إلى الحافظة');
   }
 
   loadSectionDetail() async {
