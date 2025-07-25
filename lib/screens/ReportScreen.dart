@@ -22,14 +22,12 @@ class ReportsScreenState extends State<ReportsScreen>
   final Map<int, String> sections = {
     1: "أذكار الصباح",
     2: "أذكار المساء",
-    5: "الأذكار بعد السلام من الصلاة",
     6: "أذكار النوم"
   };
 
   final Map<int, IconData> sectionIcons = {
     1: Icons.wb_sunny,
     2: Icons.nights_stay,
-    5: Icons.mosque,
     6: Icons.bedtime
   };
 
@@ -838,6 +836,14 @@ class ReportsScreenState extends State<ReportsScreen>
     int streak = 0;
     DateTime checkDate = DateTime.now();
 
+    // Step 1: If today is not complete, skip it
+    String todayKey = DateFormat('yyyy-MM-dd').format(checkDate);
+    Map<String, dynamic> todayData = completionData[todayKey] ?? {};
+    if (todayData.length != sections.length) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
+    // Step 2: Count streak from most recent fully completed day
     while (true) {
       String dateKey = DateFormat('yyyy-MM-dd').format(checkDate);
       Map<String, dynamic> dayData = completionData[dateKey] ?? {};
