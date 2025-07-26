@@ -51,7 +51,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'يرجى إنشاء حساب ',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,
         duration: Duration(seconds: 2),
       ));
       Navigator.push(

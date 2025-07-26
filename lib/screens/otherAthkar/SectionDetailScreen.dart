@@ -62,7 +62,6 @@ class SectionDetailScreenState extends State<SectionDetailScreen>
       backgroundColor: isDark ? Colors.grey[900] : Colors.grey[50],
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: isDark ? Colors.grey[850] : Colors.green,
         foregroundColor: isDark ? Colors.white : Colors.black87,
         title: Text(
           widget.title ?? '',
@@ -367,7 +366,7 @@ class SectionDetailScreenState extends State<SectionDetailScreen>
             'تم نسخ النص',
             style: TextStyle(fontFamily: 'Tajawal'),
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.teal,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

@@ -151,8 +151,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
   Color get cardColor => isDarkTheme ? const Color(0xFF2C2C2C) : Colors.white;
   Color get textColor => isDarkTheme ? Colors.white : const Color(0xFF2C3E50);
   Color get secondaryTextColor => isDarkTheme ? Colors.white70 : const Color(0xFF5D6D7E);
-  Color get primaryColor => isDarkTheme ? const Color(0xFF66BB6A) : const Color(0xFF4CAF50);
-  Color get appBarColor => isDarkTheme ? const Color(0xFF2C2C2C) : const Color(0xFF4CAF50);
+  Color get primaryColor => isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
   Color get shadowColor => isDarkTheme ? Colors.black26 : Colors.black.withOpacity(0.05);
 
   void _showCustomSnackBar(String message) {
@@ -287,7 +286,6 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       elevation: 0,
-      backgroundColor: appBarColor,
       foregroundColor: Colors.white,
       title: const Text(
         'الذكر',
@@ -411,7 +409,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.3),
+            color: Colors.teal.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

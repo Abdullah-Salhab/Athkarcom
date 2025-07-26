@@ -112,7 +112,7 @@ class AddAthkarScreenState extends State<AddAthkarScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.teal,
                     ),
                     child: const Text(
                       'إضافة الذكر',

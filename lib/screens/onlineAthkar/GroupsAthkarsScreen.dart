@@ -234,7 +234,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                     color: Theme.of(context).dialogBackgroundColor,
                     border: Border.all(
                         color: documents[currentIndex].get("name") == userName
-                            ? Colors.green
+                            ? Colors.teal
                             : Colors.white,
                         width: 2),
                     boxShadow: [
@@ -263,7 +263,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                     leading: CircleAvatar(
                       backgroundColor:
                           documents[currentIndex].get("name") == adminName
-                              ? Colors.green
+                              ? Colors.teal
                               : Colors.blueAccent,
                       child: Text("${currentIndex + 1}",
                           style: const TextStyle(color: Colors.white)),
@@ -452,7 +452,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: Colors.teal,
                                     content: Text('تم إنهاءه سابقاً'),
                                     duration: Duration(seconds: 1),
                                   ),
@@ -499,7 +499,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                                 if (users.contains(userName))
                                   const Icon(
                                     Icons.check_circle,
-                                    color: Colors.green,
+                                    color: Colors.teal,
                                   )
                               ],
                             ),
@@ -742,7 +742,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                     color: Theme.of(context).dialogBackgroundColor,
                     border: Border.all(
                         color: documents[currentIndex].get("name") == userName
-                            ? Colors.green
+                            ? Colors.teal
                             : Colors.white,
                         width: 2),
                     boxShadow: [
@@ -788,7 +788,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                       backgroundColor:
                           documents[currentIndex].get("name") != adminName
                               ? Colors.blueAccent
-                              : Colors.green,
+                              : Colors.teal,
                       child: Text("${currentIndex + 1}",
                           style: const TextStyle(color: Colors.white)),
                     ),

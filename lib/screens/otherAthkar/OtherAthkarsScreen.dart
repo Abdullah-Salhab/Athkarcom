@@ -43,7 +43,6 @@ class _OtherAthkarScreenState extends State<OtherAthkarScreen>
       backgroundColor: isDark ? Colors.grey[900] : Colors.grey[50],
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: isDark ? Colors.grey[850] : Colors.green,
         foregroundColor: isDark ? Colors.white : Colors.black87,
         title: const Text(
           'أذكار أخرى',

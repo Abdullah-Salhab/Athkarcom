@@ -63,7 +63,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                 });
               },
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search, color: Colors.green),
+                prefixIcon: const Icon(Icons.search, color: Colors.teal),
                 hintText: "ابحث عن مجموعة...",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -276,7 +276,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,
         content: Text('تم إرسال طلب الانضمام لمسؤول المجموعة'),
         duration: Duration(seconds: 3),
       ),

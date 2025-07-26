@@ -222,7 +222,7 @@ class CreateUserScreenState extends State<CreateUserScreen> {
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.teal,
                               content: Text('تم إنشاء الحساب بنجاح!'),
                             ),
                           );
@@ -232,7 +232,7 @@ class CreateUserScreenState extends State<CreateUserScreen> {
                     },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateColor.resolveWith(
-                            (states) => Colors.green)),
+                            (states) => Colors.teal)),
                     child: const Text(
                       'إنشاء الحساب',
                       style: TextStyle(color: Colors.white),

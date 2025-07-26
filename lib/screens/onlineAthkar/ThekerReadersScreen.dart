@@ -72,7 +72,7 @@ class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
                           color: Theme.of(context).dialogBackgroundColor,
                           border: Border.all(
                               color: widget.users[index] == widget.userName
-                                  ? Colors.green
+                                  ? Colors.teal
                                   : Colors.white,
                               width: 2),
                           boxShadow: [

@@ -231,7 +231,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(
                             color: name == userName
-                                ? Colors.green.shade300
+                                ? Colors.teal.shade300
                                 : Colors.white,
                             width: 3)),
                     child: ListTile(
@@ -239,7 +239,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           horizontal: 16, vertical: 12),
                       leading: CircleAvatar(
                         radius: 28,
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.teal,
                         child: Text(
                           name.isNotEmpty ? name[0].toUpperCase() : '',
                           style: const TextStyle(
@@ -253,7 +253,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                               fontWeight: FontWeight.bold)),
                       subtitle: name == userName
                           ? const Text("المستخدم الحالي",
-                              style: TextStyle(color: Colors.green))
+                              style: TextStyle(color: Colors.teal))
                           : null,
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
@@ -265,7 +265,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           setCurrentUserName(name);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.teal,
                               duration: const Duration(seconds: 1),
                               content: Text('تم التبديل إلى $name',
                                   style:
@@ -299,7 +299,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
               label: const Text("إضافة حساب جديد",
                   style: TextStyle(fontFamily: 'Tajawal', fontSize: 16)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700,
+                backgroundColor: Colors.teal.shade700,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(70),
                 shape: RoundedRectangleBorder(

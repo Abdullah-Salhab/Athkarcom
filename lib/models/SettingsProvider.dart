@@ -64,7 +64,7 @@ class SettingsProvider extends ChangeNotifier {
           fontFamily: 'Amiri',
           fontSize: 18
         ),
-        backgroundColor: Colors.green),
+        backgroundColor: Colors.teal),
     primarySwatch: Colors.blue,
     secondaryHeaderColor: const Color.fromRGBO(40, 112, 200, 1.0),
     cardColor: Colors.white,
@@ -100,7 +100,7 @@ class SettingsProvider extends ChangeNotifier {
           fontFamily: 'Amiri',
           fontSize: 18
         ),
-        backgroundColor: Colors.green),
+        backgroundColor: Colors.teal),
     primarySwatch: Colors.blue,
     secondaryHeaderColor: const Color.fromRGBO(40, 112, 200, 1.0),
     cardColor: Colors.white,

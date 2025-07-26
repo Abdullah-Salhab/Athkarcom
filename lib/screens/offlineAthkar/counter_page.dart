@@ -13,6 +13,7 @@ import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart'; // Add this import
+import '../../main.dart';
 import '../ExceptionDialog.dart';
 import '../ReportScreen.dart';
 
@@ -131,8 +132,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
   Color get cardColor => isDarkTheme ? const Color(0xFF2C2C2C) : Colors.white;
   Color get textColor => isDarkTheme ? Colors.white : const Color(0xFF2C3E50);
   Color get secondaryTextColor => isDarkTheme ? Colors.white70 : const Color(0xFF5D6D7E);
-  Color get primaryColor => isDarkTheme ? const Color(0xFF66BB6A) : const Color(0xFF4CAF50);
-  Color get appBarColor => isDarkTheme ? const Color(0xFF2C2C2C) : const Color(0xFF4CAF50);
+  Color get primaryColor => isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
   Color get shadowColor => isDarkTheme ? Colors.black26 : Colors.black.withOpacity(0.05);
 
   // NEW: Record completion for reports
@@ -158,6 +158,9 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
 
       // Save back to preferences
       await prefs.setString('athkar_completion_data', json.encode(completionData));
+
+      // After saving completion data
+      await AthkarWidgetHelper.updateWidgetOnCompletion();
     } catch (e) {
       if (kDebugMode) {
         print('Error recording completion: $e');
@@ -246,7 +249,9 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
           voiceActive = false;
 
           // NEW: Record completion when all athkar are finished
-          _recordCompletion();
+          if(widget.id == 1 || widget.id == 2|| widget.id == 6  ) {
+            _recordCompletion();
+          }
           _showCompletionDialog();
         }
       }
@@ -327,6 +332,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    if(widget.id == 1 || widget.id == 2 || widget.id == 6 )
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
@@ -409,7 +415,6 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       elevation: 0,
-      backgroundColor: appBarColor,
       foregroundColor: Colors.white,
       title: Text(
         widget.title,
@@ -621,7 +626,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
     return Container(
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: voiceActive ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+        color: voiceActive ? Colors.red.withOpacity(0.1) : Colors.teal.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: IconButton(
@@ -791,7 +796,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.3),
+                      color: Colors.teal.withOpacity(0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -822,8 +827,8 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                       ),
                     ],
                   ),
-                  progressColor: const Color(0xFF4CAF50),
-                  backgroundColor: Colors.grey.withOpacity(0.2),
+                  progressColor: const Color(0xFF4CAF9D),
+                  backgroundColor: Colors.teal.withOpacity(0.2),
                   circularStrokeCap: CircularStrokeCap.round,
                 ),
               ),

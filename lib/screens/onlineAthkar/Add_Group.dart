@@ -70,7 +70,7 @@ class AddGroupScreenState extends State<AddGroupScreen> {
     }
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,
         content: Text('تم إنشاء المجموعة بنجاح'),
         duration: Duration(seconds: 2),
       ),
@@ -195,7 +195,7 @@ class AddGroupScreenState extends State<AddGroupScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.teal,
                     ),
                     child: const Text(
                       'إنشاء المجموعة',

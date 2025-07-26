@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/SettingsProvider.dart';
+import 'AthkarWidgetSetup.dart';
 import 'DashboardScreen.dart';
 import 'ExceptionDialog.dart';
 import 'Feedback Screen.dart';
@@ -154,7 +155,7 @@ class _MyDrawerState extends State<MyDrawer> {
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
                 color:
-                    settingsProvider.isNight ? Colors.grey[800] : Colors.green),
+                    settingsProvider.isNight ? Colors.grey[800] : Colors.teal),
             accountName: Text(
               userName,
               style: const TextStyle(fontSize: 18),
@@ -283,9 +284,9 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.my_library_books_rounded),
+            leading: const Icon(Icons.pie_chart),
             title: const Text(
-              'أذكاري',
+              'إضافة التقرير اليومي',
             ),
             onTap: () {
               Navigator.push(
@@ -294,7 +295,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     type: PageTransitionType.leftToRightWithFade,
                     duration: const Duration(milliseconds: 500),
                     reverseDuration: const Duration(milliseconds: 500),
-                    child: const OfflineAthkarList(),
+                    child: const AthkarWidgetSetup(),
                   ));
             },
           ),

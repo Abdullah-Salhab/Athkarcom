@@ -85,7 +85,7 @@ class SplitRectangleIntoTriangles extends StatelessWidget {
                       Expanded(child: Container()),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.teal,
                         ),
                         onPressed: () {
                           Navigator.push(
