@@ -2,6 +2,7 @@ import 'package:athkar/screens/ExceptionDialog.dart';
 import 'package:athkar/screens/check_connection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,6 +23,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
   List<String> athkarCount = [];
   List<String> athkarCurrentCount = [];
   bool isDarkThemeActive = false;
+  Map<String, String> userDocIds = {}; // Store document IDs for each user
+  bool _isLoadingDocIds = false;
 
   @override
   void initState() {
@@ -40,6 +43,42 @@ class _AccountsScreenState extends State<AccountsScreen> {
     await getUsersList().catchError((e) {
       showExceptionPopup(context, e.toString());
     });
+    // Load document IDs for all users
+    await loadUserDocumentIds();
+  }
+
+  Future<void> loadUserDocumentIds() async {
+    if (usersList.isEmpty) return;
+
+    setState(() {
+      _isLoadingDocIds = true;
+    });
+
+    try {
+      Map<String, String> tempDocIds = {};
+
+      for (String user in usersList) {
+        QuerySnapshot userQuery = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('name', isEqualTo: user)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isNotEmpty) {
+          tempDocIds[user] = userQuery.docs.first.id;
+        }
+      }
+
+      setState(() {
+        userDocIds = tempDocIds;
+      });
+    } catch (e) {
+      showExceptionPopup(context, e.toString());
+    } finally {
+      setState(() {
+        _isLoadingDocIds = false;
+      });
+    }
   }
 
   Future<void> getUserName() async {
@@ -72,6 +111,22 @@ class _AccountsScreenState extends State<AccountsScreen> {
     setState(() {
       userName = selectedUser;
     });
+  }
+
+  Future<void> logoutUser(String selectedUser) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (selectedUser != "") {
+      await prefs.setBool('theme', isDarkThemeActive);
+      await prefs.setString('userName', selectedUser);
+      await prefs.setStringList('usersList', usersList);
+    }
+
+    setState(() {
+      userName = selectedUser;
+    });
+
+    saveOfflineAthkarList();
   }
 
   Future<void> deleteUserName(String selectedUser, String deletedUser) async {
@@ -121,6 +176,77 @@ class _AccountsScreenState extends State<AccountsScreen> {
       }
       element.reference.delete();
     }
+
+    // Remove from userDocIds map
+    userDocIds.remove(deletedUser);
+  }
+
+  Future<void> _showLogoutConfirmationDialog(
+      BuildContext context, int index) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('تسجيل الخروج',
+              style: TextStyle(fontFamily: 'Tajawal')),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('هل انت متأكد من تسجيل الخروج من الحساب الحالي؟',
+                    style: TextStyle(fontFamily: 'Tajawal')),
+                SizedBox(height: 8),
+                Text(
+                    'سيتم الاحتفاظ بالحساب ويمكنك تسجيل الدخول مرة أخرى باستخدام معرف الحساب فقط.',
+                    style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        color: Colors.grey)),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child:
+                  const Text('الغاء', style: TextStyle(fontFamily: 'Tajawal')),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('تسجيل الخروج',
+                  style:
+                      TextStyle(fontFamily: 'Tajawal', color: Colors.orange)),
+              onPressed: () async {
+                usersList.removeAt(index);
+                String newSelectedUser =
+                    usersList.isNotEmpty ? usersList.first : "";
+
+                await logoutUser(newSelectedUser).catchError((e) {
+                  showExceptionPopup(context, e.toString());
+                });
+
+                setState(() {
+                  userName = newSelectedUser;
+                });
+
+                if (usersList.isEmpty) {
+                  Navigator.pushReplacement(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.bottomRight,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const DashboardScreen(),
+                      ));
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _showDeleteConfirmationDialog(
@@ -184,6 +310,81 @@ class _AccountsScreenState extends State<AccountsScreen> {
     );
   }
 
+  void _showDocumentIdDialog(String userName, String documentId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('معرف حساب $userName',
+              style: const TextStyle(fontFamily: 'Tajawal')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('معرف الحساب:',
+                  style: TextStyle(
+                      fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        documentId,
+                        style: const TextStyle(
+                          fontFamily: 'Courier',
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, color: Colors.teal),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: documentId));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.green,
+                            duration: Duration(seconds: 2),
+                            content: Text('تم نسخ معرف الحساب!',
+                                style: TextStyle(fontFamily: 'Tajawal')),
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                'استخدم هذا المعرف لتسجيل الدخول على أجهزة أخرى',
+                style: TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child:
+                  const Text('إغلاق', style: TextStyle(fontFamily: 'Tajawal')),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   getOfflineAthkarList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -217,20 +418,46 @@ class _AccountsScreenState extends State<AccountsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // Loading indicator for document IDs
+            if (_isLoadingDocIds)
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: const Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 12),
+                    Text('جاري تحميل معرفات الحسابات...',
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 14)),
+                  ],
+                ),
+              ),
+
             Expanded(
               child: ListView.separated(
                 itemCount: usersList.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final name = usersList[index];
+                  final hasDocId = userDocIds.containsKey(name);
+                  final isCurrentUser = name == userName;
+
                   return Card(
-                    color:
-                        name == userName ? Colors.green.shade50 : Colors.white,
+                    color: isCurrentUser ? Colors.green.shade50 : Colors.white,
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(
-                            color: name == userName
+                            color: isCurrentUser
                                 ? Colors.teal.shade300
                                 : Colors.white,
                             width: 3)),
@@ -251,14 +478,123 @@ class _AccountsScreenState extends State<AccountsScreen> {
                               fontSize: 18,
                               fontFamily: 'Tajawal',
                               fontWeight: FontWeight.bold)),
-                      subtitle: name == userName
-                          ? const Text("المستخدم الحالي",
-                              style: TextStyle(color: Colors.teal))
-                          : null,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () =>
-                            _showDeleteConfirmationDialog(context, index),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isCurrentUser)
+                            const Text("المستخدم الحالي",
+                                style: TextStyle(color: Colors.teal)),
+                          if (hasDocId)
+                            GestureDetector(
+                              onTap: () => _showDocumentIdDialog(
+                                  name, userDocIds[name]!),
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 18, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border:
+                                      Border.all(color: Colors.blue.shade200),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Icon(Icons.fingerprint,
+                                        size: 14, color: Colors.blue),
+                                    SizedBox(width: 2),
+                                    Text(
+                                      'عرض معرف الحساب',
+                                      style: TextStyle(
+                                        fontFamily: 'Tajawal',
+                                        fontSize: 12,
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (String value) {
+                          switch (value) {
+                            case 'document_id':
+                              if (hasDocId) {
+                                _showDocumentIdDialog(name, userDocIds[name]!);
+                              }
+                              break;
+                            case 'logout':
+                              _showLogoutConfirmationDialog(context, index);
+                              break;
+                            case 'delete':
+                              _showDeleteConfirmationDialog(context, index);
+                              break;
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          List<PopupMenuEntry<String>> items = [];
+
+                          // Document ID option
+                          if (hasDocId) {
+                            items.add(
+                              const PopupMenuItem<String>(
+                                value: 'document_id',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.qr_code,
+                                        color: Colors.blue, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('عرض معرف الحساب',
+                                        style:
+                                            TextStyle(fontFamily: 'Tajawal')),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          // Logout option (only for current user)
+                          if (isCurrentUser) {
+                            items.add(
+                              const PopupMenuItem<String>(
+                                value: 'logout',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.logout,
+                                        color: Colors.orange, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('تسجيل الخروج',
+                                        style:
+                                            TextStyle(fontFamily: 'Tajawal')),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          // Delete option
+                          items.add(
+                            const PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete,
+                                      color: Colors.red, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('حذف الحساب',
+                                      style: TextStyle(fontFamily: 'Tajawal')),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          return items;
+                        },
                       ),
                       onTap: () {
                         if (name != userName) {
@@ -293,6 +629,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                     )).whenComplete(() async {
                   await getUserName();
                   await getUsersList();
+                  await loadUserDocumentIds(); // Reload document IDs
                 });
               },
               icon: const Icon(Icons.add),
