@@ -12,11 +12,14 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
+import 'models/AthkarWidgetProvider.dart';
 import 'models/SettingsProvider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the home widget
+  await AthkarWidgetProvider.initializeWidget();
   if (!kIsWeb) {
     await Firebase.initializeApp();
   } else {
@@ -149,4 +152,16 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+}
+
+// Add this method to your main app to update widgets when athkar are completed
+class AthkarWidgetHelper {
+  static Future<void> updateWidgetOnCompletion() async {
+    await AthkarWidgetProvider.updateWidget();
+  }
+}
+
+// Call this in your main.dart initState or wherever you initialize your app
+void initializeAthkarWidget() {
+  AthkarWidgetProvider.initializeWidget();
 }

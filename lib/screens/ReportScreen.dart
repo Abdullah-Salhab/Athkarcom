@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../models/AthkarWidgetProvider.dart';
+import 'AthkarWidgetSetup.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -67,6 +69,9 @@ class ReportsScreenState extends State<ReportsScreen>
         isLoading = false;
       });
     }
+
+    // Update home widget when data changes
+    await _updateHomeWidget();
   }
 
   // Get theme colors
@@ -81,10 +86,8 @@ class ReportsScreenState extends State<ReportsScreen>
       isDarkTheme ? Colors.white70 : const Color(0xFF5D6D7E);
 
   Color get primaryColor =>
-      isDarkTheme ? const Color(0xFF66BB6A) : const Color(0xFF4CAF50);
+      isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
 
-  Color get appBarColor =>
-      isDarkTheme ? const Color(0xFF2C2C2C) : const Color(0xFF4CAF50);
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +95,6 @@ class ReportsScreenState extends State<ReportsScreen>
       backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: appBarColor,
         foregroundColor: Colors.white,
         title: const Text(
           'تقارير الأذكار',
@@ -102,6 +104,18 @@ class ReportsScreenState extends State<ReportsScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AthkarWidgetSetup(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add_home_outlined))
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -857,5 +871,9 @@ class ReportsScreenState extends State<ReportsScreen>
     }
 
     return streak;
+  }
+
+  Future<void> _updateHomeWidget() async {
+    await AthkarWidgetProvider.updateWidget();
   }
 }

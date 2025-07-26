@@ -59,6 +59,7 @@ dependencies:
   wakelock_plus:
   fl_chart: ^0.69.2
   intl:
+  home_widget: ^0.4.0
 
 
 flutter_launcher_icons:
