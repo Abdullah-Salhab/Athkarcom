@@ -284,7 +284,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.bottomRight,
+                          alignment: Alignment.centerRight,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const CounterPage(
@@ -342,7 +342,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.bottomLeft,
+                          alignment: Alignment.centerLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const CounterPage(
@@ -400,7 +400,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.bottomLeft,
+                          alignment: Alignment.centerRight,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const ReportsScreen(
@@ -456,7 +456,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.centerRight,
+                          alignment: Alignment.centerLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const OfflineAthkarList(),
@@ -511,7 +511,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.centerLeft,
+                          alignment: Alignment.bottomRight,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const OtherAthkarScreen(),
@@ -566,7 +566,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.bottomRight,
+                          alignment: Alignment.bottomLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const AccountsScreen(),
