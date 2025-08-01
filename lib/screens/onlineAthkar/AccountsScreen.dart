@@ -104,10 +104,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
 
   Future<void> setCurrentUserName(String selectedUser) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
     await prefs.setString('userName', selectedUser);
-    await prefs.setStringList('usersList', usersList);
-    saveOfflineAthkarList();
+
     setState(() {
       userName = selectedUser;
     });
@@ -115,11 +113,15 @@ class _AccountsScreenState extends State<AccountsScreen> {
 
   Future<void> logoutUser(String selectedUser) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
     if (selectedUser != "") {
+      // Just update the necessary fields without clearing everything else.
       await prefs.setBool('theme', isDarkThemeActive);
       await prefs.setString('userName', selectedUser);
       await prefs.setStringList('usersList', usersList);
+    } else {
+      // If no user is left, remove user-specific keys.
+      await prefs.remove('userName');
+      await prefs.remove('usersList');
     }
 
     setState(() {
@@ -129,14 +131,24 @@ class _AccountsScreenState extends State<AccountsScreen> {
     saveOfflineAthkarList();
   }
 
+  // CHANGED: This function no longer clears all preferences.
+  // It now specifically removes the deleted user's report data.
   Future<void> deleteUserName(String selectedUser, String deletedUser) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+
+    // Update the current user and list of users
     if (selectedUser != "") {
       await prefs.setBool('theme', isDarkThemeActive);
       await prefs.setString('userName', selectedUser);
       await prefs.setStringList('usersList', usersList);
+    } else {
+      // No users left, remove user-specific keys.
+      await prefs.remove('userName');
+      await prefs.remove('usersList');
     }
+
+    // Specifically remove the report data for the deleted user.
+    await prefs.remove('athkar_completion_data_$deletedUser');
 
     setState(() {
       userName = selectedUser;
@@ -224,9 +236,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
                   showExceptionPopup(context, e.toString());
                 });
 
-                setState(() {
-                  userName = newSelectedUser;
-                });
 
                 if (usersList.isEmpty) {
                   Navigator.pushReplacement(
@@ -273,7 +282,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal')),
+              child: const Text('حذف',
+                  style: TextStyle(fontFamily: 'Tajawal', color: Colors.red)),
               onPressed: () async {
                 String deletedUser = usersList[index];
                 usersList.removeAt(index);
@@ -285,9 +295,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
                   showExceptionPopup(context, e.toString());
                 });
 
-                setState(() {
-                  userName = newSelectedUser;
-                });
 
                 if (usersList.isEmpty) {
                   Navigator.pushReplacement(
@@ -459,8 +466,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         side: BorderSide(
                             color: isCurrentUser
                                 ? Colors.teal.shade300
-                                : Colors.white,
-                            width: 3)),
+                                : Colors.transparent, // Changed from white
+                            width: 2)), // Changed width
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
@@ -482,8 +489,15 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isCurrentUser)
-                            const Text("المستخدم الحالي",
-                                style: TextStyle(color: Colors.teal)),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text("المستخدم الحالي",
+                                  style: TextStyle(
+                                      color: Colors.teal.shade700,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          if (hasDocId && !isCurrentUser)
+                            const SizedBox(height: 4),
                           if (hasDocId)
                             GestureDetector(
                               onTap: () => _showDocumentIdDialog(
@@ -491,19 +505,19 @@ class _AccountsScreenState extends State<AccountsScreen> {
                               child: Container(
                                 margin: const EdgeInsets.only(top: 4),
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 18, vertical: 8),
+                                    horizontal: 12, vertical: 6),
+                                // Adjusted padding
                                 decoration: BoxDecoration(
                                   color: Colors.blue.shade50,
                                   borderRadius: BorderRadius.circular(12),
-                                  border:
-                                      Border.all(color: Colors.blue.shade200),
                                 ),
                                 child: const Row(
-                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisSize: MainAxisSize.min,
+                                  // Changed from max
                                   children: [
                                     Icon(Icons.fingerprint,
                                         size: 14, color: Colors.blue),
-                                    SizedBox(width: 2),
+                                    SizedBox(width: 4), // Adjusted spacing
                                     Text(
                                       'عرض معرف الحساب',
                                       style: TextStyle(

@@ -28,7 +28,6 @@ class CreateUserScreenState extends State<CreateUserScreen> {
   Future<void> _saveUserData(String fullName) async {
     // Save to Shared Preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
     await prefs.setString('userName', fullName);
     await saveOfflineAthkarList().catchError((e) {
       showExceptionPopup(context, e.toString());
@@ -260,6 +259,7 @@ class CreateUserScreenState extends State<CreateUserScreen> {
                                         await _checkIfNameExists(fullName)
                                             .catchError((e) {
                                       showExceptionPopup(context, e.toString());
+                                      return true; // Assume exists on error
                                     });
 
                                     if (nameExists) {

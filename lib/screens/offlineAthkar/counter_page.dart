@@ -28,7 +28,8 @@ class CounterPage extends StatefulWidget {
   CounterPageState createState() => CounterPageState();
 }
 
-class CounterPageState extends State<CounterPage> with TickerProviderStateMixin {
+class CounterPageState extends State<CounterPage>
+    with TickerProviderStateMixin {
   List<SectionDetailModel> sectionDetails = [];
   bool isLoad = false;
   final _pageController = PageController();
@@ -50,7 +51,8 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 5));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -126,20 +128,46 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
   }
 
   // Get theme colors based on current theme
-  Color get backgroundColor => isDarkTheme ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
-  Color get gradientStart => isDarkTheme ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
-  Color get gradientEnd => isDarkTheme ? const Color(0xFF2C2C2C) : const Color(0xFFE8F5E8);
-  Color get cardColor => isDarkTheme ? const Color(0xFF2C2C2C) : Colors.white;
-  Color get textColor => isDarkTheme ? Colors.white : const Color(0xFF2C3E50);
-  Color get secondaryTextColor => isDarkTheme ? Colors.white70 : const Color(0xFF5D6D7E);
-  Color get primaryColor => isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
-  Color get shadowColor => isDarkTheme ? Colors.black26 : Colors.black.withOpacity(0.05);
+  Color get backgroundColor =>
+      isDarkTheme ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
 
-  // NEW: Record completion for reports
+  Color get gradientStart =>
+      isDarkTheme ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
+
+  Color get gradientEnd =>
+      isDarkTheme ? const Color(0xFF2C2C2C) : const Color(0xFFE8F5E8);
+
+  Color get cardColor => isDarkTheme ? const Color(0xFF2C2C2C) : Colors.white;
+
+  Color get textColor => isDarkTheme ? Colors.white : const Color(0xFF2C3E50);
+
+  Color get secondaryTextColor =>
+      isDarkTheme ? Colors.white70 : const Color(0xFF5D6D7E);
+
+  Color get primaryColor =>
+      isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
+
+  Color get shadowColor =>
+      isDarkTheme ? Colors.black26 : Colors.black.withOpacity(0.05);
+
+  // CHANGED: This function now saves reports for the specific logged-in user.
   Future<void> _recordCompletion() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? data = prefs.getString('athkar_completion_data');
+      // Get the current user to create a user-specific key
+      String? userName = prefs.getString('userName');
+
+      // If there's no user, we can't save the report.
+      if (userName == null || userName.isEmpty) {
+        if (kDebugMode) {
+          print("Error: No user is currently selected. Cannot save report.");
+        }
+        return;
+      }
+
+      // Use a user-specific key for storing completion data.
+      final String completionDataKey = 'athkar_completion_data_$userName';
+      String? data = prefs.getString(completionDataKey);
 
       Map<String, dynamic> completionData = {};
       if (data != null) {
@@ -156,8 +184,8 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       // Record completion for this section
       completionData[today][widget.id.toString()] = true;
 
-      // Save back to preferences
-      await prefs.setString('athkar_completion_data', json.encode(completionData));
+      // Save back to preferences with the user-specific key.
+      await prefs.setString(completionDataKey, json.encode(completionData));
 
       // After saving completion data
       await AthkarWidgetHelper.updateWidgetOnCompletion();
@@ -190,8 +218,12 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       return 'assets/sounds/common/Athkar_$soundId.mp3';
     } else if (soundId.contains("E")) {
       return 'assets/sounds/evening/Athkar_$soundId.mp3';
-    } else {
+    } else if (soundId.contains("M")) {
       return 'assets/sounds/morning/Athkar_$soundId.mp3';
+    } else if (soundId.contains("S")) {
+      return 'assets/sounds/sleeping/Athkar_$soundId.mp3';
+    } else {
+      return null;
     }
   }
 
@@ -206,7 +238,8 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
         currentCounterValue--;
       }
 
-      if (counterValues[index] == 0 && _pageController.page != sectionDetails.length - 1) {
+      if (counterValues[index] == 0 &&
+          _pageController.page != sectionDetails.length - 1) {
         currentCounterValue = counterValues[index + 1];
         if (!kIsWeb && vibrationActive) Vibrate.vibrate();
         if (sectionDetails[index + 1].soundId == "") {
@@ -214,17 +247,20 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
             voiceActive = false;
           });
         }
-        _pageController.nextPage(
+        _pageController
+            .nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
-        ).whenComplete(() {
+        )
+            .whenComplete(() {
           if (currentCounterValue > 0 && voiceActive) {
             _toggleSound(sectionDetails[index + 1].soundId);
           }
         });
       }
 
-      if (counterValues[index] == 0 && _pageController.page == sectionDetails.length - 1) {
+      if (counterValues[index] == 0 &&
+          _pageController.page == sectionDetails.length - 1) {
         bool isFinishAll = true;
         for (int x = 0; x < sectionDetails.length; x++) {
           if (counterValues[x] != 0) {
@@ -249,7 +285,7 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
           voiceActive = false;
 
           // NEW: Record completion when all athkar are finished
-          if(widget.id == 1 || widget.id == 2|| widget.id == 6  ) {
+          if (widget.id == 1 || widget.id == 2 || widget.id == 6) {
             _recordCompletion();
           }
           _showCompletionDialog();
@@ -280,7 +316,8 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -332,42 +369,48 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    if(widget.id == 1 || widget.id == 2 || widget.id == 6 )
+                    if (widget.id == 1 || widget.id == 2 || widget.id == 6)
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ReportsScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: primaryColor,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25)),
+                        ),
+                        child: const Text(
+                          'عرض التقارير',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ReportsScreen(),
-                          ),
-                        );
+                        Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: primaryColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                      ),
-                      child: const Text(
-                        'عرض التقارير',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: primaryColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)),
                       ),
                       child: const Text(
                         'حسناً',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -391,24 +434,24 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       appBar: _buildAppBar(),
       body: !isLoad
           ? Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-        ),
-      )
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+            )
           : Stack(
-        children: [
-          PageView(
-            scrollDirection: Axis.vertical,
-            controller: _pageController,
-            onPageChanged: _onPageChanged,
-            children: [
-              for (int index = 0; index < sectionDetails.length; index++)
-                _buildCounterPage(index),
-            ],
-          ),
-          _buildConfettiWidget(),
-        ],
-      ),
+              children: [
+                PageView(
+                  scrollDirection: Axis.vertical,
+                  controller: _pageController,
+                  onPageChanged: _onPageChanged,
+                  children: [
+                    for (int index = 0; index < sectionDetails.length; index++)
+                      _buildCounterPage(index),
+                  ],
+                ),
+                _buildConfettiWidget(),
+              ],
+            ),
     );
   }
 
@@ -448,7 +491,9 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
     return Container(
       margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        color: vibrationActive ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        color: vibrationActive
+            ? Colors.white.withOpacity(0.2)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: IconButton(
@@ -470,7 +515,9 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
     return Container(
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: fontSize > 18 ? Colors.orange.withOpacity(0.1) : Colors.orange.withOpacity(0.05),
+        color: fontSize > 18
+            ? Colors.orange.withOpacity(0.1)
+            : Colors.orange.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextButton(
@@ -518,12 +565,16 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
 
   void _onPageChanged(int page) {
     setState(() {
-      if (counterValues[page] == 0 && page > currentPage && isCheckingRemaining) {
+      if (counterValues[page] == 0 &&
+          page > currentPage &&
+          isCheckingRemaining) {
         _pageController.nextPage(
           duration: const Duration(milliseconds: 1000),
           curve: Curves.easeOut,
         );
-      } else if (counterValues[page] == 0 && page < currentPage && isCheckingRemaining) {
+      } else if (counterValues[page] == 0 &&
+          page < currentPage &&
+          isCheckingRemaining) {
         _pageController.previousPage(
           duration: const Duration(milliseconds: 1000),
           curve: Curves.easeOut,
@@ -596,11 +647,12 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
   Widget _buildActionButtons(int index) {
     return Row(
       children: [
-        if (!kIsWeb) _buildActionButton(
-          Icons.share,
-              () => Share.share(sectionDetails[index].content.toString()),
-          const Color(0xFF2196F3),
-        ),
+        if (!kIsWeb)
+          _buildActionButton(
+            Icons.share,
+            () => Share.share(sectionDetails[index].content.toString()),
+            const Color(0xFF2196F3),
+          ),
         _buildFontSizeButton(),
         if (sectionDetails[index].soundId != "") _buildSoundButton(index),
         if (voiceActive) _buildSpeedButton(),
@@ -608,7 +660,8 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
     );
   }
 
-  Widget _buildActionButton(IconData icon, VoidCallback onPressed, Color color) {
+  Widget _buildActionButton(
+      IconData icon, VoidCallback onPressed, Color color) {
     return Container(
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
@@ -626,14 +679,17 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
     return Container(
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: voiceActive ? Colors.red.withOpacity(0.1) : Colors.teal.withOpacity(0.1),
+        color: voiceActive
+            ? Colors.red.withOpacity(0.1)
+            : Colors.teal.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: IconButton(
         onPressed: () {
           setState(() {
             currentCounterValue = counterValues[index];
-            if (currentCounterValue > 0 && sectionDetails[index].soundId != "") {
+            if (currentCounterValue > 0 &&
+                sectionDetails[index].soundId != "") {
               voiceActive = !voiceActive;
             }
           });
@@ -761,10 +817,14 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDarkTheme ? Colors.blue.withOpacity(0.1) : Colors.blue.withOpacity(0.05),
+        color: isDarkTheme
+            ? Colors.blue.withOpacity(0.1)
+            : Colors.blue.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDarkTheme ? Colors.blue.withOpacity(0.3) : Colors.blue.withOpacity(0.2),
+          color: isDarkTheme
+              ? Colors.blue.withOpacity(0.3)
+              : Colors.blue.withOpacity(0.2),
         ),
       ),
       child: Text(
@@ -805,30 +865,31 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
                 child: CircularPercentIndicator(
                   radius: 80.0,
                   lineWidth: 12.0,
-                  percent: counterValues[index] / int.parse(sectionDetails[index].count.toString()),
+                  percent: counterValues[index] /
+                      int.parse(sectionDetails[index].count.toString()),
                   center: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "${counterValues[index]}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 36,
                           fontFamily: 'Tajawal',
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
+                          color: textColor,
                         ),
                       ),
-                      const Text(
+                      Text(
                         "اضغط للعد",
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF7F8C8D),
+                          color: secondaryTextColor,
                         ),
                       ),
                     ],
                   ),
-                  progressColor: const Color(0xFF4CAF9D),
-                  backgroundColor: Colors.teal.withOpacity(0.2),
+                  progressColor: primaryColor,
+                  backgroundColor: primaryColor.withOpacity(0.2),
                   circularStrokeCap: CircularStrokeCap.round,
                 ),
               ),
@@ -844,23 +905,23 @@ class CounterPageState extends State<CounterPage> with TickerProviderStateMixin 
       height: 60,
       child: index == 0
           ? Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.keyboard_arrow_down,
-              size: 30,
-              color: secondaryTextColor,
-            ),
-            Text(
-              "اسحب لأسفل",
-              style: TextStyle(
-                fontSize: 12,
-                color: secondaryTextColor,
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 30,
+                    color: secondaryTextColor,
+                  ),
+                  Text(
+                    "اسحب لأسفل",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: secondaryTextColor,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-      )
+            )
           : const SizedBox(),
     );
   }

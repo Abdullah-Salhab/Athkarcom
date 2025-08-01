@@ -19,6 +19,7 @@ class ReportsScreenState extends State<ReportsScreen>
   Map<String, dynamic> completionData = {};
   bool isLoading = true;
   bool isDarkTheme = false;
+  String? _userName; // CHANGE: To store the current user's name
 
   // Section definitions
   final Map<int, String> sections = {
@@ -37,8 +38,13 @@ class ReportsScreenState extends State<ReportsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    loadCompletionData();
-    getCurrentTheme();
+    _initializeData();
+  }
+
+  // NEW: Method to handle data loading sequence
+  Future<void> _initializeData() async {
+    await getCurrentTheme();
+    await _loadUserDataAndReports();
   }
 
   @override
@@ -54,21 +60,37 @@ class ReportsScreenState extends State<ReportsScreen>
     });
   }
 
-  Future<void> loadCompletionData() async {
+  // CHANGED: This method now loads data for the specific logged-in user
+  Future<void> _loadUserDataAndReports() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? data = prefs.getString('athkar_completion_data');
+    setState(() {
+      _userName = prefs.getString('userName');
+      isLoading = true; // Set loading state before fetching data
+    });
 
-    if (data != null) {
-      setState(() {
-        completionData = json.decode(data);
-        isLoading = false;
-      });
+    if (_userName != null && _userName!.isNotEmpty) {
+      // Use a user-specific key to get the report
+      String? data = prefs.getString('athkar_completion_data_${_userName!}');
+      if (data != null) {
+        setState(() {
+          completionData = json.decode(data);
+        });
+      } else {
+        // No data found for this user, so we show an empty report
+        setState(() {
+          completionData = {};
+        });
+      }
     } else {
+      // No user is logged in, show an empty report
       setState(() {
         completionData = {};
-        isLoading = false;
       });
     }
+
+    setState(() {
+      isLoading = false;
+    });
 
     // Update home widget when data changes
     await _updateHomeWidget();
@@ -87,7 +109,6 @@ class ReportsScreenState extends State<ReportsScreen>
 
   Color get primaryColor =>
       isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
-
 
   @override
   Widget build(BuildContext context) {
@@ -401,7 +422,9 @@ class ReportsScreenState extends State<ReportsScreen>
       Map<String, dynamic> dayData = completionData[dayKey] ?? {};
       double completionRate =
           sections.length > 0 ? dayData.length / sections.length : 0;
-      spots.add(FlSpot(6 - i.toDouble(), completionRate * 100));
+      double percentage = completionRate * 100;
+      double formattedPercentage = double.parse(percentage.toStringAsFixed(1));
+      spots.add(FlSpot(6 - i.toDouble(), formattedPercentage));
     }
 
     return Container(
@@ -549,7 +572,7 @@ class ReportsScreenState extends State<ReportsScreen>
             Icons.bookmark),
         _buildStatCard(
             'معدل الإنجاز',
-            '${((completedSections / totalSections) * 100).toInt()}%',
+            '${totalSections > 0 ? ((completedSections / totalSections) * 100).toInt() : 0}%',
             Icons.trending_up),
       ],
     );
@@ -708,13 +731,14 @@ class ReportsScreenState extends State<ReportsScreen>
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        List<String> labels = ['صباح', 'مساء', 'صلاة', 'نوم'];
+                        List<String> labels = ['صباح', 'مساء', 'نوم'];
                         if (value.toInt() < labels.length) {
                           return Text(
                             labels[value.toInt()],
                             style: TextStyle(
                               color: secondaryTextColor,
                               fontSize: 12,
+                              fontFamily: 'Amiri',
                             ),
                           );
                         }
@@ -782,7 +806,8 @@ class ReportsScreenState extends State<ReportsScreen>
               String dayKey = DateFormat('yyyy-MM-dd').format(day);
               Map<String, dynamic> dayData = completionData[dayKey] ?? {};
 
-              double completionRate = dayData.length / sections.length;
+              double completionRate =
+                  sections.isNotEmpty ? dayData.length / sections.length : 0.0;
               Color dayColor = completionRate == 1.0
                   ? primaryColor
                   : completionRate > 0
@@ -848,6 +873,7 @@ class ReportsScreenState extends State<ReportsScreen>
 
   int _calculateStreak() {
     int streak = 0;
+    if (sections.isEmpty) return 0;
     DateTime checkDate = DateTime.now();
 
     // Step 1: If today is not complete, skip it
