@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,19 @@ class AthkarWidgetProvider {
   static Future<void> updateWidget() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? data = prefs.getString('athkar_completion_data');
+
+      // First, get the current user.
+      String? userName = prefs.getString('userName');
+
+      // If no user is logged in, show a default/empty state for the widget.
+      if (userName == null || userName.isEmpty) {
+        await _clearAndRetryUpdate();
+        return;
+      }
+
+      // Use the user-specific key to get the correct report data.
+      final String dataKey = 'athkar_completion_data_$userName';
+      String? data = prefs.getString(dataKey);
 
       Map<String, dynamic> completionData = {};
       if (data != null) {
@@ -36,9 +49,9 @@ class AthkarWidgetProvider {
       int completedCount = todayData.length;
       int totalCount = sections.length;
       double percentage =
-          totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+      totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-      // Calculate streak
+      // Calculate streak from the user's report
       int streak = _calculateStreak(completionData);
 
       // Get completed sections names
@@ -75,9 +88,13 @@ class AthkarWidgetProvider {
         iOSName: iOSWidgetName,
       );
 
-      print('Widget updated successfully');
+      if (kDebugMode) {
+        print('Widget updated successfully for user: $userName');
+      }
     } catch (e) {
-      print('Error updating widget: $e');
+      if (kDebugMode) {
+        print('Error updating widget: $e');
+      }
       // Optionally, you can try to clear problematic data and retry
       await _clearAndRetryUpdate();
     }
@@ -85,7 +102,7 @@ class AthkarWidgetProvider {
 
   static Future<void> _clearAndRetryUpdate() async {
     try {
-      // Clear potentially problematic data
+      // Clear potentially problematic data and set to default
       await HomeWidget.saveWidgetData<String>('percentage', '0.0');
       await HomeWidget.saveWidgetData<int>('percentage_int', 0);
       await HomeWidget.saveWidgetData<int>('completed_count', 0);
@@ -100,16 +117,30 @@ class AthkarWidgetProvider {
         iOSName: iOSWidgetName,
       );
 
-      print('Widget cleared and updated with default values');
+      if (kDebugMode) {
+        print('Widget cleared and updated with default values.');
+      }
     } catch (e) {
-      print('Error in clear and retry: $e');
+      if (kDebugMode) {
+        print('Error in clear and retry: $e');
+      }
     }
   }
 
+  // This function correctly calculates the streak from the provided data map.
   static int _calculateStreak(Map<String, dynamic> completionData) {
+    if (sections.isEmpty) return 0;
     int streak = 0;
     DateTime checkDate = DateTime.now();
 
+    // First, check if today is fully complete. If not, start checking from yesterday.
+    String todayKey = DateFormat('yyyy-MM-dd').format(checkDate);
+    Map<String, dynamic> todayData = completionData[todayKey] ?? {};
+    if (todayData.length != sections.length) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
+    // Now, count backwards from the last fully completed day.
     while (true) {
       String dateKey = DateFormat('yyyy-MM-dd').format(checkDate);
       Map<String, dynamic> dayData = completionData[dateKey] ?? {};
@@ -118,6 +149,7 @@ class AthkarWidgetProvider {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
       } else {
+        // Stop when a day is not fully completed.
         break;
       }
     }
