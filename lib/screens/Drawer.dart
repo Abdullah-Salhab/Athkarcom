@@ -60,12 +60,9 @@ class _MyDrawerState extends State<MyDrawer> {
   }
 
   setCurrentUserName(selectedUser) async {
-    // Check Shared Preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    await prefs.setString('userName', userName);
-    await prefs.setStringList('usersList', usersList);
-    saveOfflineAthkarList();
+    await prefs.setString('userName', selectedUser);
+
     setState(() {
       userName = selectedUser;
     });
@@ -83,6 +80,7 @@ class _MyDrawerState extends State<MyDrawer> {
     setState(() {
       userName = selectedUser;
     });
+    await prefs.remove('athkar_completion_data_$deletedUser');
     saveOfflineAthkarList();
     CollectionReference users = FirebaseFirestore.instance.collection('Users');
     CollectionReference groups =
@@ -360,7 +358,10 @@ class _MyDrawerState extends State<MyDrawer> {
                 width: 30,
               ),
             ],
-          )
+          ),
+          const SizedBox(
+            height: 20,
+          ),
         ],
       ),
     );
