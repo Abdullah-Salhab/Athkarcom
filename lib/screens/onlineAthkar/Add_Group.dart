@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 import '../check_connection.dart';
 
@@ -12,7 +13,10 @@ class AddGroupScreen extends StatefulWidget {
   AddGroupScreenState createState() => AddGroupScreenState();
 }
 
-class AddGroupScreenState extends State<AddGroupScreen> {
+class AddGroupScreenState extends State<AddGroupScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'AddGroupScreen';
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   String userName = "";

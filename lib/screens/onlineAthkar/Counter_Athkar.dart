@@ -10,6 +10,7 @@ import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 
 class CounterAthkarScreen extends StatefulWidget {
@@ -39,7 +40,10 @@ class CounterAthkarScreen extends StatefulWidget {
 }
 
 class CounterAthkarScreenState extends State<CounterAthkarScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , AnalyticsMixin {
+  @override
+  String get screenName => 'GroupsCounterScreen';
+
   int counter = 0;
   double fontSize = 18;
   bool isDarkTheme = false;

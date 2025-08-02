@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../models/AnalyticsMixin.dart';
+
 class ThekerReadersScreen extends StatefulWidget {
   final List users;
   final String content;
@@ -15,7 +17,10 @@ class ThekerReadersScreen extends StatefulWidget {
   State<ThekerReadersScreen> createState() => _ThekerReadersScreenState();
 }
 
-class _ThekerReadersScreenState extends State<ThekerReadersScreen> {
+class _ThekerReadersScreenState extends State<ThekerReadersScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'ReadersScreen';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

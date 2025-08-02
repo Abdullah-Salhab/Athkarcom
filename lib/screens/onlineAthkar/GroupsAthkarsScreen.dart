@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 import '../check_connection.dart';
 
@@ -25,7 +26,10 @@ class GroupsAthkarsScreen extends StatefulWidget {
 }
 
 class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AnalyticsMixin {
+  @override
+  String get screenName => 'GroupScreen';
+
   String userName = "";
   int currentCount = 1;
   bool isAdmin = false;

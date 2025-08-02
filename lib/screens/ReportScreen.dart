@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../models/AnalyticsMixin.dart';
 import '../models/AthkarWidgetProvider.dart';
 import 'AthkarWidgetSetup.dart';
 
@@ -14,7 +15,10 @@ class ReportsScreen extends StatefulWidget {
 }
 
 class ReportsScreenState extends State<ReportsScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AnalyticsMixin {
+  @override
+  String get screenName => 'ReportsScreen';
+
   late TabController _tabController;
   Map<String, dynamic> completionData = {};
   bool isLoading = true;

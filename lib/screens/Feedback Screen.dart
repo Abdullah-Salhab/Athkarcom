@@ -2,6 +2,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/AnalyticsMixin.dart';
 import 'ExceptionDialog.dart';
 import 'check_connection.dart';
 
@@ -14,7 +15,10 @@ class FeedbackScreen extends StatefulWidget {
   FeedbackScreenState createState() => FeedbackScreenState();
 }
 
-class FeedbackScreenState extends State<FeedbackScreen> {
+class FeedbackScreenState extends State<FeedbackScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'FeedbackScreen';
+
   String dropdownValue = 'مراجعة عامة';
   TextEditingController myController = TextEditingController();
   int charNum = 0;

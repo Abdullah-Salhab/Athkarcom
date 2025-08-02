@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:athkar/screens/OtherAthkar/SectionDetailScreen.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 
 class OtherAthkarScreen extends StatefulWidget {
@@ -13,7 +14,10 @@ class OtherAthkarScreen extends StatefulWidget {
 }
 
 class _OtherAthkarScreenState extends State<OtherAthkarScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , AnalyticsMixin {
+  @override
+  String get screenName => 'OtherAthkarsScreen';
+
   List<SectionModel> sectionsList = [];
   bool isLoading = true;
   late AnimationController _animationController;

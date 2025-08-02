@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import 'counter_page.dart';
 
 class MorningEveningAthkars extends StatefulWidget {
@@ -12,7 +13,10 @@ class MorningEveningAthkars extends StatefulWidget {
   State<MorningEveningAthkars> createState() => _MorningEveningAthkarsState();
 }
 
-class _MorningEveningAthkarsState extends State<MorningEveningAthkars> {
+class _MorningEveningAthkarsState extends State<MorningEveningAthkars> with AnalyticsMixin{
+  @override
+  String get screenName => 'MorningEveningAthkarsScreen';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

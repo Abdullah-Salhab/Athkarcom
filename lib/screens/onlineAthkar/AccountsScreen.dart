@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../DashboardScreen.dart';
 import 'CreateUserScreen.dart';
 
@@ -16,7 +17,10 @@ class AccountsScreen extends StatefulWidget {
   State<AccountsScreen> createState() => _AccountsScreenState();
 }
 
-class _AccountsScreenState extends State<AccountsScreen> {
+class _AccountsScreenState extends State<AccountsScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'AccountsScreen';
+
   String userName = "";
   List<String> usersList = [];
   List<String> athkarList = [];

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:page_transition/page_transition.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 import '../check_connection.dart';
 import 'LoginExistingUserScreen.dart'; // Import the login screen
@@ -14,7 +15,10 @@ class CreateUserScreen extends StatefulWidget {
   CreateUserScreenState createState() => CreateUserScreenState();
 }
 
-class CreateUserScreenState extends State<CreateUserScreen> {
+class CreateUserScreenState extends State<CreateUserScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'CreateUserScreen';
+
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();

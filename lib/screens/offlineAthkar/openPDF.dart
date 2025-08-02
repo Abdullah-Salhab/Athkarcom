@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
 
+import '../../models/AnalyticsMixin.dart';
+
 class MyPdfViewer extends StatefulWidget {
   const MyPdfViewer({super.key});
 
@@ -8,7 +10,10 @@ class MyPdfViewer extends StatefulWidget {
   MyPdfViewerState createState() => MyPdfViewerState();
 }
 
-class MyPdfViewerState extends State<MyPdfViewer> {
+class MyPdfViewerState extends State<MyPdfViewer> with AnalyticsMixin{
+  @override
+  String get screenName => 'WirdMusafaPDFScreen';
+
   final pdfController = PdfController(
     document: PdfDocument.openAsset('assets/files/wird_musafa.pdf'),
   );

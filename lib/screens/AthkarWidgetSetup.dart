@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 
+import '../models/AnalyticsMixin.dart';
 import '../models/AthkarWidgetProvider.dart';
 
 class AthkarWidgetSetup extends StatefulWidget {
@@ -11,7 +12,10 @@ class AthkarWidgetSetup extends StatefulWidget {
   State<AthkarWidgetSetup> createState() => _AthkarWidgetSetupState();
 }
 
-class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> {
+class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMixin{
+  @override
+  String get screenName => 'HomeWidgetSetupScreen';
+
   bool _isWidgetSupported = true; // Most devices support widgets
 
   @override

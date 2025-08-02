@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../DashboardScreen.dart';
 
 class LoginExistingUserScreen extends StatefulWidget {
@@ -14,7 +15,10 @@ class LoginExistingUserScreen extends StatefulWidget {
   State<LoginExistingUserScreen> createState() => _LoginExistingUserScreenState();
 }
 
-class _LoginExistingUserScreenState extends State<LoginExistingUserScreen> {
+class _LoginExistingUserScreenState extends State<LoginExistingUserScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'LoginExistingUserScreen';
+
   final TextEditingController _docIdController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import 'GroupsAthkarsScreen.dart';
 
 class GroupsListScreen extends StatefulWidget {
@@ -13,7 +14,10 @@ class GroupsListScreen extends StatefulWidget {
   State<GroupsListScreen> createState() => _GroupsListScreenState();
 }
 
-class _GroupsListScreenState extends State<GroupsListScreen> {
+class _GroupsListScreenState extends State<GroupsListScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'GroupsListScreen';
+
   String searchQuery = "";
   String userName = "";
 

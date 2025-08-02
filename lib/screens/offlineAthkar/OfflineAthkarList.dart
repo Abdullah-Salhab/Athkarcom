@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 import '../onlineAthkar/Counter_Athkar.dart';
 
@@ -13,7 +14,10 @@ class OfflineAthkarList extends StatefulWidget {
 }
 
 class _OfflineAthkarListState extends State<OfflineAthkarList>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , AnalyticsMixin {
+  @override
+  String get screenName => 'OfflineAthkarListScreen';
+
   List<String> athkarList = [];
   List<String> athkarCount = [];
   List<String> athkarCurrentCount = [];

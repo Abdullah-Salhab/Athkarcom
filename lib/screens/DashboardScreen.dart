@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
+import '../models/AnalyticsMixin.dart';
 import 'Drawer.dart';
 import 'ExceptionDialog.dart';
 import 'FirebaseMessagingAPI.dart';
@@ -25,7 +26,10 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'DashboardScreen';
+
   String userName = "";
   String dropdownValue = "";
   List<String> athkarList = [];

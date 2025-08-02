@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share/share.dart';
 
+import '../models/AnalyticsMixin.dart';
+
 class AboutApp extends StatefulWidget {
   const AboutApp({Key? key}) : super(key: key);
 
@@ -10,7 +12,10 @@ class AboutApp extends StatefulWidget {
   State<AboutApp> createState() => _AboutAppState();
 }
 
-class _AboutAppState extends State<AboutApp> {
+class _AboutAppState extends State<AboutApp> with AnalyticsMixin {
+  @override
+  String get screenName => 'AboutAppScreen';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

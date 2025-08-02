@@ -14,6 +14,7 @@ import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart'; // Add this import
 import '../../main.dart';
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 import '../ReportScreen.dart';
 
@@ -29,7 +30,10 @@ class CounterPage extends StatefulWidget {
 }
 
 class CounterPageState extends State<CounterPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , AnalyticsMixin {
+  @override
+  String get screenName => 'OfflineCounterScreen';
+
   List<SectionDetailModel> sectionDetails = [];
   bool isLoad = false;
   final _pageController = PageController();

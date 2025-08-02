@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:share/share.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 
 class SectionDetailScreen extends StatefulWidget {
@@ -20,7 +21,10 @@ class SectionDetailScreen extends StatefulWidget {
 }
 
 class SectionDetailScreenState extends State<SectionDetailScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , AnalyticsMixin {
+  @override
+  String get screenName => 'OtherAthkarsDetailsScreen';
+
   List<SectionDetailModel> sectionDetails = [];
   bool isLoading = true;
   late AnimationController _animationController;

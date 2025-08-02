@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
 import '../check_connection.dart';
 
@@ -13,7 +14,10 @@ class AddAthkarScreen extends StatefulWidget {
   AddAthkarScreenState createState() => AddAthkarScreenState();
 }
 
-class AddAthkarScreenState extends State<AddAthkarScreen> {
+class AddAthkarScreenState extends State<AddAthkarScreen> with AnalyticsMixin{
+  @override
+  String get screenName => 'AddGroupAthkarScreen';
+
   final TextEditingController _countController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
