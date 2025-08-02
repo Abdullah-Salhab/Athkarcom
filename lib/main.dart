@@ -18,9 +18,9 @@ import 'models/SettingsProvider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize the home widget
-  await AthkarWidgetProvider.initializeWidget();
   if (!kIsWeb) {
+    // Initialize the home widget
+    await AthkarWidgetProvider.initializeWidget();
     await Firebase.initializeApp();
   } else {
     await Firebase.initializeApp(

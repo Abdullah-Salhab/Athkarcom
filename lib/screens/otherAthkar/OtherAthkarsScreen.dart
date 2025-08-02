@@ -115,14 +115,15 @@ class _OtherAthkarScreenState extends State<OtherAthkarScreen>
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           itemBuilder: (context, index) {
-            final delay = index * 0.1;
+            // Clamp delay to avoid Interval assertion error
+            final start = (index * 0.1).clamp(0.0, 0.9);
             final animation = Tween<double>(
               begin: 0.0,
               end: 1.0,
             ).animate(
               CurvedAnimation(
                 parent: _animationController,
-                curve: Interval(delay, 1.0, curve: Curves.easeOutCubic),
+                curve: Interval(start, 1.0, curve: Curves.easeOutCubic),
               ),
             );
 

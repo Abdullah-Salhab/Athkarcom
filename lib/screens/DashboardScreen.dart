@@ -291,11 +291,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             id: 5,
                             title: "أذكار بعد الصلاة",
                           ),
-                        )).then((value) async {
-                      await getOfflineAthkarList().catchError((e) {
-                        showExceptionPopup(context, e.toString());
-                      });
-                    });
+                        ));
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -349,11 +345,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             id: 6,
                             title: "أذكار النوم",
                           ),
-                        )).then((value) async {
-                      await getOfflineAthkarList().catchError((e) {
-                        showExceptionPopup(context, e.toString());
-                      });
-                    });
+                        ));
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -405,11 +397,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const ReportsScreen(
                           ),
-                        )).then((value) async {
-                      await getOfflineAthkarList().catchError((e) {
-                        showExceptionPopup(context, e.toString());
-                      });
-                    });
+                        ));
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -515,11 +503,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const OtherAthkarScreen(),
-                        )).then((value) async {
-                      await getOfflineAthkarList().catchError((e) {
-                        showExceptionPopup(context, e.toString());
-                      });
-                    });
+                        ));
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -570,11 +554,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const AccountsScreen(),
-                        )).then((value) async {
-                      await getOfflineAthkarList().catchError((e) {
-                        showExceptionPopup(context, e.toString());
-                      });
-                    });
+                        ));
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
