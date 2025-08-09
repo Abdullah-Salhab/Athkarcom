@@ -61,7 +61,7 @@ android {
         multiDexEnabled true
         minSdkVersion 23
         //noinspection OldTargetApi
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
