@@ -80,41 +80,6 @@ class SplitRectangleIntoTriangles extends StatelessWidget {
                   height: height,
                 ),
               ),
-              Positioned(
-                  bottom: 0, // Adjust bottom position as needed
-                  left: 0,
-                  right: 0,
-                  child: Row(
-                    children: [
-                      Expanded(child: Container()),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              PageTransition(
-                                type: PageTransitionType.fade,
-                                reverseDuration: const Duration(milliseconds: 250),
-                                duration: const Duration(milliseconds: 250),
-                                child: const MyPdfViewer(),
-                              ));
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            'الذكر المطول',
-                            style: TextStyle(
-                                fontFamily: 'Tajawal',
-                                fontSize: 20.0,
-                                color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      Expanded(child: Container()),
-                    ],
-                  )),
             ],
           ),
         );
