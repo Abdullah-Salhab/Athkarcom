@@ -54,6 +54,10 @@
     </array>
     <key>NSAppTransportSecurity</key>
     <key>NSAllowsArbitraryLoads</key>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>نحتاج إلى موقعك لتحديد أوقات الصلاة بدقة</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>نحتاج إلى موقعك لتحديد أوقات الصلاة بدقة</string>
     <true/>
 </dict>
 </plist>
