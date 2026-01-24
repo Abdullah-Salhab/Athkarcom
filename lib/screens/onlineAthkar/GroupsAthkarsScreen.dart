@@ -398,7 +398,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                   itemBuilder: (context, index) {
                     final object = objects[index];
                     final List users = object['users'];
-                    currentCount = getCounterOnlineResult(object.id);
+                    currentCount = getCounterOnlineResult(object.id + userName.toString());
                     return Column(
                       children: [
                         Container(
@@ -423,7 +423,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                             onTap: () {
                               if (!users.contains(userName)) {
                                 currentCount =
-                                    getCounterOnlineResult(object.id);
+                                    getCounterOnlineResult(object.id + userName.toString());
                                 Navigator.push(
                                     context,
                                     PageTransition(
@@ -449,7 +449,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                                     )).then((value) {
                                   setState(() {
                                     currentCount =
-                                        getCounterOnlineResult(object.id);
+                                        getCounterOnlineResult(object.id + userName.toString());
                                   });
                                   return true;
                                 });
@@ -569,17 +569,42 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
             const SizedBox(height: 5),
             const Divider(thickness: 2),
             const SizedBox(height: 5),
-            const Card(
-                elevation: 4,
-                child: Padding(
-                  padding:
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding:
                       EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Text("إدارة الأعضاء",
+                      child: Text("إدارة الأعضاء",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: 'Tajawal',
+                              fontWeight: FontWeight.bold)),
+                    )),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: ElevatedButton.icon(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.orange),
+                    ),
+                    onPressed: () {
+                      _showResetPointsConfirmationDialog(context);
+                    },
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    label: const Text(
+                      "إعادة تعيين النقاط",
                       style: TextStyle(
-                          fontSize: 18,
-                          fontFamily: 'Tajawal',
-                          fontWeight: FontWeight.bold)),
-                )),
+                        fontSize: 14,
+                        fontFamily: 'Tajawal',
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 5),
             Expanded(flex: 2, child: membersAdminStreamBuilder()),
           ],
@@ -1259,6 +1284,94 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                   } catch (e) {
                     showExceptionPopup(context, e.toString());
                   }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showResetPointsConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'إعادة تعيين النقاط',
+            style: TextStyle(
+              fontSize: 22,
+              fontFamily: 'Tajawal',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'هل أنت متأكد من إعادة تعيين نقاط جميع الأعضاء إلى 0؟',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Tajawal',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'إلغاء',
+                style: TextStyle(fontFamily: 'Tajawal'),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'نعم، إعادة تعيين',
+                style: TextStyle(fontFamily: 'Tajawal', color: Colors.orange),
+              ),
+              onPressed: () async {
+                if (await getConnection(context)) {
+                  try {
+                    // Get all users in this group
+                    var groupMembers = await FirebaseFirestore.instance
+                        .collection('Users')
+                        .where("groupId", isEqualTo: widget.groupId)
+                        .get();
+
+                    if (groupMembers.docs.isNotEmpty) {
+                      // Reset points for each member
+                      for (var userDoc in groupMembers.docs) {
+                        await userDoc.reference.update({
+                          'points': 0,
+                          'last_update': DateTime.now().toIso8601String(),
+                        });
+                      }
+
+                      Navigator.of(context).pop();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.green,
+                          content: Text(
+                            'تم إعادة تعيين النقاط لجميع الأعضاء',
+                            style: TextStyle(fontFamily: 'Tajawal'),
+                          ),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    showExceptionPopup(context, e.toString());
+                  }
+                } else {
+                  Navigator.of(context).pop();
                 }
               },
             ),
