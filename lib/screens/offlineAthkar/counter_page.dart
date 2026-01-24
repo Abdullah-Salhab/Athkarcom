@@ -288,6 +288,8 @@ class CounterPageState extends State<CounterPage>
           _triggerConfetti();
           voiceActive = false;
 
+          // Stop Keeping the screen on
+          WakelockPlus.disable();
           // NEW: Record completion when all athkar are finished
           if (widget.id == 1 || widget.id == 2 || widget.id == 6) {
             _recordCompletion();
