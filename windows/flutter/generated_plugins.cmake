@@ -5,7 +5,9 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
   firebase_core
+  geolocator_windows
   pdfx
+  permission_handler_windows
   rive_common
   url_launcher_windows
 )

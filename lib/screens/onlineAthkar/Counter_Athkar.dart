@@ -707,7 +707,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
 
   Future<void> saveCounterOnlineResult() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(widget.id.toString(), counter.toString());
+    prefs.setString(widget.id.toString() + widget.userName.toString(), counter.toString());
   }
 
   Future<void> resetCounter() async {

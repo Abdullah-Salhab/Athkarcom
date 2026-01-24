@@ -12,9 +12,14 @@ import 'ExceptionDialog.dart';
 import 'FirebaseMessagingAPI.dart';
 import 'NotificationService.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
+import 'Prayer/PrayerTimesScreen.dart';
+import 'Qibla/QiblaScreen.dart';
+import 'Quiz/AddQuizQuestionScreen.dart';
+import 'Quiz/RamadanQuizScreen.dart';
 import 'check_connection.dart';
 import 'offlineAthkar/counter_page.dart';
 import 'offlineAthkar/morningNightScreen.dart';
+import 'offlineAthkar/openPDF.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/GroupsListScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -285,17 +290,15 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 child: RawMaterialButton(
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerRight,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const CounterPage(
-                            id: 5,
-                            title: "أذكار بعد الصلاة",
-                          ),
-                        ));
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.centerRight,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const PrayerTimesScreen(),
+                      ),
+                    );
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -307,12 +310,12 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                              "assets/images/praying.png",
+                              "assets/images/time.png",
                               fit: BoxFit.cover,
                             )),
                         const SizedBox(height: 8.0),
                         const Text(
-                          "أذكار بعد الصلاة",
+                          "مواقيت الصلاة",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 20.0,
@@ -345,10 +348,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                           alignment: Alignment.centerLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
-                          child: const CounterPage(
-                            id: 6,
-                            title: "أذكار النوم",
-                          ),
+                          child: const RamadanQuizScreen()
                         ));
                   },
                   shape: RoundedRectangleBorder(
@@ -361,12 +361,12 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                              "assets/images/sleep.png",
+                              "assets/images/ramadan.png",
                               fit: BoxFit.cover,
                             )),
                         const SizedBox(height: 8.0),
                         const Text(
-                          "أذكار النوم",
+                          "مسابقة أذكاركم الرمضانية",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 20.0,
@@ -451,6 +451,166 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                           alignment: Alignment.centerLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
+                          child: const CounterPage(
+                            id: 5,
+                            title: "أذكار بعد الصلاة",
+                          ),
+                        ));
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/praying.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "أذكار بعد الصلاة",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.centerRight,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
+                          child: const CounterPage(
+                            id: 6,
+                            title: "أذكار النوم",
+                          ),
+                        ));
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/sleep.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "أذكار النوم",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.centerRight,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const QiblaScreen(),
+                      ),
+                    );
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/kaaba.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "اتجاه القبلة",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.scale,
+                          alignment: Alignment.centerRight,
+                          duration: const Duration(milliseconds: 500),
+                          reverseDuration: const Duration(milliseconds: 500),
                           child: const OfflineAthkarList(),
                         )).then((value) async {
                       await getOfflineAthkarList().catchError((e) {
@@ -503,7 +663,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.bottomRight,
+                          alignment: Alignment.centerLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const OtherAthkarScreen(),
@@ -554,7 +714,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         context,
                         PageTransition(
                           type: PageTransitionType.scale,
-                          alignment: Alignment.bottomLeft,
+                          alignment: Alignment.bottomRight,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
                           child: const AccountsScreen(),
@@ -576,6 +736,58 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         const SizedBox(height: 8.0),
                         const Text(
                           "حسابات العائلة",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.bottomLeft,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const MyPdfViewer(),
+                      ),
+                    );
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // Icon(Icons.search, color: Colors.white),
+                        Expanded(
+                            child: Image.asset(
+                              "assets/images/other2.png",
+                              fit: BoxFit.cover,
+                            )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "الذكر المطول",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 20.0,

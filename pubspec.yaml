@@ -60,6 +60,11 @@ dependencies:
   fl_chart: ^0.69.2
   intl:
   home_widget: ^0.4.0
+  adhan:
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  permission_handler: ^11.0.1
+  flutter_compass: ^0.8.0
 
 
 flutter_launcher_icons:
