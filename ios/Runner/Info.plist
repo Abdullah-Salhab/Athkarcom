@@ -58,6 +58,8 @@
     <string>نحتاج إلى موقعك لتحديد أوقات الصلاة بدقة</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>نحتاج إلى موقعك لتحديد أوقات الصلاة بدقة</string>
+    <key>NSCameraUsageDescription</key>
+    <string>نحتاج للكاميرا لعرض اتجاه القبلة بالواقع المعزز</string>
     <true/>
 </dict>
 </plist>

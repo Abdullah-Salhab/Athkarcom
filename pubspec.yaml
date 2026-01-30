@@ -65,6 +65,8 @@ dependencies:
   geocoding: ^2.1.1
   permission_handler: ^11.0.1
   flutter_compass: ^0.8.0
+  camera: ^0.10.5+5
+  sensors_plus: ^4.0.2
 
 
 flutter_launcher_icons:

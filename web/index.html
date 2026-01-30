@@ -63,6 +63,19 @@
       });
     });
   </script>
+  <script>
+    // طلب أذونات البوصلة للأجهزة التي تدعم DeviceOrientation
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === 'granted') {
+            console.log('Device orientation permission granted');
+          }
+        })
+        .catch(console.error);
+    }
+  </script>
   <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";

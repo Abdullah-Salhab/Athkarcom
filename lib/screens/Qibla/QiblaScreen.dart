@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -29,6 +31,13 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
   @override
   String get screenName => 'QiblaScreen';
 
+  // Camera (للهواتف فقط)
+  CameraController? _cameraController;
+  List<CameraDescription>? _cameras;
+  bool _isCameraInitialized = false;
+  bool _useARMode = false;
+
+  // Compass
   double? _heading;
   double? _qiblaDirection;
   StreamSubscription<CompassEvent>? _compassSubscription;
@@ -48,16 +57,42 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
   void initState() {
     super.initState();
     _initializeLocation();
+    if (!kIsWeb) {
+      _initializeCamera();
+    }
   }
 
   @override
   void dispose() {
     _compassSubscription?.cancel();
+    _cameraController?.dispose();
     super.dispose();
   }
 
+  Future<void> _initializeCamera() async {
+    try {
+      _cameras = await availableCameras();
+      if (_cameras != null && _cameras!.isNotEmpty) {
+        _cameraController = CameraController(
+          _cameras![0],
+          ResolutionPreset.medium,
+          enableAudio: false,
+        );
+
+        await _cameraController!.initialize();
+
+        if (mounted) {
+          setState(() {
+            _isCameraInitialized = true;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
+  }
+
   Future<void> _initializeLocation() async {
-    // Check if location was passed as parameter
     if (widget.latitude != null && widget.longitude != null) {
       _latitude = widget.latitude;
       _longitude = widget.longitude;
@@ -65,7 +100,6 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
       _calculateQiblaDirection();
       _checkPermissionAndStartCompass();
     } else {
-      // Get location from GPS
       await _getCurrentLocation();
     }
   }
@@ -76,14 +110,6 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
     });
 
     try {
-      var status = await Permission.location.status;
-      if (!status.isGranted) {
-        status = await Permission.location.request();
-        if (!status.isGranted) {
-          throw Exception('يجب السماح بالوصول إلى الموقع');
-        }
-      }
-
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -91,16 +117,21 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
       _latitude = position.latitude;
       _longitude = position.longitude;
 
-      // Get city name
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        _latitude!,
-        _longitude!,
-      );
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          _latitude!,
+          _longitude!,
+        );
 
-      if (placemarks.isNotEmpty) {
-        _cityName = placemarks.first.locality ??
-            placemarks.first.administrativeArea ??
-            'موقعك الحالي';
+        if (placemarks.isNotEmpty) {
+          _cityName = placemarks.first.locality ??
+              placemarks.first.administrativeArea ??
+              'موقعك الحالي';
+        } else {
+          _cityName = 'موقعك الحالي';
+        }
+      } catch (e) {
+        _cityName = 'موقعك الحالي';
       }
 
       _calculateQiblaDirection();
@@ -155,24 +186,31 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
   }
 
   Future<void> _checkPermissionAndStartCompass() async {
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
-
-    if (status.isGranted) {
+    if (kIsWeb) {
       setState(() {
         _hasPermission = true;
+        _heading = 0;
       });
-      _startCompass();
     } else {
-      setState(() {
-        _hasPermission = false;
-      });
+      var status = await Permission.location.status;
+      if (!status.isGranted) {
+        status = await Permission.location.request();
+      }
+
+      if (status.isGranted) {
+        setState(() {
+          _hasPermission = true;
+        });
+        _startMobileCompass();
+      } else {
+        setState(() {
+          _hasPermission = false;
+        });
+      }
     }
   }
 
-  void _startCompass() {
+  void _startMobileCompass() {
     _compassSubscription = FlutterCompass.events?.listen((CompassEvent event) {
       if (mounted && event.heading != null) {
         setState(() {
@@ -193,6 +231,32 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
     return diff < 2 || diff > 350;
   }
 
+  void _toggleARMode() {
+    setState(() {
+      _useARMode = !_useARMode;
+    });
+  }
+
+  // حساب المسافة إلى الكعبة
+  double _calculateDistance() {
+    if (_latitude == null || _longitude == null) return 0;
+
+    const R = 6371; // نصف قطر الأرض بالكيلومتر
+    final lat1 = _latitude! * math.pi / 180;
+    final lat2 = kaabaLatitude * math.pi / 180;
+    final dLat = (kaabaLatitude - _latitude!) * math.pi / 180;
+    final dLon = (kaabaLongitude - _longitude!) * math.pi / 180;
+
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1) *
+            math.cos(lat2) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    return R * c;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPointing = _isPointingToKaaba();
@@ -200,7 +264,9 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: _useARMode && !kIsWeb
+              ? null
+              : LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
@@ -229,359 +295,674 @@ class _QiblaScreenState extends State<QiblaScreen> with AnalyticsMixin {
               ],
             ),
           )
-              : Column(
+              : Stack(
             children: [
-              // App Bar
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+              // AR Camera View (للهواتف فقط)
+              if (_useARMode &&
+                  !kIsWeb &&
+                  _isCameraInitialized &&
+                  _cameraController != null)
+                Positioned.fill(
+                  child: CameraPreview(_cameraController!),
+                ),
+
+              // Normal View
+              if (!_useARMode || kIsWeb)
+                Positioned.fill(
+                  child: _buildNormalView(isPointing),
+                ),
+
+              // AR Overlay (للهواتف فقط)
+              if (_useARMode && !kIsWeb && _qiblaDirection != null)
+                Positioned.fill(
+                  child: _buildAROverlay(isPointing),
+                ),
+
+              // Top Bar
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _buildTopBar(),
+              ),
+
+              // AR Toggle Button (للهواتف فقط)
+              if (!kIsWeb && _isCameraInitialized)
+                Positioned(
+                  top: 60,
+                  left: 10,
+                  child: FloatingActionButton.extended(
+                    onPressed: _toggleARMode,
+                    backgroundColor: Colors.teal,
+                    icon: Icon(
+                      _useARMode ? Icons.map : Icons.camera_alt,
+                      color: Colors.white,
                     ),
-                    const Expanded(
-                      child: Text(
-                        'اتجاه القبلة',
-                        style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
+                    label: Text(
+                      _useARMode ? 'عرض عادي' : 'واقع معزز',
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        color: Colors.white,
+                        fontSize: 14,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.my_location,
-                          color: Colors.white),
-                      tooltip: 'تحديث الموقع',
-                      onPressed: _getCurrentLocation,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.7),
+            Colors.black.withOpacity(0.3),
+            Colors.transparent,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const Expanded(
+                  child: Text(
+                    'اتجاه القبلة',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.my_location, color: Colors.white),
+                  tooltip: 'تحديث الموقع',
+                  onPressed: _getCurrentLocation,
+                ),
+              ],
+            ),
+            if (_cityName.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.location_on,
+                        color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        _cityName,
+                        style: const TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
 
-              // Location Info
-              if (_cityName.isNotEmpty)
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.location_on, color: Colors.white),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          _cityName,
-                          style: const TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+  Widget _buildNormalView(bool isPointing) {
+    return Column(
+      children: [
+        const SizedBox(height: 120),
+
+        // Web-specific notice
+        if (kIsWeb)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: const Column(
+              children: [
+                Icon(Icons.web, color: Colors.white, size: 30),
+                SizedBox(height: 10),
+                Text(
+                  'وضع الويب',
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                SizedBox(height: 5),
+                Text(
+                  'استخدم هاتفك للحصول على تجربة البوصلة والواقع المعزز',
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
 
-              const SizedBox(height: 16),
-
-              // Status Message
-              if (!_hasPermission)
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.warning, color: Colors.white),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'يرجى السماح بالوصول إلى الموقع',
-                              style: TextStyle(
-                                fontFamily: 'Tajawal',
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: _checkPermissionAndStartCompass,
-                        icon:
-                        const Icon(Icons.refresh, color: Colors.teal),
-                        label: const Text(
-                          'إعادة المحاولة',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            color: Colors.teal,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else if (_heading == null)
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        'جاري تحديد الاتجاه...',
+        // Status Message (للهواتف فقط)
+        if (!_hasPermission && !kIsWeb)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.warning, color: Colors.white),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'يرجى السماح بالوصول إلى الموقع',
                         style: TextStyle(
                           fontFamily: 'Tajawal',
                           fontSize: 16,
                           color: Colors.white,
                         ),
                       ),
-                    ],
-                  ),
-                )
-              else if (isPointing)
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(15),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check_circle,
-                            color: Colors.white, size: 24),
-                        SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            'أنت تتجه نحو القبلة ✨',
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                  onPressed: _checkPermissionAndStartCompass,
+                  icon: const Icon(Icons.refresh, color: Colors.teal),
+                  label: const Text(
+                    'إعادة المحاولة',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      color: Colors.teal,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (isPointing && !kIsWeb)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 24),
+                SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    'أنت تتجه نحو القبلة ✨',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        const SizedBox(height: 20),
+
+        // Compass
+        Expanded(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_qiblaDirection != null)
+                    Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 280,
+                            height: 280,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_heading != null && !kIsWeb)
+                            Transform.rotate(
+                              angle: -_heading! * math.pi / 180,
+                              child: SizedBox(
+                                width: 280,
+                                height: 280,
+                                child: CustomPaint(
+                                  painter: CompassPainter(),
+                                ),
+                              ),
+                            ),
+                          if (kIsWeb)
+                            SizedBox(
+                              width: 280,
+                              height: 280,
+                              child: CustomPaint(
+                                painter: CompassPainter(),
+                              ),
+                            ),
+                          Transform.rotate(
+                            angle: _heading != null && !kIsWeb
+                                ? _getRotationAngle() * math.pi / 180
+                                : _qiblaDirection! * math.pi / 180,
+                            child: Icon(
+                              Icons.navigation,
+                              size: 100,
+                              color: isPointing && !kIsWeb
+                                  ? Colors.green
+                                  : Colors.teal,
+                            ),
+                          ),
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.mosque,
+                              size: 30,
+                              color: Colors.teal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Instructions for web/static view
+                  if (kIsWeb && _qiblaDirection != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'أدِر جسمك باتجاه السهم الأزرق ☝️',
                             style: TextStyle(
                               fontFamily: 'Tajawal',
                               fontSize: 18,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 15),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.mosque,
+                                        color: Colors.white, size: 24),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'الكعبة المشرفة',
+                                      style: TextStyle(
+                                        fontFamily: 'Tajawal',
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'الاتجاه: ${_qiblaDirection!.toStringAsFixed(0)}° من الشمال',
+                                  style: const TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  'المسافة: ${_calculateDistance().toStringAsFixed(0)} كم',
+                                  style: const TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Info Card
+        if (_qiblaDirection != null)
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.explore, color: Colors.teal),
+                    SizedBox(width: 10),
+                    Text(
+                      'معلومات الاتجاه',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'اتجاه القبلة',
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '${_qiblaDirection!.toStringAsFixed(1)}°',
+                            style: const TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_heading != null && !kIsWeb) ...[
+                      Container(
+                        width: 2,
+                        height: 40,
+                        color: Colors.grey.shade300,
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Text(
+                              'اتجاهك الحالي',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              '${_heading!.toStringAsFixed(1)}°',
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAROverlay(bool isPointing) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.3),
+            Colors.transparent,
+            Colors.black.withOpacity(0.3),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 120),
+
+          if (isPointing)
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white, size: 24),
+                  SizedBox(width: 10),
+                  Text(
+                    'أنت تتجه نحو القبلة ✨',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          const Spacer(),
+
+          if (_heading != null && _qiblaDirection != null)
+            Transform.rotate(
+              angle: _getRotationAngle() * math.pi / 180,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.arrow_upward,
+                    size: 100,
+                    color: isPointing ? Colors.green : Colors.teal,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 10,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isPointing ? Colors.green : Colors.teal)
+                          .withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.mosque, color: Colors.white, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'اتجاه القبلة',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                   ),
-
-              // Spacer
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Compass
-                        if (_hasPermission &&
-                            _heading != null &&
-                            _qiblaDirection != null)
-                          Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Outer Circle
-                                Container(
-                                  width: 280,
-                                  height: 280,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                        Colors.black.withOpacity(0.2),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 10),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Direction Markers
-                                Transform.rotate(
-                                  angle: -_heading! * math.pi / 180,
-                                  child: SizedBox(
-                                    width: 280,
-                                    height: 280,
-                                    child: CustomPaint(
-                                      painter: CompassPainter(),
-                                    ),
-                                  ),
-                                ),
-
-                                // Qibla Arrow
-                                Transform.rotate(
-                                  angle:
-                                  _getRotationAngle() * math.pi / 180,
-                                  child: Icon(
-                                    Icons.navigation,
-                                    size: 100,
-                                    color: isPointing
-                                        ? Colors.green
-                                        : Colors.teal,
-                                  ),
-                                ),
-
-                                // Kaaba Icon at center
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.mosque,
-                                    size: 30,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
+            ),
 
-              // Distance Info
-              if (_qiblaDirection != null && _heading != null)
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+          const Spacer(),
+
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'اتجاه القبلة',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        color: Colors.white70,
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.explore, color: Colors.teal),
-                          SizedBox(width: 10),
-                          Text(
-                            'معلومات الاتجاه',
-                            style: TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '${_qiblaDirection!.toStringAsFixed(0)}°',
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      const SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'اتجاه القبلة',
-                                  style: TextStyle(
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  '${_qiblaDirection!.toStringAsFixed(1)}°',
-                                  style: const TextStyle(
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: 2,
-                            height: 40,
-                            color: Colors.grey.shade300,
-                          ),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'اتجاهك الحالي',
-                                  style: TextStyle(
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  '${_heading!.toStringAsFixed(1)}°',
-                                  style: const TextStyle(
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-            ],
+                Container(
+                  width: 2,
+                  height: 40,
+                  color: Colors.white30,
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'اتجاهك',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '${_heading!.toStringAsFixed(0)}°',
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
+
+          const SizedBox(height: 80),
+        ],
       ),
     );
   }
@@ -597,7 +978,6 @@ class CompassPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
-    // Draw direction markers
     for (int i = 0; i < 360; i += 30) {
       final angle = i * math.pi / 180;
       final x1 = center.dx + (radius - 20) * math.cos(angle);
@@ -611,7 +991,6 @@ class CompassPainter extends CustomPainter {
       canvas.drawLine(Offset(x1, y1), Offset(x2, y2), paint);
     }
 
-    // Draw N marker
     final textPainter = TextPainter(
       text: const TextSpan(
         text: 'N',

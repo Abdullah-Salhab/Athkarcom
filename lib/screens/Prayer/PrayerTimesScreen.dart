@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
@@ -82,13 +83,24 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         cityName = savedCity ?? '';
         countryName = savedCountry ?? '';
         await _calculatePrayerTimes();
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        await _getCurrentLocation();
+        // للويب: اذهب مباشرة إلى الإدخال اليدوي
+        if (kIsWeb) {
+          setState(() {
+            isLoading = false;
+          });
+          // انتظر حتى يتم بناء الواجهة ثم افتح شاشة الإدخال اليدوي
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _showWebLocationDialog();
+          });
+        } else {
+          // للهواتف: جرب GPS
+          await _getCurrentLocation();
+        }
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -99,7 +111,163 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     }
   }
 
+  // دالة خاصة للويب لإظهار رسالة ثم فتح الإدخال اليدوي
+  void _showWebLocationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'تحديد الموقع',
+          style: TextStyle(fontFamily: 'Tajawal'),
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.location_on, size: 60, color: Colors.teal),
+            const SizedBox(height: 20),
+            const Text(
+              'يرجى تحديد موقعك لحساب مواقيت الصلاة',
+              style: TextStyle(fontFamily: 'Tajawal', fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _tryGPSLocation();
+              },
+              icon: const Icon(Icons.gps_fixed),
+              label: const Text(
+                'تحديد تلقائي (GPS)',
+                style: TextStyle(fontFamily: 'Tajawal'),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _openManualLocationScreen();
+              },
+              icon: const Icon(Icons.edit_location),
+              label: const Text(
+                'إدخال يدوي',
+                style: TextStyle(fontFamily: 'Tajawal'),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.teal,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _tryGPSLocation() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      latitude = position.latitude;
+      longitude = position.longitude;
+
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          latitude,
+          longitude,
+        );
+
+        if (placemarks.isNotEmpty) {
+          cityName = placemarks.first.locality ??
+              placemarks.first.administrativeArea ??
+              'موقعك الحالي';
+          countryName = placemarks.first.country ?? '';
+        }
+      } catch (e) {
+        cityName = 'موقعك الحالي';
+        countryName = '';
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('prayer_latitude', latitude);
+      await prefs.setDouble('prayer_longitude', longitude);
+      await prefs.setString('prayer_city', cityName);
+      await prefs.setString('prayer_country', countryName);
+
+      await _calculatePrayerTimes();
+
+      setState(() {
+        isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              'تم تحديد الموقع: $cityName',
+              style: const TextStyle(fontFamily: 'Tajawal'),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        // إذا فشل GPS، افتح الإدخال اليدوي
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text(
+              'خطأ في تحديد الموقع',
+              style: TextStyle(fontFamily: 'Tajawal'),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              'لم نتمكن من تحديد موقعك تلقائياً.\n${e.toString()}',
+              style: const TextStyle(fontFamily: 'Tajawal'),
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _openManualLocationScreen();
+                },
+                child: const Text(
+                  'إدخال يدوي',
+                  style: TextStyle(fontFamily: 'Tajawal'),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _getCurrentLocation() async {
+    if (kIsWeb) {
+      // للويب: جرب GPS مباشرة
+      await _tryGPSLocation();
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
@@ -219,7 +387,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         found = prayerEntries[i].key;
         duration = prayerEntries[i].value.difference(now);
 
-        // Get previous prayer
         if (i > 0) {
           previous = prayerEntries[i - 1].key;
           previousDuration = now.difference(prayerEntries[i - 1].value);
@@ -250,7 +417,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       found = Prayer.fajr;
       duration = tomorrowPrayers.fajr.difference(now);
 
-      // Last prayer of today is previous
       previous = Prayer.isha;
       previousDuration = now.difference(prayerTimesList[Prayer.isha]!);
     }
@@ -403,6 +569,105 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       );
     }
 
+    // إذا لم يتم تحديد الموقع بعد
+    if (latitude == 0.0 && longitude == 0.0 && !isLoading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.teal.shade700,
+                Colors.teal.shade400,
+                Colors.white,
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.location_off,
+                      size: 100,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 30),
+                    const Text(
+                      'لم يتم تحديد الموقع',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      'يرجى تحديد موقعك لعرض مواقيت الصلاة',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 16,
+                        color: Colors.white70,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 40),
+                    if (!kIsWeb) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton.icon(
+                          onPressed: _getCurrentLocation,
+                          icon: const Icon(Icons.gps_fixed),
+                          label: const Text(
+                            'تحديد تلقائي (GPS)',
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 18,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.teal,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: OutlinedButton.icon(
+                        onPressed: _openManualLocationScreen,
+                        icon: const Icon(Icons.edit_location),
+                        label: const Text(
+                          'إدخال يدوي',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 18,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white, width: 2),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final isUrgent = _isUrgent();
     final showPreviousPrayer = timeSincePreviousPrayer != null &&
         timeSincePreviousPrayer!.inMinutes <= 30;
@@ -507,15 +772,18 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                     onPressed: _openQiblaScreen,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit_location, color: Colors.white),
+                    icon: const Icon(Icons.edit_location,
+                        color: Colors.white),
                     tooltip: 'إدخال الموقع يدوياً',
                     onPressed: _openManualLocationScreen,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.my_location, color: Colors.white),
-                    tooltip: 'تحديث الموقع',
-                    onPressed: _getCurrentLocation,
-                  ),
+                  if (!kIsWeb)
+                    IconButton(
+                      icon: const Icon(Icons.my_location,
+                          color: Colors.white),
+                      tooltip: 'تحديث الموقع',
+                      onPressed: _getCurrentLocation,
+                    ),
                 ],
               ),
 
@@ -537,13 +805,17 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                           borderRadius: BorderRadius.circular(25),
                           gradient: LinearGradient(
                             colors: [
-                              _getPrayerColor(nextPrayer!, isUrgent: isUrgent),
-                              _getPrayerColor(nextPrayer!, isUrgent: isUrgent).withOpacity(0.7),
+                              _getPrayerColor(nextPrayer!,
+                                  isUrgent: isUrgent),
+                              _getPrayerColor(nextPrayer!,
+                                  isUrgent: isUrgent)
+                                  .withOpacity(0.7),
                             ],
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: _getPrayerColor(nextPrayer!, isUrgent: isUrgent)
+                              color: _getPrayerColor(nextPrayer!,
+                                  isUrgent: isUrgent)
                                   .withOpacity(0.5),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
@@ -611,7 +883,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    isUrgent ? 'اقترب الأذان!' : 'الوقت المتبقي',
+                                    isUrgent
+                                        ? 'اقترب الأذان!'
+                                        : 'الوقت المتبقي',
                                     style: const TextStyle(
                                       fontFamily: 'Tajawal',
                                       fontSize: 16,
@@ -620,7 +894,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
-                                    _formatDuration(timeUntilNextPrayer!),
+                                    _formatDuration(
+                                        timeUntilNextPrayer!),
                                     style: const TextStyle(
                                       fontFamily: 'Tajawal',
                                       fontSize: 32,
@@ -638,7 +913,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                   ),
                 ),
 
-              // Previous Prayer Card (if within 30 minutes)
+              // Previous Prayer Card
               if (showPreviousPrayer && previousPrayer != null)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -780,27 +1055,35 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                       final time = entry.value;
                       final isNext = prayer == nextPrayer;
                       final isPast = time.isBefore(DateTime.now());
-                      final timeSince = isPast ? DateTime.now().difference(time) : null;
-                      final showTimeSince = isPast && timeSince != null && timeSince.inMinutes <= 30;
+                      final timeSince = isPast
+                          ? DateTime.now().difference(time)
+                          : null;
+                      final showTimeSince = isPast &&
+                          timeSince != null &&
+                          timeSince.inMinutes <= 30;
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Container(
                           decoration: BoxDecoration(
                             color: isNext
-                                ? _getPrayerColor(prayer, isUrgent: isUrgent).withOpacity(0.1)
+                                ? _getPrayerColor(prayer,
+                                isUrgent: isUrgent)
+                                .withOpacity(0.1)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isNext
-                                  ? _getPrayerColor(prayer, isUrgent: isUrgent)
+                                  ? _getPrayerColor(prayer,
+                                  isUrgent: isUrgent)
                                   : Colors.transparent,
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: isNext
-                                    ? _getPrayerColor(prayer, isUrgent: isUrgent)
+                                    ? _getPrayerColor(prayer,
+                                    isUrgent: isUrgent)
                                     .withOpacity(0.3)
                                     : Colors.grey.withOpacity(0.2),
                                 blurRadius: 10,
@@ -816,13 +1099,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                             leading: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: _getPrayerColor(prayer, isUrgent: isNext && isUrgent)
+                                color: _getPrayerColor(prayer,
+                                    isUrgent: isNext && isUrgent)
                                     .withOpacity(0.2),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 _getPrayerIcon(prayer),
-                                color: _getPrayerColor(prayer, isUrgent: isNext && isUrgent),
+                                color: _getPrayerColor(prayer,
+                                    isUrgent: isNext && isUrgent),
                                 size: 28,
                               ),
                             ),
@@ -841,7 +1126,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                             ),
                             trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
@@ -851,7 +1137,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: isNext
-                                        ? _getPrayerColor(prayer, isUrgent: isUrgent)
+                                        ? _getPrayerColor(prayer,
+                                        isUrgent: isUrgent)
                                         : isPast
                                         ? Colors.grey
                                         : Colors.black87,
