@@ -69,14 +69,23 @@ class CounterPageState extends State<CounterPage>
       loadSectionDetail();
       _player = AudioPlayer();
 
-      // Listen to player completion event
-      _player.playerStateStream.listen((state) async {
-        if (state.processingState == ProcessingState.completed && voiceActive) {
-          if (currentCounterValue > 1) {
-            await _player.seek(Duration.zero);
-            await _player.play();
+      // Listen to player completion event (for counter decrement)
+      bool _isProcessingCompletion = false;
+
+      _player.positionStream.listen((position) async {
+        if (voiceActive &&
+            _player.duration != null &&
+            !_isProcessingCompletion &&
+            _player.playing) {
+          // When audio completes, decrement counter
+          if (position >= _player.duration! - const Duration(milliseconds: 100)) {
+            _isProcessingCompletion = true;
+            decrementCounter(currentPage);
+
+            // Reset flag after a delay
+            await Future.delayed(const Duration(milliseconds: 300));
+            _isProcessingCompletion = false;
           }
-          decrementCounter(currentPage);
         }
       });
       // Keep the screen on
@@ -204,16 +213,34 @@ class CounterPageState extends State<CounterPage>
     try {
       if (voiceActive == false) {
         await _player.stop();
+        await _player.setLoopMode(LoopMode.off);
       } else {
         final path = _getSoundPath(soundId!);
         if (path != null) {
+          // Stop and clear current audio completely
+          await _player.stop();
+          await _player.setLoopMode(LoopMode.off);
+
+          // Small delay to ensure cleanup on web
+          if (kIsWeb) {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+
+          // Load new audio
           await _player.setAsset(path);
+          await _player.setLoopMode(LoopMode.one);
           await _player.setSpeed(playbackRate);
           await _player.play();
         }
       }
     } catch (e) {
-      showExceptionPopup(context, e.toString());
+      if (kDebugMode) {
+        print('Audio error: $e');
+      }
+      // Don't show popup for loading interrupted errors, just log them
+      if (!e.toString().contains('Loading interrupted')) {
+        showExceptionPopup(context, e.toString());
+      }
     }
   }
 
@@ -234,7 +261,7 @@ class CounterPageState extends State<CounterPage>
   // decrement the counter, the index is the current page value
   void decrementCounter(int index) {
     _animateCounterTap();
-    HapticFeedback.lightImpact(); // Better haptic feedback
+    if (!kIsWeb && vibrationActive) HapticFeedback.lightImpact(); // Better haptic feedback
 
     setState(() {
       if (counterValues[index] > 0) {
@@ -287,6 +314,9 @@ class CounterPageState extends State<CounterPage>
           if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
           _triggerConfetti();
           voiceActive = false;
+          _player.stop().then((_) {
+            _player.setLoopMode(LoopMode.off);
+          });
 
           // Stop Keeping the screen on
           WakelockPlus.disable();
