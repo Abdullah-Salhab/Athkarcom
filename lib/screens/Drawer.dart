@@ -163,8 +163,9 @@ class _MyDrawerState extends State<MyDrawer> {
               radius: 10,
               backgroundColor:
                   settingsProvider.isNight ? Colors.black : Colors.white,
-              child: const Icon(
+              child: Icon(
                 Icons.person,
+                color: settingsProvider.isNight ? Colors.white : Colors.black,
                 size: 40,
               ),
             ),

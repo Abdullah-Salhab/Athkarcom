@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:vibration/vibration.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
 
@@ -425,7 +425,9 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
             counter = 0;
           });
           if (!kIsWeb && vibrationActive) {
-            Vibrate.vibrate();
+            if (await Vibration.hasVibrator() ?? false) {
+              Vibration.vibrate(duration: 200);
+            }
           }
           _triggerConfetti();
 
@@ -659,12 +661,14 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
       });
     } else if (counter == 1) {
       if (!kIsWeb && vibrationActive) {
-        final Iterable<Duration> pauses = [
-          const Duration(milliseconds: 500),
-          const Duration(milliseconds: 1000),
-          const Duration(milliseconds: 500),
-        ];
-        Vibrate.vibrateWithPauses(pauses);
+        if (await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(pattern: [
+            0,    // no delay
+            500,  // vibrate 500ms
+            1000, // pause 1000ms
+            500,  // vibrate 500ms
+          ]);
+        }
       }
 
       setState(() {

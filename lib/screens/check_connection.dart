@@ -1,23 +1,28 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:connectivity/connectivity.dart';
 
 import 'ExceptionDialog.dart';
 
-var connectivityResult = ConnectivityResult.none;
+Future<bool> getConnection(BuildContext context) async {
+  try {
+    final List<ConnectivityResult> connectivityResults =
+    await Connectivity().checkConnectivity();
 
-getConnection(BuildContext context) async {
-  connectivityResult =
-      await (Connectivity().checkConnectivity()).catchError((e) {
-    showExceptionPopup(context, e.toString());
-  });
-  if (connectivityResult == ConnectivityResult.none) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('لا يوجد اتصال بالإنترنت'),
-      backgroundColor: Colors.red,
-      duration: Duration(seconds: 7),
-    ));
-    return false;
-  } else {
+    // If no internet connection
+    if (connectivityResults.contains(ConnectivityResult.none)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('لا يوجد اتصال بالإنترنت'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 7),
+        ),
+      );
+      return false;
+    }
+
     return true;
+  } catch (e) {
+    showExceptionPopup(context, e.toString());
+    return false;
   }
 }

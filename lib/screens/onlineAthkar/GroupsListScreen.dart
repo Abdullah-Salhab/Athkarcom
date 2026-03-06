@@ -164,8 +164,12 @@ class _GroupsListScreenState extends State<GroupsListScreen> with AnalyticsMixin
                             userIsMember
                                 ? Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GroupsAthkarsScreen(
+                                    PageTransition(
+                                      type: PageTransitionType.rightToLeft,
+                                      alignment: Alignment.centerRight,
+                                      duration: const Duration(milliseconds: 500),
+                                      reverseDuration: const Duration(milliseconds: 500),
+                                      child:  GroupsAthkarsScreen(
                                         groupName: group.get("name"),
                                         groupId: group.id,
                                         groupDesc: group.get("desc"),
@@ -228,9 +232,12 @@ class _GroupsListScreenState extends State<GroupsListScreen> with AnalyticsMixin
                                   onPressed: () => userIsMember
                                       ? Navigator.push(
                                           context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                GroupsAthkarsScreen(
+                                          PageTransition(
+                                            type: PageTransitionType.rightToLeft,
+                                            alignment: Alignment.centerRight,
+                                            duration: const Duration(milliseconds: 500),
+                                            reverseDuration: const Duration(milliseconds: 500),
+                                            child:  GroupsAthkarsScreen(
                                               groupName: group.get("name"),
                                               groupId: group.id,
                                               groupDesc: group.get("desc"),

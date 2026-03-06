@@ -3,13 +3,13 @@ import 'dart:math';
 
 import 'package:athkar/models/section_detail_model.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:share/share.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:vibration/vibration.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart'; // Add this import
@@ -30,7 +30,7 @@ class CounterPage extends StatefulWidget {
 }
 
 class CounterPageState extends State<CounterPage>
-    with TickerProviderStateMixin , AnalyticsMixin {
+    with TickerProviderStateMixin, AnalyticsMixin {
   @override
   String get screenName => 'OfflineCounterScreen';
 
@@ -78,7 +78,8 @@ class CounterPageState extends State<CounterPage>
             !_isProcessingCompletion &&
             _player.playing) {
           // When audio completes, decrement counter
-          if (position >= _player.duration! - const Duration(milliseconds: 100)) {
+          if (position >=
+              _player.duration! - const Duration(milliseconds: 100)) {
             _isProcessingCompletion = true;
             decrementCounter(currentPage);
 
@@ -261,7 +262,8 @@ class CounterPageState extends State<CounterPage>
   // decrement the counter, the index is the current page value
   void decrementCounter(int index) {
     _animateCounterTap();
-    if (!kIsWeb && vibrationActive) HapticFeedback.lightImpact(); // Better haptic feedback
+    if (!kIsWeb && vibrationActive)
+      HapticFeedback.lightImpact(); // Better haptic feedback
 
     setState(() {
       if (counterValues[index] > 0) {
@@ -272,7 +274,9 @@ class CounterPageState extends State<CounterPage>
       if (counterValues[index] == 0 &&
           _pageController.page != sectionDetails.length - 1) {
         currentCounterValue = counterValues[index + 1];
-        if (!kIsWeb && vibrationActive) Vibrate.vibrate();
+        if (!kIsWeb && vibrationActive) {
+          Vibration.vibrate(duration: 200);
+        }
         if (sectionDetails[index + 1].soundId == "") {
           setState(() {
             voiceActive = false;
@@ -306,12 +310,14 @@ class CounterPageState extends State<CounterPage>
         }
 
         if (isFinishAll) {
-          final Iterable<Duration> pauses = [
-            const Duration(milliseconds: 500),
-            const Duration(milliseconds: 1000),
-            const Duration(milliseconds: 500),
-          ];
-          if (!kIsWeb && vibrationActive) Vibrate.vibrateWithPauses(pauses);
+          if (!kIsWeb && vibrationActive) {
+            Vibration.vibrate(pattern: [
+              0, // no delay
+              500, // vibrate 500ms
+              1000, // pause 1000ms
+              500, // vibrate 500ms
+            ]);
+          }
           _triggerConfetti();
           voiceActive = false;
           _player.stop().then((_) {

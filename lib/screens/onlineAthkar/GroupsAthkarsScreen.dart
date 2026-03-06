@@ -429,7 +429,6 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                                     PageTransition(
                                       type: PageTransitionType.size,
                                       alignment: Alignment.bottomCenter,
-                                      curve: Curves.bounceOut,
                                       duration:
                                           const Duration(milliseconds: 500),
                                       reverseDuration:
@@ -802,7 +801,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                               Icons.highlight_remove,
                               color: Colors.white,
                             ),
-                            label: const Text("حذف المستخدم",
+                            label: const Text("حذف",
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontFamily: 'Tajawal',
