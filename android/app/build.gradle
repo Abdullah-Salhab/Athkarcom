@@ -1,11 +1,9 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
-    // END: FlutterFire Configuration
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -27,8 +25,6 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
@@ -38,12 +34,13 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.athkar.athkarcom"
-    compileSdk flutter.compileSdkVersion
-    ndkVersion "25.1.8937393"
+    compileSdk 36
+    ndkVersion "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -54,16 +51,27 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+
+    // This property ensures the packaging tool aligns to 16KB
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
     defaultConfig {
         applicationId "com.athkar.athkarcom"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         multiDexEnabled true
-        minSdkVersion 23
+        minSdkVersion flutter.minSdkVersion
         //noinspection OldTargetApi
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
     }
 
     signingConfigs {
@@ -89,7 +97,10 @@ flutter {
 }
 
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:32.8.0')
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+
+    implementation platform('com.google.firebase:firebase-bom:34.9.0')
+    implementation 'com.google.firebase:firebase-perf'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-analytics'
