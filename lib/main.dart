@@ -12,11 +12,18 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'models/AthkarWidgetProvider.dart';
 import 'models/SettingsProvider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.athkar.athkarcom.channel.audio',
+    androidNotificationChannelName: 'Quran Audio Playback',
+    androidNotificationOngoing: true,
+    androidNotificationIcon: 'mipmap/launcher_icon',
+  );
 
   if (!kIsWeb) {
     // Initialize the home widget

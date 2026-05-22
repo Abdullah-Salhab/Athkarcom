@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:athkar/models/section_detail_model.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +33,7 @@ class CounterPage extends StatefulWidget {
 }
 
 class CounterPageState extends State<CounterPage>
-    with TickerProviderStateMixin, AnalyticsMixin {
+    with TickerProviderStateMixin, AnalyticsMixin, WidgetsBindingObserver {
   @override
   String get screenName => 'OfflineCounterScreen';
 
@@ -55,6 +58,7 @@ class CounterPageState extends State<CounterPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _pulseController = AnimationController(
@@ -100,11 +104,26 @@ class CounterPageState extends State<CounterPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _player.dispose();
     _confettiController.dispose();
     _pulseController.dispose();
     WakelockPlus.disable();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_player.playing) {
+        _player.pause();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (voiceActive && !_player.playing && currentCounterValue > 0) {
+        _player.play();
+      }
+    }
   }
 
   // Animation for counter tap
@@ -210,6 +229,21 @@ class CounterPageState extends State<CounterPage>
     }
   }
 
+  Future<Uri?> _cachedArtUri() async {
+    try {
+      final directory = await getTemporaryDirectory();
+      final filePath = '${directory.path}/App_Icon.jpg';
+      final file = File(filePath);
+      if (!await file.exists()) {
+        final byteData = await rootBundle.load('assets/images/App_Icon.jpg');
+        await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+      }
+      return Uri.file(filePath);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> _toggleSound(String? soundId) async {
     try {
       if (voiceActive == false) {
@@ -228,7 +262,15 @@ class CounterPageState extends State<CounterPage>
           }
 
           // Load new audio
-          await _player.setAsset(path);
+          final artUri = await _cachedArtUri();
+          await _player.setAudioSource(AudioSource.asset(
+            path,
+            tag: MediaItem(
+              id: soundId,
+              title: "Athkar Sound",
+              artUri: artUri,
+            ),
+          ));
           await _player.setLoopMode(LoopMode.one);
           await _player.setSpeed(playbackRate);
           await _player.play();
@@ -282,16 +324,10 @@ class CounterPageState extends State<CounterPage>
             voiceActive = false;
           });
         }
-        _pageController
-            .nextPage(
+        _pageController.nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
-        )
-            .whenComplete(() {
-          if (currentCounterValue > 0 && voiceActive) {
-            _toggleSound(sectionDetails[index + 1].soundId);
-          }
-        });
+        );
       }
 
       if (counterValues[index] == 0 &&

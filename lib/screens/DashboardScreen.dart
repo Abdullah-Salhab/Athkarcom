@@ -1,4 +1,5 @@
 import 'package:athkar/screens/ReportScreen.dart';
+import 'package:athkar/screens/Quran/QuranAudioPlayerScreen.dart';
 import 'package:athkar/screens/offlineAthkar/OfflineAthkarList.dart';
 import 'package:athkar/screens/onlineAthkar/AccountsScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,8 +15,8 @@ import 'NotificationService.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'Prayer/PrayerTimesScreen.dart';
 import 'Qibla/QiblaScreen.dart';
-import 'Quiz/AddQuizQuestionScreen.dart';
-import 'Quiz/RamadanQuizScreen.dart';
+import 'Quran/QuranSurahListScreen.dart';
+import 'Quiz/OfflineQuizScreen.dart';
 import 'check_connection.dart';
 import 'offlineAthkar/counter_page.dart';
 import 'offlineAthkar/morningNightScreen.dart';
@@ -274,6 +275,112 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                   ),
                 ),
               ),
+              // ── القرآن الكريم Card ──
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.center,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const QuranSurahListScreen(),
+                      ),
+                    );
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                            child: Image.asset(
+                          "assets/images/quran2.png",
+                          fit: BoxFit.cover,
+                        )),
+                        const SizedBox(height: 8.0),
+                        const Text(
+                          "القرآن الكريم",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // ── صوتيات القرآن Card ──
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: RawMaterialButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.scale,
+                        alignment: Alignment.center,
+                        duration: const Duration(milliseconds: 500),
+                        reverseDuration: const Duration(milliseconds: 500),
+                        child: const QuranAudioPlayerScreen(),
+                      ),
+                    );
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const SizedBox(height: 10.0),
+                        Expanded(
+                            child: Image.asset(
+                          "assets/images/sound2.png",
+                          fit: BoxFit.cover,
+                        )),
+                        const SizedBox(height: 15.0),
+                        const Text(
+                          "صوتيات القرآن",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 20.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
@@ -341,6 +448,15 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
+                    // Navigator.push(
+                    //     context,
+                    //     PageTransition(
+                    //       type: PageTransitionType.scale,
+                    //       alignment: Alignment.centerLeft,
+                    //       duration: const Duration(milliseconds: 500),
+                    //       reverseDuration: const Duration(milliseconds: 500),
+                    //       child: const RamadanQuizScreen()
+                    //     ));
                     Navigator.push(
                         context,
                         PageTransition(
@@ -348,7 +464,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                           alignment: Alignment.centerLeft,
                           duration: const Duration(milliseconds: 500),
                           reverseDuration: const Duration(milliseconds: 500),
-                          child: const RamadanQuizScreen()
+                          child: const OfflineQuizScreen()
                         ));
                   },
                   shape: RoundedRectangleBorder(
@@ -361,12 +477,12 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         // Icon(Icons.search, color: Colors.white),
                         Expanded(
                             child: Image.asset(
-                              "assets/images/ramadan.png",
+                              "assets/images/quiz.png",
                               fit: BoxFit.cover,
                             )),
                         const SizedBox(height: 8.0),
                         const Text(
-                          "مسابقة أذكاركم الرمضانية",
+                          "مسابقة أذكاركم",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 20.0,
@@ -556,7 +672,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                       context,
                       PageTransition(
                         type: PageTransitionType.scale,
-                        alignment: Alignment.centerRight,
+                        alignment: Alignment.centerLeft,
                         duration: const Duration(milliseconds: 500),
                         reverseDuration: const Duration(milliseconds: 500),
                         child: const QiblaScreen(),
