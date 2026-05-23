@@ -5,13 +5,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'dart:async';
 import 'package:page_transition/page_transition.dart';
 
 import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
+import '../../models/PrayerWidgetProvider.dart';
 import '../Qibla/QiblaScreen.dart';
 import 'ManualLocationScreen.dart';
 
@@ -337,18 +337,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     try {
       final coordinates = Coordinates(latitude, longitude);
 
-      final params = CalculationMethod.muslim_world_league.getParameters();
+      final params = CalculationMethod.karachi.getParameters();
       params.madhab = Madhab.shafi;
-      params.fajrAngle = 18.0;
-      params.ishaAngle = 17.0;
       params.adjustments.fajr = 0;
-      params.adjustments.sunrise = 0;
-      params.adjustments.dhuhr = 2;
+      params.adjustments.sunrise = -5;
+      params.adjustments.dhuhr = -1;
       params.adjustments.asr = 0;
-      params.adjustments.maghrib = 1;
+      params.adjustments.maghrib = 5;
       params.adjustments.isha = 0;
 
-      final now = DateTime.now();
       prayerTimes = PrayerTimes.today(coordinates, params);
 
       prayerTimesList = {
@@ -366,6 +363,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
         _updateNextPrayer();
       });
+
+      // Update the home screen widget
+      await PrayerWidgetProvider.updateWidget();
     } catch (e) {
       if (mounted) {
         showExceptionPopup(context, e.toString());
@@ -397,15 +397,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
     if (found == null) {
       final coordinates = Coordinates(latitude, longitude);
-      final params = CalculationMethod.muslim_world_league.getParameters();
+      final params = CalculationMethod.karachi.getParameters();
       params.madhab = Madhab.shafi;
-      params.fajrAngle = 18.0;
-      params.ishaAngle = 17.0;
       params.adjustments.fajr = 0;
-      params.adjustments.sunrise = 0;
-      params.adjustments.dhuhr = 2;
+      params.adjustments.sunrise = -5;
+      params.adjustments.dhuhr = -1;
       params.adjustments.asr = 0;
-      params.adjustments.maghrib = 1;
+      params.adjustments.maghrib = 5;
       params.adjustments.isha = 0;
 
       final tomorrow = DateTime.now().add(const Duration(days: 1));

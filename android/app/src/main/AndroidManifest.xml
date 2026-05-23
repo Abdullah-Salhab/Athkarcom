@@ -94,6 +94,25 @@
             <action android:name="com.athkar.athkarcom.UPDATE_WIDGET" />
         </intent-filter>
     </receiver>
+
+    <!-- Prayer Times Widget Provider -->
+    <receiver android:name=".PrayerWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/prayer_widget_info" />
+    </receiver>
+
+    <!-- Prayer Times Widget Update Receiver -->
+    <receiver android:name=".PrayerWidgetReceiver"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.athkar.athkarcom.UPDATE_PRAYER_WIDGET" />
+        </intent-filter>
+    </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility?hl=en and

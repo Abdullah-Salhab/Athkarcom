@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'models/AthkarWidgetProvider.dart';
+import 'models/PrayerWidgetProvider.dart';
 import 'models/SettingsProvider.dart';
 
 Future<void> main() async {
@@ -26,8 +27,9 @@ Future<void> main() async {
   );
 
   if (!kIsWeb) {
-    // Initialize the home widget
+    // Initialize the home widgets
     await AthkarWidgetProvider.initializeWidget();
+    await PrayerWidgetProvider.initializeWidget();
     await Firebase.initializeApp();
   } else {
     await Firebase.initializeApp(

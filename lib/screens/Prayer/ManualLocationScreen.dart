@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/PrayerWidgetProvider.dart';
 
 class ManualLocationScreen extends StatefulWidget {
   const ManualLocationScreen({super.key});
@@ -71,6 +72,9 @@ class _ManualLocationScreenState extends State<ManualLocationScreen> {
             'prayer_latitude', double.parse(_latitudeController.text));
         await prefs.setDouble(
             'prayer_longitude', double.parse(_longitudeController.text));
+
+        // Update the home screen widget
+        await PrayerWidgetProvider.updateWidget();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
