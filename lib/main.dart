@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:athkar/screens/DashboardScreen.dart';
 import 'package:athkar/screens/ExceptionDialog.dart';
+import 'package:athkar/screens/OnboardingScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -105,7 +106,23 @@ class _MainScreenState extends State<MainScreen> {
     getCurrentTheme();
     Timer(
         kIsWeb ? const Duration(seconds: 1) : const Duration(seconds: 3),
-        () => Navigator.pushReplacement(
+        () async {
+          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+          bool onboardingShown = sharedPreferences.getBool('onboarding_shown') ?? false;
+
+          if (!mounted) return;
+
+          if (!onboardingShown) {
+            Navigator.pushReplacement(
+              context,
+              PageTransition(
+                type: PageTransitionType.fade,
+                duration: const Duration(milliseconds: 500),
+                child: const OnboardingScreen(),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
               context,
               PageTransition(
                 type: PageTransitionType.scale,
@@ -114,7 +131,9 @@ class _MainScreenState extends State<MainScreen> {
                 reverseDuration: const Duration(milliseconds: 500),
                 child: const DashboardScreen(),
               ),
-            ));
+            );
+          }
+        });
     FirebaseAnalytics.instance.logEvent(name: 'open_app');
   }
 

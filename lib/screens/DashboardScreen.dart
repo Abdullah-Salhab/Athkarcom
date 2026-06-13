@@ -12,6 +12,7 @@ import 'Drawer.dart';
 import 'ExceptionDialog.dart';
 import 'FirebaseMessagingAPI.dart';
 import 'NotificationService.dart';
+import 'UpdateService.dart';
 import 'OtherAthkar/OtherAthkarsScreen.dart';
 import 'Prayer/PrayerTimesScreen.dart';
 import 'Qibla/QiblaScreen.dart';
@@ -105,6 +106,16 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
     return userQuerySnapshot.docs.isNotEmpty;
   }
 
+  void _handlePendingNotification() {
+    if (NotificationService.pendingPayload != null) {
+      final String payload = NotificationService.pendingPayload!;
+      NotificationService.pendingPayload = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        NotificationService.navigateToScreen(payload);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -116,7 +127,11 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
       showExceptionPopup(context, e.toString());
     });
     if (kIsWeb == false) {
-      NotificationService().initializeNotifications();
+      NotificationService().initializeNotifications().then((_) {
+        NotificationService.isAppLoaded = true;
+        _handlePendingNotification();
+        UpdateService.checkForUpdates(context);
+      });
       NotificationService().scheduleDailyNotifications();
       FirebaseMessagingAPI().initNotifications();
     }

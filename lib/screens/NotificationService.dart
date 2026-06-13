@@ -15,6 +15,9 @@ class NotificationService {
 
   NotificationService._internal();
 
+  static String? pendingPayload;
+  static bool isAppLoaded = false;
+
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -40,6 +43,14 @@ class NotificationService {
       initializationSettings,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
+
+    // Check if the app was launched by clicking a notification
+    final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+        await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+    if (notificationAppLaunchDetails != null &&
+        notificationAppLaunchDetails.didNotificationLaunchApp) {
+      pendingPayload = notificationAppLaunchDetails.notificationResponse?.payload;
+    }
   }
 
   Future<void> scheduleDailyNotifications() async {
@@ -96,25 +107,33 @@ class NotificationService {
     String? payload = response.payload;
 
     if (payload != null) {
-      if (payload == 'navigate_to_morning_screen') {
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) => const CounterPage(
-              id: 1,
-              title: "أذكار الصباح",
-            ),
-          ),
-        );
-      } else if (payload == 'navigate_to_evening_screen') {
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) => const CounterPage(
-              id: 2,
-              title: "أذكار المساء",
-            ),
-          ),
-        );
+      if (isAppLoaded) {
+        navigateToScreen(payload);
+      } else {
+        pendingPayload = payload;
       }
+    }
+  }
+
+  static void navigateToScreen(String payload) {
+    if (payload == 'navigate_to_morning_screen') {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => const CounterPage(
+            id: 1,
+            title: "أذكار الصباح",
+          ),
+        ),
+      );
+    } else if (payload == 'navigate_to_evening_screen') {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => const CounterPage(
+            id: 2,
+            title: "أذكار المساء",
+          ),
+        ),
+      );
     }
   }
 }
