@@ -1,4 +1,3 @@
-import 'package:athkar/screens/offlineAthkar/openPDF.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
