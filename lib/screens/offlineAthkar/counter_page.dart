@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -46,6 +47,7 @@ class CounterPageState extends State<CounterPage>
   bool vibrationActive = true;
   bool voiceActive = false;
   late AudioPlayer _player;
+  StreamSubscription<Duration>? _positionSubscription;
   int currentCounterValue = 0;
   double playbackRate = 1;
   late ConfettiController _confettiController;
@@ -76,20 +78,32 @@ class CounterPageState extends State<CounterPage>
       // Listen to player completion event (for counter decrement)
       bool _isProcessingCompletion = false;
 
-      _player.positionStream.listen((position) async {
+      _positionSubscription = _player.positionStream.listen((position) async {
         if (voiceActive &&
             _player.duration != null &&
-            !_isProcessingCompletion &&
             _player.playing) {
-          // When audio completes, decrement counter
-          if (position >=
-              _player.duration! - const Duration(milliseconds: 100)) {
-            _isProcessingCompletion = true;
-            decrementCounter(currentPage);
+          // If we are on the last repetition (count == 1) and loop mode is still LoopMode.one,
+          // and we have successfully started playing the last repetition (position < duration / 2),
+          // we switch loop mode to off.
+          if (counterValues[currentPage] == 1 &&
+              _player.loopMode == LoopMode.one &&
+              position.inMilliseconds < _player.duration!.inMilliseconds ~/ 2) {
+            _player.setLoopMode(LoopMode.off);
+          }
 
-            // Reset flag after a delay
-            await Future.delayed(const Duration(milliseconds: 300));
-            _isProcessingCompletion = false;
+          if (!_isProcessingCompletion) {
+            // When audio completes, decrement counter
+            if (position >=
+                _player.duration! - const Duration(milliseconds: 100)) {
+              _isProcessingCompletion = true;
+              if (mounted) {
+                decrementCounter(currentPage);
+              }
+
+              // Reset flag after a delay
+              await Future.delayed(const Duration(milliseconds: 300));
+              _isProcessingCompletion = false;
+            }
           }
         }
       });
@@ -105,6 +119,7 @@ class CounterPageState extends State<CounterPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _positionSubscription?.cancel();
     _player.dispose();
     _confettiController.dispose();
     _pulseController.dispose();
@@ -271,7 +286,11 @@ class CounterPageState extends State<CounterPage>
               artUri: artUri,
             ),
           ));
-          await _player.setLoopMode(LoopMode.one);
+          if (counterValues[currentPage] > 1) {
+            await _player.setLoopMode(LoopMode.one);
+          } else {
+            await _player.setLoopMode(LoopMode.off);
+          }
           await _player.setSpeed(playbackRate);
           await _player.play();
         }
@@ -324,6 +343,7 @@ class CounterPageState extends State<CounterPage>
             voiceActive = false;
           });
         }
+        _player.stop(); // Stop audio immediately to prevent replaying old audio during transition
         _pageController.nextPage(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
@@ -337,6 +357,7 @@ class CounterPageState extends State<CounterPage>
           if (counterValues[x] != 0) {
             isFinishAll = false;
             isCheckingRemaining = true;
+            _player.stop(); // Stop audio immediately to prevent replaying old audio during transition
             _pageController.animateToPage(x,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeOut);
