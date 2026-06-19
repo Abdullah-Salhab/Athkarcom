@@ -28,6 +28,8 @@ dependencies:
   awesome_dialog: ^3.2.1
   connectivity_plus: ^6.0.5
   just_audio: ^0.9.42
+  youtube_explode_dart: ^3.1.0
+  youtube_player_flutter: ^9.0.1
   http: ^1.2.0
   page_transition: ^2.1.0
   confetti: ^0.8.0
@@ -52,16 +54,33 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/images/App_Icon.jpg"
+
+  # Android adaptive icon (Android 8.0+)
+  adaptive_icon_background: "#1b4341"   # Deep green background
+  adaptive_icon_foreground: "assets/images/App_Icon.jpg"
+
+  # Web (PWA)
   web:
     generate: true
     image_path: "assets/images/App_Icon.jpg"
     background_color: "#hexcode"
     theme_color: "#hexcode"
 
+  # Windows
+  windows:
+    generate: true
+    image_path: "assets/images/App_Icon.jpg"
+    icon_size: 48
+
+  # macOS
+  macos:
+    generate: true
+    image_path: "assets/images/App_Icon.jpg"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  flutter_launcher_icons: ^0.14.1
   flutter_lints: ^6.0.0
 
 
@@ -72,7 +91,7 @@ flutter:
 
   assets:
     - assets/
-    - assets/files/wird_musafa.pdf
+    - assets/files/wird_musafa.json
     - assets/database/
     - assets/images/
     - assets/sounds/

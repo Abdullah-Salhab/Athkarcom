@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,9 @@ class CounterAthkarScreen extends StatefulWidget {
   final int currentCount;
   final String? userName;
   final String groupId;
+  final bool isSharedTarget;
+  final int sharedTargetCount;
+  final int sharedCompletedCount;
 
   const CounterAthkarScreen({
     super.key,
@@ -33,6 +37,9 @@ class CounterAthkarScreen extends StatefulWidget {
     required this.currentCount,
     this.userName,
     required this.groupId,
+    this.isSharedTarget = false,
+    this.sharedTargetCount = 0,
+    this.sharedCompletedCount = 0,
   });
 
   @override
@@ -51,6 +58,11 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
   late ConfettiController _confettiController;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  int sharedCompletedCount = 0;
+  int sharedTargetCount = 0;
+  bool _hasParticipated = false;
+  StreamSubscription<DocumentSnapshot>? _athkarSubscription;
 
   Future<void> _updateUsers() async {
     final objectRef = FirebaseFirestore.instance
@@ -81,10 +93,44 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
 
     if (userQuerySnapshot.docs.isNotEmpty) {
       var userDocument = userQuerySnapshot.docs.first;
-      int currentPoints = userDocument.get('points');
+      int currentPoints = userDocument.get('points') as int? ?? 0;
+
+      final Map<String, dynamic>? userData = userDocument.data() as Map<String, dynamic>?;
+      int currentStreak = userData != null && userData.containsKey('streak')
+          ? (userData['streak'] as int? ?? 0)
+          : 0;
+
+      String lastUpdateStr = userData != null && userData.containsKey('last_update')
+          ? (userData['last_update'] as String? ?? '')
+          : '';
+
+      int newStreak = 1;
+      if (lastUpdateStr.isNotEmpty) {
+        try {
+          DateTime lastUpdate = DateTime.parse(lastUpdateStr);
+          DateTime now = DateTime.now();
+          DateTime lastUpdateDateOnly = DateTime(lastUpdate.year, lastUpdate.month, lastUpdate.day);
+          DateTime nowDateOnly = DateTime(now.year, now.month, now.day);
+          int differenceInDays = nowDateOnly.difference(lastUpdateDateOnly).inDays;
+
+          if (differenceInDays == 1) {
+            newStreak = currentStreak + 1;
+          } else if (differenceInDays == 0) {
+            newStreak = currentStreak == 0 ? 1 : currentStreak;
+          } else {
+            newStreak = 1;
+          }
+        } catch (e) {
+          newStreak = 1;
+        }
+      } else {
+        newStreak = 1;
+      }
+
       await userDocument.reference.update({
         'points': currentPoints + 10,
         'last_update': DateTime.now().toIso8601String(),
+        'streak': newStreak,
       });
     }
   }
@@ -94,6 +140,8 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
     super.initState();
     setState(() {
       counter = widget.currentCount;
+      sharedCompletedCount = widget.sharedCompletedCount;
+      sharedTargetCount = widget.sharedTargetCount;
     });
     _confettiController = ConfettiController(duration: const Duration(seconds: 5));
     _pulseController = AnimationController(
@@ -105,10 +153,33 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
     );
     getFontSize();
     getCurrentTheme();
+
+    if (widget.isSharedTarget) {
+      _athkarSubscription = FirebaseFirestore.instance
+          .collection('Groups')
+          .doc(widget.groupId)
+          .collection('Athkars')
+          .doc(widget.id)
+          .snapshots()
+          .listen((doc) {
+            if (doc.exists && mounted) {
+              final Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+              if (data != null) {
+                setState(() {
+                  sharedCompletedCount = data['sharedCompletedCount'] ?? 0;
+                  sharedTargetCount = data['sharedTargetCount'] ?? 0;
+                  List<dynamic> users = data['users'] ?? [];
+                  _hasParticipated = users.contains(widget.userName);
+                });
+              }
+            }
+          });
+    }
   }
 
   @override
   void dispose() {
+    _athkarSubscription?.cancel();
     _confettiController.dispose();
     _pulseController.dispose();
     super.dispose();
@@ -156,7 +227,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
   Color get textColor => isDarkTheme ? Colors.white : const Color(0xFF2C3E50);
   Color get secondaryTextColor => isDarkTheme ? Colors.white70 : const Color(0xFF5D6D7E);
   Color get primaryColor => isDarkTheme ? const Color(0xFF66BBB1) : const Color(0xFF4CAF95);
-  Color get shadowColor => isDarkTheme ? Colors.black26 : Colors.black.withOpacity(0.05);
+  Color get shadowColor => isDarkTheme ? Colors.black.withOpacity(0.40) : Colors.black.withOpacity(0.08);
 
   void _showCustomSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -370,7 +441,7 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildActionButtons(),
-          if (counter > 0 && widget.id != "0") _buildCompleteButton(),
+          if (counter > 0 && widget.id != "0" && !widget.isSharedTarget) _buildCompleteButton(),
         ],
       ),
     );
@@ -482,8 +553,9 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
         boxShadow: [
           BoxShadow(
             color: shadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: 14,
+            spreadRadius: 1,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -551,21 +623,35 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
                 child: CircularPercentIndicator(
                   radius: 80.0,
                   lineWidth: 12.0,
-                  percent: counter / widget.count,
+                  percent: widget.isSharedTarget
+                      ? (sharedTargetCount > 0 ? (sharedCompletedCount / sharedTargetCount).clamp(0.0, 1.0) : 0.0)
+                      : (widget.count > 0 ? (counter / widget.count).clamp(0.0, 1.0) : 0.0),
                   center: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "$counter",
+                        widget.isSharedTarget ? "$sharedCompletedCount" : "$counter",
                         style: TextStyle(
-                          fontSize: 36,
+                          fontSize: widget.isSharedTarget ? 28 : 36,
                           fontFamily: 'Tajawal',
                           fontWeight: FontWeight.bold,
                           color: textColor,
                         ),
                       ),
+                      if (widget.isSharedTarget) ...[
+                        Text(
+                          "الهدف: $sharedTargetCount",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Tajawal',
+                            color: secondaryTextColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                      ],
                       Text(
-                        "اضغط للعد",
+                        widget.isSharedTarget ? "اضغط للمشاركة" : "اضغط للعد",
                         style: TextStyle(
                           fontSize: 12,
                           color: secondaryTextColor,
@@ -654,6 +740,54 @@ class CounterAthkarScreenState extends State<CounterAthkarScreen>
   Future<void> decreaseCounter() async {
     _animateCounterTap();
     HapticFeedback.lightImpact();
+
+    if (widget.isSharedTarget) {
+      if (sharedCompletedCount < sharedTargetCount) {
+        if (!kIsWeb && vibrationActive) {
+          HapticFeedback.lightImpact();
+        }
+
+        setState(() {
+          sharedCompletedCount++;
+        });
+
+        final objectRef = FirebaseFirestore.instance
+            .collection('Groups')
+            .doc(widget.groupId)
+            .collection("Athkars")
+            .doc(widget.id);
+
+        try {
+          if (!_hasParticipated) {
+            _hasParticipated = true;
+            await objectRef.update({
+              'users': FieldValue.arrayUnion([widget.userName]),
+              'sharedCompletedCount': FieldValue.increment(1),
+            });
+            await _updateUserPoints();
+          } else {
+            await objectRef.update({
+              'sharedCompletedCount': FieldValue.increment(1),
+            });
+          }
+        } catch (e) {
+          showExceptionPopup(context, e.toString());
+        }
+
+        if (sharedCompletedCount >= sharedTargetCount) {
+          if (!kIsWeb && vibrationActive) {
+            if (await Vibration.hasVibrator() ?? false) {
+              Vibration.vibrate(duration: 500);
+            }
+          }
+          _triggerConfetti();
+          _showCompletionDialog();
+        }
+      } else {
+        _showCustomSnackBar('تم إكمال الهدف الجماعي بالفعل! 🎉');
+      }
+      return;
+    }
 
     if (counter > 1) {
       setState(() {

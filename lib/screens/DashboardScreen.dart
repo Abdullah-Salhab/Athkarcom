@@ -21,7 +21,7 @@ import 'Quiz/OfflineQuizScreen.dart';
 import 'check_connection.dart';
 import 'offlineAthkar/counter_page.dart';
 import 'offlineAthkar/morningNightScreen.dart';
-import 'offlineAthkar/openPDF.dart';
+import 'offlineAthkar/wird_musafa_reader.dart';
 import 'onlineAthkar/CreateUserScreen.dart';
 import 'onlineAthkar/GroupsListScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -899,7 +899,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                         alignment: Alignment.bottomLeft,
                         duration: const Duration(milliseconds: 500),
                         reverseDuration: const Duration(milliseconds: 500),
-                        child: const MyPdfViewer(),
+                        child: const WirdMusafaReader(),
                       ),
                     );
                   },

@@ -22,6 +22,7 @@ class AddAthkarScreenState extends State<AddAthkarScreen> with AnalyticsMixin{
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isSharedTarget = false;
 
   Future<void> _addObject() async {
     final now = DateTime.now();
@@ -33,11 +34,14 @@ class AddAthkarScreenState extends State<AddAthkarScreen> with AnalyticsMixin{
         .collection("Athkars");
 
     await objects.add({
-      'count': int.parse(_countController.text),
+      'count': _isSharedTarget ? 0 : int.parse(_countController.text),
       'content': _contentController.text,
       'value': _valueController.text,
       'users': [],
       'date': dateToday,
+      'isSharedTarget': _isSharedTarget,
+      'sharedTargetCount': _isSharedTarget ? int.parse(_countController.text) : 0,
+      'sharedCompletedCount': 0,
     });
     Navigator.of(context).pop();
   }
@@ -74,13 +78,36 @@ class AddAthkarScreenState extends State<AddAthkarScreen> with AnalyticsMixin{
                 const SizedBox(
                   height: 20,
                 ),
+                SwitchListTile(
+                  title: const Text(
+                    'هدف جماعي مشترك',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'يتعاون جميع أعضاء المجموعة لإتمام هذا الهدف',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 12),
+                  ),
+                  value: _isSharedTarget,
+                  activeColor: Colors.teal,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isSharedTarget = value;
+                    });
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
                 TextFormField(
                   controller: _countController,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      labelText: "* العدد"),
+                      labelText: _isSharedTarget ? "* الهدف الجماعي المشترك" : "* العدد"),
                   validator: (value) {
                     if (value!.trim().isEmpty) {
                       return 'يرجى إدخال العدد';

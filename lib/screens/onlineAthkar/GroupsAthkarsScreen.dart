@@ -1,10 +1,12 @@
 import 'package:athkar/screens/onlineAthkar/Add_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/Counter_Athkar.dart';
 import 'package:athkar/screens/onlineAthkar/ThekerReadersScreen.dart';
+import 'package:athkar/screens/onlineAthkar/GroupChatSection.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../models/AnalyticsMixin.dart';
 import '../ExceptionDialog.dart';
@@ -84,9 +86,9 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
       showExceptionPopup(context, e.toString());
     }).whenComplete(() {
       if (isAdmin) {
-        _tabController = TabController(length: 3, vsync: this);
+        _tabController = TabController(length: 4, vsync: this);
       } else {
-        _tabController = TabController(length: 2, vsync: this);
+        _tabController = TabController(length: 3, vsync: this);
       }
       setState(() {
         isLoading = false;
@@ -133,6 +135,7 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                   tabs: [
                     const Tab(text: 'الأذكار', icon: Icon(Icons.list_alt)),
                     const Tab(text: 'الأوائل', icon: Icon(Icons.star)),
+                    const Tab(text: 'الدردشة', icon: Icon(Icons.chat)),
                     if (isAdmin)
                       const Tab(
                           text: 'إدارة المجموعة',
@@ -172,10 +175,13 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                 children: [
                   athkarListStreamBuilder(),
                   topUsersStreamBuilder(),
+                  GroupChatSection(groupId: widget.groupId, userName: userName),
                   if (isAdmin) groupAdminSection(),
                 ],
               ));
+
   }
+
 
   StreamBuilder<QuerySnapshot<Object?>> topUsersStreamBuilder() {
     return StreamBuilder<QuerySnapshot>(
@@ -218,74 +224,183 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
           physics: const BouncingScrollPhysics(),
           itemCount: documents.length,
           itemBuilder: (context, currentIndex) {
+            final bool isDark = Theme.of(context).brightness == Brightness.dark;
+            final String name = documents[currentIndex].get("name") as String? ?? '';
+            final int points = documents[currentIndex].get("points") as int? ?? 0;
+            final bool isMe = name == userName;
+            final bool isUserAdmin = name == adminName;
+
+            final Map<String, dynamic>? userData = documents[currentIndex].data() as Map<String, dynamic>?;
+            final int streak = userData != null && userData.containsKey('streak')
+                ? (userData['streak'] as int? ?? 0)
+                : 0;
+
+            // Define modern card background and border colors
+            Color cardColor;
+            Border border;
+            if (isMe) {
+              cardColor = isDark ? const Color(0xFF202A35) : Colors.teal.shade50.withOpacity(0.4);
+              border = Border.all(color: Colors.teal.shade400, width: 2.0);
+            } else {
+              cardColor = isDark ? const Color(0xFF1E2832) : Colors.white;
+              border = Border.all(
+                color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade200,
+                width: 1.0,
+              );
+            }
+
+            // Define metallic rank colors/gradients for top 3
+            Gradient? rankGradient;
+            Color? rankBgColor;
+            if (currentIndex == 0) {
+              rankGradient = const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFFA000)]); // Gold
+            } else if (currentIndex == 1) {
+              rankGradient = const LinearGradient(colors: [Color(0xFFE0E0E0), Color(0xFF9E9E9E)]); // Silver
+            } else if (currentIndex == 2) {
+              rankGradient = const LinearGradient(colors: [Color(0xFFD7CCC8), Color(0xFF8D6E63)]); // Bronze
+            } else {
+              rankBgColor = isUserAdmin
+                  ? Colors.teal
+                  : (isDark ? const Color(0xFF303A46) : Colors.blueAccent);
+            }
+
             return Column(
               children: [
                 if (currentIndex == 3)
-                  const SizedBox(
-                    width: 1300,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
                     child: Divider(
-                      thickness: 2,
+                      thickness: 1.5,
+                      color: isDark ? Colors.white10 : Colors.grey.shade300,
+                      indent: 16,
+                      endIndent: 16,
                     ),
                   ),
                 Container(
-                  width: 1300,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Theme.of(context).dialogBackgroundColor,
-                    border: Border.all(
-                        color: documents[currentIndex].get("name") == userName
-                            ? Colors.teal
-                            : Colors.white,
-                        width: 2),
+                    borderRadius: BorderRadius.circular(20),
+                    color: cardColor,
+                    border: border,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset:
-                            const Offset(3, 3), // changes position of shadow
+                        color: Colors.black.withOpacity(isDark ? 0.40 : 0.08),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     trailing: currentIndex < 3
                         ? Image.asset(
                             "assets/images/medal_${currentIndex + 1}.png",
-                            width: 30,
+                            width: 34,
                           )
                         : currentIndex < firstUser0Index
                             ? const Icon(
                                 size: 30,
                                 Icons.stars_sharp,
-                                color: Colors.yellow,
+                                color: Colors.amber,
                               )
                             : const SizedBox(),
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          documents[currentIndex].get("name") == adminName
-                              ? Colors.teal
-                              : Colors.blueAccent,
-                      child: Text("${currentIndex + 1}",
-                          style: const TextStyle(color: Colors.white)),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: rankGradient,
+                        color: rankBgColor,
+                      ),
+                      child: Center(
+                        child: Text(
+                          "${currentIndex + 1}",
+                          style: const TextStyle(
+                            fontFamily: 'Tajawal',
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     ),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          documents[currentIndex].get("name") == adminName
-                              ? documents[currentIndex].get("name") + " 👑 "
-                              : documents[currentIndex].get("name"),
-                          style: const TextStyle(
-                              fontSize: 18, fontFamily: 'Tajawal'),
+                        Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  isUserAdmin ? "$name 👑" : name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontFamily: 'Tajawal',
+                                    fontWeight: isMe ? FontWeight.bold : FontWeight.w500,
+                                    color: isMe
+                                        ? (isDark ? Colors.teal.shade200 : Colors.teal.shade800)
+                                        : (isDark ? Colors.white70 : Colors.black87),
+                                  ),
+                                ),
+                              ),
+                              if (streak > 0) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        "🔥",
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        "$streak",
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.orange,
+                                          fontFamily: 'Tajawal',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
-                        Text(
-                          "${documents[currentIndex].get("points")} نقطة",
-                          style: const TextStyle(
-                              fontSize: 18, fontFamily: 'Tajawal'),
+                        const SizedBox(width: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "$points نقطة",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: 'Tajawal',
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.amber.shade200 : Colors.amber.shade800,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.emoji_events_rounded,
+                              size: 18,
+                              color: currentIndex == 0
+                                  ? const Color(0xFFFFD700)
+                                  : (isDark ? Colors.amber.shade200 : Colors.amber.shade700),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -311,6 +426,9 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+
+        final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(
             child: Column(
@@ -355,196 +473,511 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                       ))
               ],
             ),
-          ); // Handle empty data
+          );
         }
 
         final documents = snapshot.data!.docs;
 
-        Map<DateTime, List<DocumentSnapshot>> groupedObjects = {};
-        for (var doc in documents) {
-          final date = (doc['date'] as Timestamp).toDate();
-          final dateKey = DateTime(date.year, date.month, date.day);
+        return ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          itemCount: documents.length,
+          itemBuilder: (context, currentIndex) {
+            final doc = documents[currentIndex];
+            final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+            final String id = doc.id;
+            final String content = data['content'] ?? '';
+            final String value = data['value'] ?? '';
+            final int count = data['count'] ?? 1;
+            final Timestamp timestamp = data['date'] ?? Timestamp.now();
+            final DateTime date = timestamp.toDate();
+            final List<dynamic> users = data['users'] ?? [];
 
-          if (!groupedObjects.containsKey(dateKey)) {
-            groupedObjects[dateKey] = [];
-          }
-          groupedObjects[dateKey]!.add(doc);
-        }
+            final bool isSharedTarget = data['isSharedTarget'] ?? false;
+            final int sharedTargetCount = data['sharedTargetCount'] ?? 0;
+            final int sharedCompletedCount = data['sharedCompletedCount'] ?? 0;
 
-        return ListView(
-          children: groupedObjects.entries.map((entry) {
-            final date = entry.key;
-            final objects = entry.value;
+            final int currentCount = getCounterOnlineResult(id + userName.toString());
+            final bool hasCompleted = users.contains(userName);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      '${date.day}/${date.month}/${date.year}',
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Tajawal'),
-                    ),
-                  ),
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E2832) : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: hasCompleted
+                      ? Colors.teal.withOpacity(0.4)
+                      : (isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade200),
+                  width: hasCompleted ? 1.5 : 1.0,
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: objects.length,
-                  itemBuilder: (context, index) {
-                    final object = objects[index];
-                    final List users = object['users'];
-                    currentCount = getCounterOnlineResult(object.id + userName.toString());
-                    return Column(
-                      children: [
-                        Container(
-                          width: 1300,
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Theme.of(context).dialogBackgroundColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(
-                                    3, 3), // changes position of shadow
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.45 : 0.08),
+                    blurRadius: 14,
+                    spreadRadius: 1.5,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (isSharedTarget) {
+                        if (sharedCompletedCount < sharedTargetCount) {
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.size,
+                                alignment: Alignment.bottomCenter,
+                                duration: const Duration(milliseconds: 500),
+                                reverseDuration: const Duration(milliseconds: 500),
+                                child: CounterAthkarScreen(
+                                  count: count,
+                                  content: content,
+                                  id: id,
+                                  value: value,
+                                  index: -1,
+                                  currentCount: currentCount >= 0
+                                      ? currentCount
+                                      : count,
+                                  userName: userName,
+                                  groupId: widget.groupId,
+                                  isSharedTarget: true,
+                                  sharedTargetCount: sharedTargetCount,
+                                  sharedCompletedCount: sharedCompletedCount,
+                                ),
+                              )).then((value) {
+                            setState(() {});
+                            return true;
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.teal,
+                              content: Text(
+                                'تم إكمال الهدف الجماعي بالفعل! 🎉',
+                                style: TextStyle(fontFamily: 'Tajawal'),
+                              ),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      } else {
+                        if (!hasCompleted) {
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.size,
+                                alignment: Alignment.bottomCenter,
+                                duration: const Duration(milliseconds: 500),
+                                reverseDuration: const Duration(milliseconds: 500),
+                                child: CounterAthkarScreen(
+                                  count: count,
+                                  content: content,
+                                  id: id,
+                                  value: value,
+                                  index: -1,
+                                  currentCount: currentCount >= 0
+                                      ? currentCount
+                                      : count,
+                                  userName: userName,
+                                  groupId: widget.groupId,
+                                  isSharedTarget: false,
+                                ),
+                              )).then((value) {
+                            setState(() {});
+                            return true;
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.teal,
+                              content: Text(
+                                'تم إنهاؤه سابقاً',
+                                style: TextStyle(fontFamily: 'Tajawal'),
+                              ),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.calendar_month_rounded, size: 14, color: Colors.teal.shade400),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "${date.day}/${date.month}/${date.year}",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark ? Colors.white70 : Colors.black87,
+                                        fontFamily: 'Tajawal',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  if (isSharedTarget)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        "هدف جماعي 👥",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Tajawal',
+                                        ),
+                                      ),
+                                    ),
+                                  if (isAdmin) ...[
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      tooltip: 'حذف الذكر',
+                                      onPressed: () {
+                                        _showDeleteConfirmationDialog(context, id, "");
+                                      },
+                                    ),
+                                  ],
+                                ],
                               ),
                             ],
                           ),
-                          child: ListTile(
-                            onTap: () {
-                              if (!users.contains(userName)) {
-                                currentCount =
-                                    getCounterOnlineResult(object.id + userName.toString());
-                                Navigator.push(
-                                    context,
-                                    PageTransition(
-                                      type: PageTransitionType.size,
-                                      alignment: Alignment.bottomCenter,
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      reverseDuration:
-                                          const Duration(milliseconds: 500),
-                                      child: CounterAthkarScreen(
-                                        count: object["count"],
-                                        content: object['content'],
-                                        id: object.id,
-                                        value: object['value'],
-                                        index: -1,
-                                        currentCount: currentCount >= 0
-                                            ? currentCount
-                                            : object["count"],
-                                        userName: userName,
-                                        groupId: widget.groupId,
-                                      ),
-                                    )).then((value) {
-                                  setState(() {
-                                    currentCount =
-                                        getCounterOnlineResult(object.id + userName.toString());
-                                  });
-                                  return true;
-                                });
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    backgroundColor: Colors.teal,
-                                    content: Text('تم إنهاءه سابقاً'),
-                                    duration: Duration(seconds: 1),
-                                  ),
-                                );
-                              }
-                            },
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: MediaQuery.sizeOf(context).width > 600
-                                      ? 300
-                                      : 100,
-                                  child: Text(
-                                    object['content'],
-                                    style: const TextStyle(fontSize: 18),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: MediaQuery.sizeOf(context).width > 600
-                                      ? 150
-                                      : 64,
-                                  child: Text(
-                                    '${users.contains(userName) ? 0 : currentCount >= 0 ? currentCount : object["count"]}/${object['count']}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Tajawal',
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 12),
+                          Text(
+                            content,
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontFamily: 'Amiri',
+                              height: 1.5,
+                              color: isDark ? Colors.white : Colors.black87,
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isAdmin)
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    tooltip: 'حذف ذكر',
-                                    onPressed: () {
-                                      _showDeleteConfirmationDialog(
-                                          context, object.id, "");
-                                    },
-                                  ),
-                                if (users.contains(userName))
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: Colors.teal,
-                                  )
-                              ],
-                            ),
-
-                            leading: IconButton(
-                              tooltip: "الذاكرين",
-                              onPressed: () => Navigator.push(
-                                  context,
-                                  PageTransition(
-                                    type:
-                                        PageTransitionType.rightToLeftWithFade,
-                                    reverseDuration:
-                                        const Duration(milliseconds: 500),
-                                    duration: const Duration(milliseconds: 500),
-                                    child: ThekerReadersScreen(
-                                        users: users,
-                                        content: object['content'],
-                                        userName: userName),
-                                  )),
-                              icon: const CircleAvatar(
-                                backgroundColor: Colors.blueAccent,
-                                child: Icon(
-                                  Icons.groups_rounded,
-                                  color: Colors.white,
-                                  size: 25,
-                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (value.isNotEmpty) ...[
+                            Text(
+                              value,
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontFamily: 'Tajawal',
+                                color: isDark ? Colors.white60 : Colors.black54,
                               ),
                             ),
-                            // Add more fields if needed
+                            const SizedBox(height: 12),
+                          ],
+                          const Divider(height: 1, thickness: 0.5),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: _buildAvatarStack(users, content),
+                              ),
+                              const SizedBox(width: 12),
+                              _buildCardProgress(
+                                isSharedTarget,
+                                sharedCompletedCount,
+                                sharedTargetCount,
+                                count,
+                                currentCount,
+                                hasCompleted,
+                                isDark,
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ],
+              ),
             );
-          }).toList(),
+          },
         );
       },
     );
   }
+
+  Widget _buildAvatarStack(List<dynamic> users, String content) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    if (users.isEmpty) {
+      return InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            PageTransition(
+              type: PageTransitionType.rightToLeftWithFade,
+              reverseDuration: const Duration(milliseconds: 500),
+              duration: const Duration(milliseconds: 500),
+              child: ThekerReadersScreen(
+                users: users,
+                content: content,
+                userName: userName,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.emoji_objects_outlined, color: Colors.amber, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                "كن أول الذاكرين! ✨",
+                style: TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 13,
+                  color: isDark ? Colors.teal.shade200 : Colors.teal.shade700,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final int displayCount = users.length > 3 ? 3 : users.length;
+    final List<dynamic> displayUsers = users.sublist(0, displayCount);
+
+    String namesText = "";
+    if (users.length == 1) {
+      namesText = "أنهى القراءة: ${users[0]}";
+    } else if (users.length == 2) {
+      namesText = "أنهى القراءة: ${users[0]} و ${users[1]}";
+    } else if (users.length == 3) {
+      namesText = "أنهى القراءة: ${users[0]}، ${users[1]} و ${users[2]}";
+    } else {
+      namesText = "أنهى القراءة: ${users[0]}، ${users[1]} و ${users.length - 2} آخرين";
+    }
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.rightToLeftWithFade,
+            reverseDuration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 500),
+            child: ThekerReadersScreen(
+              users: users,
+              content: content,
+              userName: userName,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: (displayCount * 18.0) + 10,
+              height: 28,
+              child: Stack(
+                children: List.generate(displayCount, (index) {
+                  final String userInitial = displayUsers[index].toString().isNotEmpty
+                      ? displayUsers[index].toString()[0]
+                      : "?";
+                  final List<Color> colors = [
+                    Colors.teal,
+                    Colors.blueAccent,
+                    Colors.amber,
+                  ];
+                  final Color avatarColor = colors[index % colors.length];
+
+                  return Positioned(
+                    left: index * 14.0,
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: avatarColor,
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF1E2832) : Colors.white,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          userInitial,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                namesText,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 12,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardProgress(
+    bool isSharedTarget,
+    int sharedCompletedCount,
+    int sharedTargetCount,
+    int count,
+    int currentCount,
+    bool hasCompleted,
+    bool isDark,
+  ) {
+    if (isSharedTarget) {
+      double percent = sharedTargetCount > 0
+          ? (sharedCompletedCount / sharedTargetCount).clamp(0.0, 1.0)
+          : 0.0;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularPercentIndicator(
+            radius: 20.0,
+            lineWidth: 3.5,
+            percent: percent,
+            center: Text(
+              "${(percent * 100).toInt()}%",
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            progressColor: Colors.blue,
+            backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
+            circularStrokeCap: CircularStrokeCap.round,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "$sharedCompletedCount/$sharedTargetCount",
+            style: TextStyle(
+              fontSize: 10,
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Tajawal',
+            ),
+          ),
+        ],
+      );
+    } else {
+      if (hasCompleted) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.teal,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "تم القراءة",
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.teal.shade400,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
+              ),
+            ),
+          ],
+        );
+      } else {
+        int remaining = currentCount >= 0 ? currentCount : count;
+        double percent = count > 0
+            ? ((count - remaining) / count).clamp(0.0, 1.0)
+            : 0.0;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularPercentIndicator(
+              radius: 20.0,
+              lineWidth: 3.5,
+              percent: percent,
+              center: Text(
+                "$remaining",
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              progressColor: Colors.teal,
+              backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
+              circularStrokeCap: CircularStrokeCap.round,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "المتبقي: $remaining/$count",
+              style: TextStyle(
+                fontSize: 10,
+                color: isDark ? Colors.white70 : Colors.black54,
+                fontFamily: 'Tajawal',
+              ),
+            ),
+          ],
+        );
+      }
+    }
+  }
+
 
   Widget groupAdminSection() {
     return LayoutBuilder(
@@ -1025,31 +1458,66 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
     final TextEditingController descController =
         TextEditingController(text: groupDesc);
     final formKey = GlobalKey<FormState>();
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          surfaceTintColor: Colors.white,
-          title: const Text(
-            'تعديل معلومات المجموعة',
-            style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.0),
+          ),
+          backgroundColor: isDark ? const Color(0xFF1E2832) : Colors.white,
+          surfaceTintColor: Colors.transparent,
+          title: Row(
+            children: [
+              Icon(Icons.settings_suggest_rounded, color: Colors.teal.shade400, size: 28),
+              const SizedBox(width: 10),
+              const Text(
+                'تعديل معلومات المجموعة',
+                style: TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           content: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(top: 10.0),
               child: Form(
                 key: formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextFormField(
                       controller: nameController,
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          labelText: "* اسم المجموعة"),
+                        prefixIcon: Icon(Icons.group_rounded, color: Colors.teal.shade400),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                          borderSide: const BorderSide(color: Colors.teal, width: 2.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                          borderSide: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        labelText: "* اسم المجموعة",
+                        labelStyle: TextStyle(
+                          fontFamily: 'Tajawal',
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
                       validator: (value) {
                         if (value!.trim().isEmpty) {
                           return 'يرجى إدخال الاسم';
@@ -1063,11 +1531,29 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                     ),
                     TextFormField(
                       controller: descController,
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          labelText: "* الوصف"),
+                        prefixIcon: Icon(Icons.description_rounded, color: Colors.teal.shade400),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                          borderSide: const BorderSide(color: Colors.teal, width: 2.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                          borderSide: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        labelText: "* الوصف",
+                        labelStyle: TextStyle(
+                          fontFamily: 'Tajawal',
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
                       validator: (value) {
                         if (value!.trim().isEmpty) {
                           return 'يرجى إدخال وصف للمجموعة';
@@ -1076,36 +1562,46 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
                       },
                       maxLength: 25,
                     ),
-                    const SizedBox(height: 10),
-                    ElevatedButton.icon(
-                        style: const ButtonStyle(
-                          backgroundColor:
-                              MaterialStatePropertyAll(Colors.blue),
+                    const SizedBox(height: 15),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.redAccent,
+                        side: const BorderSide(color: Colors.redAccent, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
                         ),
-                        onPressed: () {
-                          _showDeleteGroupConfirmationDialog(context);
-                        },
-                        icon: const Icon(
-                          size: 25,
-                          Icons.delete,
-                          color: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        _showDeleteGroupConfirmationDialog(context);
+                      },
+                      icon: const Icon(Icons.delete_outline_rounded, size: 22),
+                      label: const Text(
+                        "حذف المجموعة",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Tajawal',
+                          fontWeight: FontWeight.bold,
                         ),
-                        label: const Text("حذف المجموعة",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'Tajawal',
-                                color: Colors.white))),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           actions: <Widget>[
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: isDark ? Colors.white70 : Colors.black54,
+              ),
               child: const Text(
                 'الغاء',
                 style: TextStyle(
                   fontFamily: 'Tajawal',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               onPressed: () {
@@ -1113,10 +1609,15 @@ class _GroupsAthkarsScreenState extends State<GroupsAthkarsScreen>
               },
             ),
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.teal,
+              ),
               child: const Text(
                 'تعديل',
                 style: TextStyle(
                   fontFamily: 'Tajawal',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               onPressed: () async {
