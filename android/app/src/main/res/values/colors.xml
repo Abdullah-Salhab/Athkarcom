@@ -2,4 +2,5 @@
 <resources>
     <color name="widget_accent_primary">#27AAAE</color>
     <color name="widget_progress_background">#E0E0E0</color>
+	<color name="ic_launcher_background">#1b4341</color>
 </resources>
