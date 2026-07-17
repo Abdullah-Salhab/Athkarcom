@@ -1,4 +1,4 @@
 <resources>
     <string name="widget_description">التقرير اليومي</string>
-    <string name="widget_header_title">تقرير اليوم</string>
+    <string name="prayer_widget_description">مواقيت الصلاة</string>
 </resources>

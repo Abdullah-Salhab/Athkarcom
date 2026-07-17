@@ -43,7 +43,7 @@ class AthkarWidgetProvider : AppWidgetProvider() {
         // Get data from Flutter with safe null handling
         val date = widgetData.getString("date", "اليوم") ?: "اليوم"
         val completedCount = widgetData.getInt("completed_count", 0)
-        val totalCount = widgetData.getInt("total_count", 3)
+        val totalCount = widgetData.getInt("total_count", 2)
         val percentageStr = widgetData.getString("percentage", "0.0")
         val percentage = percentageStr?.toFloatOrNull() ?: 0.0f
         val streak = widgetData.getInt("streak", 0)

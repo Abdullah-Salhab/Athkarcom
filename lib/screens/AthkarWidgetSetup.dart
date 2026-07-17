@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 
 import '../models/AnalyticsMixin.dart';
 import '../models/AthkarWidgetProvider.dart';
+import '../models/PrayerWidgetProvider.dart';
 
 class AthkarWidgetSetup extends StatefulWidget {
   const AthkarWidgetSetup({Key? key}) : super(key: key);
@@ -16,13 +17,9 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
   @override
   String get screenName => 'HomeWidgetSetupScreen';
 
-  bool _isWidgetSupported = true; // Most devices support widgets
-
   @override
   void initState() {
     super.initState();
-    // Widget support check is handled differently in home_widget
-    // Most Android and iOS devices support widgets
   }
 
   @override
@@ -30,16 +27,17 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'إعداد الأذكار على الشاشة الرئيسية',
+          'إعداد الأدوات على الشاشة الرئيسية',
           style: TextStyle(fontFamily: 'Amiri'),
         ),
         foregroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Card 1: Athkar Widget ──
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -47,7 +45,7 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'أذكار على الشاشة الرئيسية',
+                      'أداة تقرير الأذكار',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -56,7 +54,7 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'اعرض تقدمك اليومي في الأذكار مباشرة على الشاشة الرئيسية لهاتفك',
+                      'اعرض تقدمك اليومي في الأذكار والنسبة المئوية مباشرة على الشاشة الرئيسية لهاتفك',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
@@ -64,74 +62,202 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
                       ),
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        try {
-                          await AthkarWidgetProvider.initializeWidget();
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'تم تحديث الأذكار على الشاشة الرئيسية'),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('خطأ في تحديث الأذكار: $e'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('تحديث الأذكار'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0C979F),
-                        foregroundColor: Colors.white,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                await AthkarWidgetProvider.initializeWidget();
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'تم تحديث الأذكار على الشاشة الرئيسية'),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('خطأ في تحديث الأذكار: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('تحديث البيانات'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0C979F),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                await AthkarWidgetProvider.initializeWidget();
+                                final isPinSupported = await HomeWidget.isRequestPinWidgetSupported();
+                                if (isPinSupported ?? false) {
+                                  await HomeWidget.requestPinWidget(
+                                    name: AthkarWidgetProvider.androidWidgetName,
+                                    androidName: AthkarWidgetProvider.androidWidgetName,
+                                    qualifiedAndroidName: 'com.athkar.athkarcom.AthkarWidgetProvider',
+                                  );
+                                } else {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'يرجى الذهاب للشاشة الرئيسية وإضافة الأداة يدوياً.',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('خطأ: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.add_to_home_screen),
+                            label: const Text('إضافة الأداة'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2196F3),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Card 2: Prayer Widget ──
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'أداة مواقيت الصلاة',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Amiri',
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        // Update widget data first
-                        try {
-                          await AthkarWidgetProvider.initializeWidget();
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'تم تحديث البيانات. الآن اذهب للشاشة الرئيسية واضغط مطولاً لإضافة الأذكار',
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('خطأ: $e'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('تحضير الأذكار للشاشة الرئيسية'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2196F3),
-                        foregroundColor: Colors.white,
+                    const Text(
+                      'اعرض مواقيت الصلاة اليومية والصلاة القادمة مباشرة على الشاشة الرئيسية لهاتفك',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontFamily: 'Amiri',
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                await PrayerWidgetProvider.initializeWidget();
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'تم تحديث مواقيت الصلاة على الشاشة الرئيسية'),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('خطأ في تحديث الصلاة: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('تحديث البيانات'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0C979F),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                await PrayerWidgetProvider.initializeWidget();
+                                final isPinSupported = await HomeWidget.isRequestPinWidgetSupported();
+                                if (isPinSupported ?? false) {
+                                  await HomeWidget.requestPinWidget(
+                                    name: PrayerWidgetProvider.androidWidgetName,
+                                    androidName: PrayerWidgetProvider.androidWidgetName,
+                                    qualifiedAndroidName: 'com.athkar.athkarcom.PrayerWidgetProvider',
+                                  );
+                                } else {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'يرجى الذهاب للشاشة الرئيسية وإضافة الأداة يدوياً.',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('خطأ: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.add_to_home_screen),
+                            label: const Text('إضافة الأداة'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2196F3),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
+
+            // ── Card 3: Info & Guide ──
             const Card(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -139,7 +265,7 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ما يعرضه الأذكار:',
+                      'تفاصيل عرض الأدوات:',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -148,29 +274,19 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
                     ),
                     SizedBox(height: 8),
                     Text(
-                      '• التاريخ الحالي\n'
-                      '• عدد الأذكار المكتملة اليوم\n'
-                      '• النسبة المئوية للإنجاز\n'
-                      '• عدد الأيام المتتالية\n'
-                      '• الأذكار المكتملة',
+                      '• أداة الأذكار: تعرض التاريخ الحالي، الأذكار المطلوبة المنجزة اليوم، النسبة المئوية للإنجاز، والأيام المتتالية.\n'
+                      '• أداة الصلاة: تعرض مواقيت الصلاة الخمس اليومية والشروق، والمدينة، والوقت المتبقي للصلاة القادمة.',
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Amiri',
+                        height: 1.5,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Card(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                    SizedBox(height: 12),
+                    Divider(),
+                    SizedBox(height: 12),
                     Text(
-                      'كيفية الاستخدام:',
+                      'كيفية الاستخدام اليدوي:',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -179,15 +295,14 @@ class _AthkarWidgetSetupState extends State<AthkarWidgetSetup> with AnalyticsMix
                     ),
                     SizedBox(height: 8),
                     Text(
-                      '1. اضغط على "تحضير الأذكار للشاشة الرئيسية"\n'
-                      '2. اذهب للشاشة الرئيسية\n'
-                      '3. اضغط مطولاً على مساحة فارغة\n'
-                      '4. اختر "Widgets" أو "الأدوات"\n'
-                      '5. ابحث عن أذكار وأضفها\n'
-                      '6. سيتم تحديث الأذكار تلقائياً',
+                      '1. اذهب للشاشة الرئيسية لهاتفك.\n'
+                      '2. اضغط مطولاً على مساحة فارغة.\n'
+                      '3. اختر "Widgets" أو "الأدوات".\n'
+                      '4. ابحث عن "أذكاركم" واختر الأداة المناسبة لتقوم بإضافتها.',
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Amiri',
+                        height: 1.5,
                       ),
                     ),
                   ],

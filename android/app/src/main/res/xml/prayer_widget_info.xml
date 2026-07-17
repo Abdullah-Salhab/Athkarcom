@@ -7,8 +7,9 @@
     android:minResizeWidth="180dp"
     android:minResizeHeight="110dp"
     android:updatePeriodMillis="1800000"
-    android:previewImage="@drawable/athkar_widget_preview"
+    android:previewImage="@drawable/prayer_widget_preview"
     android:initialLayout="@layout/prayer_widget_layout"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen">
+    android:widgetCategory="home_screen"
+    android:description="@string/prayer_widget_description">
 </appwidget-provider>

@@ -11,8 +11,7 @@ class AthkarWidgetProvider {
   // Section definitions (same as in your ReportsScreen)
   static final Map<int, String> sections = {
     1: "أذكار الصباح",
-    2: "أذكار المساء",
-    6: "أذكار النوم"
+    2: "أذكار المساء"
   };
 
   static Future<void> initializeWidget() async {
@@ -46,7 +45,9 @@ class AthkarWidgetProvider {
       String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
       Map<String, dynamic> todayData = completionData[today] ?? {};
 
-      int completedCount = todayData.length;
+      int completedCount = todayData.entries
+          .where((e) => sections.containsKey(int.tryParse(e.key) ?? 0) && e.value == true)
+          .length;
       int totalCount = sections.length;
       double percentage =
       totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
@@ -136,7 +137,10 @@ class AthkarWidgetProvider {
     // First, check if today is fully complete. If not, start checking from yesterday.
     String todayKey = DateFormat('yyyy-MM-dd').format(checkDate);
     Map<String, dynamic> todayData = completionData[todayKey] ?? {};
-    if (todayData.length != sections.length) {
+    int todayCompleted = todayData.entries
+        .where((e) => sections.containsKey(int.tryParse(e.key) ?? 0) && e.value == true)
+        .length;
+    if (todayCompleted != sections.length) {
       checkDate = checkDate.subtract(const Duration(days: 1));
     }
 
@@ -144,8 +148,11 @@ class AthkarWidgetProvider {
     while (true) {
       String dateKey = DateFormat('yyyy-MM-dd').format(checkDate);
       Map<String, dynamic> dayData = completionData[dateKey] ?? {};
+      int dayCompleted = dayData.entries
+          .where((e) => sections.containsKey(int.tryParse(e.key) ?? 0) && e.value == true)
+          .length;
 
-      if (dayData.length == sections.length) {
+      if (dayCompleted == sections.length) {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
       } else {

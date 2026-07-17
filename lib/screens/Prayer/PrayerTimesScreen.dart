@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -775,13 +776,51 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                     tooltip: 'إدخال الموقع يدوياً',
                     onPressed: _openManualLocationScreen,
                   ),
-                  if (!kIsWeb)
+                  if (!kIsWeb) ...[
+                    IconButton(
+                      icon: const Icon(Icons.add_to_home_screen, color: Colors.white),
+                      tooltip: 'إضافة الأداة للشاشة الرئيسية',
+                      onPressed: () async {
+                        try {
+                          await PrayerWidgetProvider.initializeWidget();
+                          final isPinSupported = await HomeWidget.isRequestPinWidgetSupported();
+                          if (isPinSupported ?? false) {
+                            await HomeWidget.requestPinWidget(
+                              name: PrayerWidgetProvider.androidWidgetName,
+                              androidName: PrayerWidgetProvider.androidWidgetName,
+                              qualifiedAndroidName: 'com.athkar.athkarcom.PrayerWidgetProvider',
+                            );
+                          } else {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'إضافة الأداة تلقائياً غير مدعومة على هذا الجهاز، يرجى إضافتها يدوياً.',
+                                    style: TextStyle(fontFamily: 'Tajawal'),
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('خطأ: $e', style: const TextStyle(fontFamily: 'Tajawal')),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
                     IconButton(
                       icon: const Icon(Icons.my_location,
                           color: Colors.white),
                       tooltip: 'تحديث الموقع',
                       onPressed: _getCurrentLocation,
                     ),
+                  ],
                 ],
               ),
 
@@ -1170,6 +1209,107 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                   ),
                 ),
               ),
+
+              if (!kIsWeb)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                    child: Card(
+                      color: Colors.teal.shade50,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(color: Colors.teal.shade100),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_to_home_screen, color: Colors.teal.shade700),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'أداة مواقيت الصلاة',
+                                  style: TextStyle(
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'تابع مواقيت الصلوات الخمس والوقت المتبقي مباشرة من شاشتك الرئيسية',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  try {
+                                    await PrayerWidgetProvider.initializeWidget();
+                                    final isPinSupported = await HomeWidget.isRequestPinWidgetSupported();
+                                    if (isPinSupported ?? false) {
+                                      await HomeWidget.requestPinWidget(
+                                        name: PrayerWidgetProvider.androidWidgetName,
+                                        androidName: PrayerWidgetProvider.androidWidgetName,
+                                        qualifiedAndroidName: 'com.athkar.athkarcom.PrayerWidgetProvider',
+                                      );
+                                    } else {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'يرجى الذهاب للشاشة الرئيسية وإضافة الأداة يدوياً.',
+                                              style: TextStyle(fontFamily: 'Tajawal'),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('خطأ: $e', style: const TextStyle(fontFamily: 'Tajawal')),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text(
+                                  'إضافة الأداة للشاشة الرئيسية',
+                                  style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.teal,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
