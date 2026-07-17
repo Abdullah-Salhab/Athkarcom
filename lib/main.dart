@@ -117,7 +117,7 @@ class _MainScreenState extends State<MainScreen> {
               context,
               PageTransition(
                 type: PageTransitionType.fade,
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 300),
                 child: const OnboardingScreen(),
               ),
             );
@@ -125,10 +125,9 @@ class _MainScreenState extends State<MainScreen> {
             Navigator.pushReplacement(
               context,
               PageTransition(
-                type: PageTransitionType.scale,
-                alignment: Alignment.center,
-                duration: const Duration(milliseconds: 500),
-                reverseDuration: const Duration(milliseconds: 500),
+                type: PageTransitionType.fade,
+                duration: const Duration(milliseconds: 300),
+                reverseDuration: const Duration(milliseconds: 300),
                 child: const DashboardScreen(),
               ),
             );

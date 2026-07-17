@@ -65,22 +65,13 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
         backgroundColor: Colors.teal,
         duration: Duration(seconds: 2),
       ));
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.bottomToTop,
-          duration: const Duration(milliseconds: 500),
-          reverseDuration: const Duration(milliseconds: 500),
-          child: const CreateUserScreen(),
-        ),
-      ).then((value) {
+      _pushScreen(const CreateUserScreen(), type: PageTransitionType.bottomToTop).then((value) {
         Navigator.pushReplacement(
             context,
             PageTransition(
-              type: PageTransitionType.scale,
-              alignment: Alignment.center,
-              duration: const Duration(milliseconds: 500),
-              reverseDuration: const Duration(milliseconds: 500),
+              type: PageTransitionType.fade,
+              duration: const Duration(milliseconds: 300),
+              reverseDuration: const Duration(milliseconds: 300),
               child: const DashboardScreen(),
             ));
       });
@@ -96,6 +87,18 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
         athkarCurrentCount = prefs.getStringList('athkarCurrentCount')!;
       }
     });
+  }
+
+  Future<T?> _pushScreen<T>(Widget screen, {PageTransitionType type = PageTransitionType.rightToLeftWithFade}) {
+    return Navigator.push<T>(
+      context,
+      PageTransition(
+        type: type,
+        duration: const Duration(milliseconds: 300),
+        reverseDuration: const Duration(milliseconds: 300),
+        child: screen,
+      ),
+    );
   }
 
   Future<bool> userIsExist() async {
@@ -178,36 +181,12 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 child: RawMaterialButton(
                   onPressed: () {
                     if (userName != "") {
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                            type: PageTransitionType.scale,
-                            alignment: Alignment.topRight,
-                            duration: const Duration(milliseconds: 500),
-                            reverseDuration: const Duration(milliseconds: 500),
-                            child: const GroupsListScreen(),
-                          ));
+                      _pushScreen(const GroupsListScreen());
                     } else {
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                            type: PageTransitionType.bottomToTop,
-                            duration: const Duration(milliseconds: 500),
-                            reverseDuration: const Duration(milliseconds: 500),
-                            child: const CreateUserScreen(),
-                          )).then((value) async {
+                      _pushScreen(const CreateUserScreen(), type: PageTransitionType.bottomToTop).then((value) async {
                         await getOfflineAthkarList();
                         if (userName != "") {
-                          Navigator.push(
-                              context,
-                              PageTransition(
-                                type: PageTransitionType.scale,
-                                alignment: Alignment.center,
-                                duration: const Duration(milliseconds: 500),
-                                reverseDuration:
-                                    const Duration(milliseconds: 500),
-                                child: const GroupsListScreen(),
-                              ));
+                          _pushScreen(const GroupsListScreen());
                         }
                       });
                     }
@@ -252,18 +231,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                   ],
                 ),
                 child: RawMaterialButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.scale,
-                        alignment: Alignment.topLeft,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
-                        child: const MorningEveningAthkars(),
-                      ),
-                    );
-                  },
+                  onPressed: () => _pushScreen(const MorningEveningAthkars(),type: PageTransitionType.leftToRightWithFade),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   child: Padding(
@@ -305,18 +273,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                   ],
                 ),
                 child: RawMaterialButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.scale,
-                        alignment: Alignment.center,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
-                        child: const QuranSurahListScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => _pushScreen(const QuranSurahListScreen()),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   child: Padding(
@@ -357,18 +314,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                   ],
                 ),
                 child: RawMaterialButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.scale,
-                        alignment: Alignment.center,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
-                        child: const QuranAudioPlayerScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => _pushScreen(const QuranAudioPlayerScreen(),type: PageTransitionType.leftToRightWithFade),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   child: Padding(
@@ -410,18 +356,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                   ],
                 ),
                 child: RawMaterialButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.scale,
-                        alignment: Alignment.centerRight,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
-                        child: const PrayerTimesScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => _pushScreen(const PrayerTimesScreen()),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   child: Padding(
@@ -472,15 +407,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                     //       reverseDuration: const Duration(milliseconds: 500),
                     //       child: const RamadanQuizScreen()
                     //     ));
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerLeft,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const OfflineQuizScreen()
-                        ));
+                    _pushScreen(const OfflineQuizScreen(),type: PageTransitionType.leftToRightWithFade);
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -523,16 +450,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerRight,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const ReportsScreen(
-                          ),
-                        ));
+                    _pushScreen(const ReportsScreen());
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -575,18 +493,10 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerLeft,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const CounterPage(
-                            id: 5,
-                            title: "أذكار بعد الصلاة",
-                          ),
-                        ));
+                    _pushScreen(const CounterPage(
+                      id: 5,
+                      title: "أذكار بعد الصلاة",
+                    ),type: PageTransitionType.leftToRightWithFade);
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -629,18 +539,10 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerRight,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const CounterPage(
-                            id: 6,
-                            title: "أذكار النوم",
-                          ),
-                        ));
+                    _pushScreen(const CounterPage(
+                      id: 6,
+                      title: "أذكار النوم",
+                    ));
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -683,16 +585,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.scale,
-                        alignment: Alignment.centerLeft,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
-                        child: const QiblaScreen(),
-                      ),
-                    );
+                    _pushScreen(const QiblaScreen(),type: PageTransitionType.leftToRightWithFade);
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -735,15 +628,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerRight,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const OfflineAthkarList(),
-                        )).then((value) async {
+                    _pushScreen(const OfflineAthkarList()).then((value) async {
                       await getOfflineAthkarList().catchError((e) {
                         showExceptionPopup(context, e.toString());
                       });
@@ -790,15 +675,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.centerLeft,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const OtherAthkarScreen(),
-                        ));
+                    _pushScreen(const OtherAthkarScreen(),type: PageTransitionType.leftToRightWithFade);
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -841,15 +718,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.scale,
-                          alignment: Alignment.bottomRight,
-                          duration: const Duration(milliseconds: 500),
-                          reverseDuration: const Duration(milliseconds: 500),
-                          child: const AccountsScreen(),
-                        ));
+                    _pushScreen(const AccountsScreen());
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -892,16 +761,7 @@ class _DashboardScreenState extends State<DashboardScreen> with AnalyticsMixin{
                 ),
                 child: RawMaterialButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.scale,
-                        alignment: Alignment.bottomLeft,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
-                        child: const WirdMusafaReader(),
-                      ),
-                    );
+                    _pushScreen(const WirdMusafaReader(),type: PageTransitionType.leftToRightWithFade);
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),

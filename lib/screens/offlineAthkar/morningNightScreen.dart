@@ -122,8 +122,8 @@ class LeftTriangleButtonState extends State<LeftTriangleButton> {
             context,
             PageTransition(
               type: PageTransitionType.leftToRightWithFade,
-              reverseDuration: const Duration(milliseconds: 500),
-              duration: const Duration(milliseconds: 500),
+              reverseDuration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               child: const CounterPage(
                 id: 1,
                 title: "أذكار الصباح",
@@ -192,8 +192,8 @@ class RightTriangleButtonState extends State<RightTriangleButton> {
             context,
             PageTransition(
                 type: PageTransitionType.rightToLeftWithFade,
-                reverseDuration: const Duration(milliseconds: 500),
-                duration: const Duration(milliseconds: 500),
+                reverseDuration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 300),
                 child: const CounterPage(
                   id: 2,
                   title: "أذكار المساء",

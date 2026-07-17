@@ -218,16 +218,15 @@ class _MyDrawerState extends State<MyDrawer> {
                   context,
                   PageTransition(
                     type: PageTransitionType.bottomToTop,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const CreateUserScreen(),
                   )).then((value) => Navigator.pushReplacement(
                   context,
                   PageTransition(
-                    type: PageTransitionType.scale,
-                    alignment: Alignment.center,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.fade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const DashboardScreen(),
                   )));
             },
@@ -242,10 +241,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.pushReplacement(
                   context,
                   PageTransition(
-                    type: PageTransitionType.scale,
-                    alignment: Alignment.center,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.fade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const DashboardScreen(),
                   ));
             },
@@ -259,9 +257,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                   context,
                   PageTransition(
-                    type: PageTransitionType.leftToRightWithFade,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.rightToLeftWithFade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const GroupsListScreen(),
                   ));
             },
@@ -275,9 +273,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                   context,
                   PageTransition(
-                    type: PageTransitionType.leftToRightWithFade,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.rightToLeftWithFade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const MorningEveningAthkars(),
                   ));
             },
@@ -291,9 +289,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                   context,
                   PageTransition(
-                    type: PageTransitionType.leftToRightWithFade,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.rightToLeftWithFade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const AthkarWidgetSetup(),
                   ));
             },
@@ -303,9 +301,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                   context,
                   PageTransition(
-                    type: PageTransitionType.leftToRightWithFade,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.rightToLeftWithFade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: FeedbackScreen(userName),
                   ));
             },
@@ -323,9 +321,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Navigator.push(
                   context,
                   PageTransition(
-                    type: PageTransitionType.leftToRightWithFade,
-                    duration: const Duration(milliseconds: 500),
-                    reverseDuration: const Duration(milliseconds: 500),
+                    type: PageTransitionType.rightToLeftWithFade,
+                    duration: const Duration(milliseconds: 300),
+                    reverseDuration: const Duration(milliseconds: 300),
                     child: const AboutApp(),
                   ));
             },
@@ -438,8 +436,8 @@ class _MyDrawerState extends State<MyDrawer> {
                       context,
                       PageTransition(
                         type: PageTransitionType.fade,
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 500),
+                        duration: const Duration(milliseconds: 300),
+                        reverseDuration: const Duration(milliseconds: 300),
                         child: const DashboardScreen(),
                       ));
                 } else {
