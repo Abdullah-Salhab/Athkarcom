@@ -28,14 +28,12 @@ class ReportsScreenState extends State<ReportsScreen>
   // Section definitions
   final Map<int, String> sections = {
     1: "أذكار الصباح",
-    2: "أذكار المساء",
-    6: "أذكار النوم"
+    2: "أذكار المساء"
   };
 
   final Map<int, IconData> sectionIcons = {
     1: Icons.wb_sunny,
-    2: Icons.nights_stay,
-    6: Icons.bedtime
+    2: Icons.nights_stay
   };
 
   @override
@@ -190,7 +188,7 @@ class ReportsScreenState extends State<ReportsScreen>
   }
 
   Widget _buildTodayOverview(Map<String, dynamic> todayData) {
-    int completedCount = todayData.length;
+    int completedCount = _getCompletedCountForDay(todayData);
     int totalCount = sections.length;
     double percentage = totalCount > 0 ? (completedCount / totalCount) : 0;
 
@@ -425,7 +423,7 @@ class ReportsScreenState extends State<ReportsScreen>
 
       Map<String, dynamic> dayData = completionData[dayKey] ?? {};
       double completionRate =
-          sections.length > 0 ? dayData.length / sections.length : 0;
+          sections.length > 0 ? _getCompletedCountForDay(dayData) / sections.length : 0;
       double percentage = completionRate * 100;
       double formattedPercentage = double.parse(percentage.toStringAsFixed(1));
       spots.add(FlSpot(6 - i.toDouble(), formattedPercentage));
@@ -560,12 +558,13 @@ class ReportsScreenState extends State<ReportsScreen>
       String dayKey = DateFormat('yyyy-MM-dd').format(day);
       Map<String, dynamic> dayData = completionData[dayKey] ?? {};
 
-      if (dayData.isNotEmpty) {
+      int completedCount = _getCompletedCountForDay(dayData);
+      if (completedCount > 0) {
         completedDays++;
       }
 
       totalSections += sections.length;
-      completedSections += dayData.length;
+      completedSections += completedCount;
     }
 
     return Column(
@@ -811,7 +810,7 @@ class ReportsScreenState extends State<ReportsScreen>
               Map<String, dynamic> dayData = completionData[dayKey] ?? {};
 
               double completionRate =
-                  sections.isNotEmpty ? dayData.length / sections.length : 0.0;
+                  sections.isNotEmpty ? _getCompletedCountForDay(dayData) / sections.length : 0.0;
               Color dayColor = completionRate == 1.0
                   ? primaryColor
                   : completionRate > 0
@@ -875,6 +874,12 @@ class ReportsScreenState extends State<ReportsScreen>
     );
   }
 
+  int _getCompletedCountForDay(Map<String, dynamic> dayData) {
+    return dayData.entries
+        .where((e) => sections.containsKey(int.tryParse(e.key) ?? 0) && e.value == true)
+        .length;
+  }
+
   int _calculateStreak() {
     int streak = 0;
     if (sections.isEmpty) return 0;
@@ -883,7 +888,7 @@ class ReportsScreenState extends State<ReportsScreen>
     // Step 1: If today is not complete, skip it
     String todayKey = DateFormat('yyyy-MM-dd').format(checkDate);
     Map<String, dynamic> todayData = completionData[todayKey] ?? {};
-    if (todayData.length != sections.length) {
+    if (_getCompletedCountForDay(todayData) != sections.length) {
       checkDate = checkDate.subtract(const Duration(days: 1));
     }
 
@@ -892,7 +897,7 @@ class ReportsScreenState extends State<ReportsScreen>
       String dateKey = DateFormat('yyyy-MM-dd').format(checkDate);
       Map<String, dynamic> dayData = completionData[dateKey] ?? {};
 
-      if (dayData.length == sections.length) {
+      if (_getCompletedCountForDay(dayData) == sections.length) {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
       } else {

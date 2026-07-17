@@ -965,18 +965,21 @@ class _QuranPageReadingScreenState extends State<QuranPageReadingScreen>
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                           icon: const Icon(Icons.menu_book_outlined, color: Colors.white, size: 20),
-                          onPressed: () {
+                          onPressed: () async {
                              if (currentPageData.surahGroups.isNotEmpty) {
-                                Navigator.push(
+                                final result = await Navigator.push(
                                   context,
                                   PageTransition(
                                     type: PageTransitionType.bottomToTop,
                                     child: QuranPageTafsirScreen(
-                                      page: currentPageData,
-                                      pageNumber: _currentPage,
+                                      pages: widget.pages,
+                                      initialPageNumber: _currentPage,
                                     ),
                                   ),
                                 );
+                                if (result is int && result > 0 && result <= widget.pages.length && mounted) {
+                                  _pageController.jumpToPage(result - 1);
+                                }
                               }
                           },
                         ),

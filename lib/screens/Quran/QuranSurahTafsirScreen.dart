@@ -6,13 +6,13 @@ import '../../models/quran_model.dart';
 import '../../models/tafsir_model.dart';
 
 class QuranPageTafsirScreen extends StatefulWidget {
-  final QuranPage page;
-  final int pageNumber;
+  final List<QuranPage> pages;
+  final int initialPageNumber;
 
   const QuranPageTafsirScreen({
     super.key, 
-    required this.page,
-    required this.pageNumber,
+    required this.pages,
+    required this.initialPageNumber,
   });
 
   @override
@@ -30,6 +30,8 @@ class _QuranPageTafsirScreenState extends State<QuranPageTafsirScreen>
   double _fontSize = 24.0;
   String? _errorMessage;
   late List<({int surahNumber, String surahName, QuranVerse verse})> _flatVerses;
+  late int _currentPageNumber;
+  late QuranPage _currentPageData;
 
   String _toArabicNumber(int number) {
     const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -43,13 +45,19 @@ class _QuranPageTafsirScreenState extends State<QuranPageTafsirScreen>
   @override
   void initState() {
     super.initState();
+    _currentPageNumber = widget.initialPageNumber;
+    _currentPageData = widget.pages[_currentPageNumber - 1];
+    _initPageData();
+    _loadFontSize();
+  }
+
+  void _initPageData() {
     _flatVerses = [];
-    for (final group in widget.page.surahGroups) {
+    for (final group in _currentPageData.surahGroups) {
       for (final v in group.verses) {
         _flatVerses.add((surahNumber: group.surahNumber, surahName: group.surahName, verse: v));
       }
     }
-    _loadFontSize();
     _loadAllTafsir();
   }
 
@@ -65,7 +73,7 @@ class _QuranPageTafsirScreenState extends State<QuranPageTafsirScreen>
     });
     try {
       final map = <String, String>{};
-      final surahsOnPage = widget.page.surahGroups.map((g) => g.surahNumber).toSet();
+      final surahsOnPage = _currentPageData.surahGroups.map((g) => g.surahNumber).toSet();
       
       for (final sNum in surahsOnPage) {
         final surahMap = await TafsirData.getSurahTafsir(sNum);
@@ -221,31 +229,76 @@ class _QuranPageTafsirScreenState extends State<QuranPageTafsirScreen>
         isDark ? const Color(0xFFFFD54F) : const Color(0xFFBF8C2C);
     final bgColor = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFFFF8F0);
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: primaryGreen,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'تفسير صفحة ${widget.pageNumber}',
-          style: const TextStyle(
-            fontFamily: 'Amiri',
-            fontSize: 20,
-            color: Colors.white,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.pop(context, _currentPageNumber);
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        appBar: AppBar(
+          backgroundColor: primaryGreen,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context, _currentPageNumber),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.text_fields, color: Colors.white, size: 22),
-            tooltip: 'حجم الخط',
-            onPressed: () => _showFontSizeSlider(primaryGreen, isDark),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'تفسير صفحة ${_toArabicNumber(_currentPageNumber)}',
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                ' الجزء ${_toArabicNumber(_currentPageData.juz)}',
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+          centerTitle: true,
+          actions: [
+            if (_currentPageNumber > 1)
+              IconButton(
+                icon: const Icon(Icons.chevron_left, color: Colors.white, size: 28),
+                tooltip: 'الصفحة السابقة',
+                onPressed: () {
+                  if (_isLoading) return;
+                  setState(() {
+                    _currentPageNumber--;
+                    _currentPageData = widget.pages[_currentPageNumber - 1];
+                    _initPageData();
+                  });
+                },
+              ),
+            if (_currentPageNumber < widget.pages.length)
+              IconButton(
+                icon: const Icon(Icons.chevron_right, color: Colors.white, size: 28),
+                tooltip: 'الصفحة التالية',
+                onPressed: () {
+                  if (_isLoading) return;
+                  setState(() {
+                    _currentPageNumber++;
+                    _currentPageData = widget.pages[_currentPageNumber - 1];
+                    _initPageData();
+                  });
+                },
+              ),
+            IconButton(
+              icon: const Icon(Icons.text_fields, color: Colors.white, size: 22),
+              tooltip: 'حجم الخط',
+              onPressed: () => _showFontSizeSlider(primaryGreen, isDark),
+            ),
+          ],
+        ),
       body: _isLoading
           ? Center(
               child: Column(
@@ -437,6 +490,7 @@ class _QuranPageTafsirScreenState extends State<QuranPageTafsirScreen>
                     );
                   },
                 ),
+      ),
     );
   }
 }
